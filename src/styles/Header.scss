@@ -27,9 +27,9 @@ $headerOffset: 16px;
     flex-direction: row;
     margin-left: $headerOffset;
     justify-content: space-between;
-    cursor: pointer;
     align-items: center;
-
+    cursor: default;
+   
     img {
       margin-right: 8px; 
       width: 1.2em;

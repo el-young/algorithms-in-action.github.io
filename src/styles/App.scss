@@ -36,7 +36,6 @@ $dragBarWidth: 10px;
 }
 
 #leftcol {
-	width: fit-content;
 	overflow: auto;
 	grid-area: leftcol;
 	background-color: var(--left-bg);
@@ -61,7 +60,6 @@ $dragBarWidth: 10px;
 
 }
 
-
 .dragbar {
 	background-color: var(--system-handle-bg);
 	display: flex;
@@ -84,15 +82,11 @@ $dragBarWidth: 10px;
 
 .dragbar:active {
 	background-color: var(--system-handle-bg-active);
-
 }
-
-
 
 .handle {
 	overflow: hidden;
 	width: $dragBarWidth;
-	// height: $handleLen;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-evenly;
@@ -106,7 +100,6 @@ $dragBarWidth: 10px;
 		circle {
 			fill: var(--system-handle-circle-fill) !important;
 		}
-
 	}
 }
 
@@ -118,27 +111,22 @@ $dragBarWidth: 10px;
 #rightdragbar {
 	grid-area: rightdragbar;
 	cursor: col-resize;
-
 }
 
 // Left Dragbar
 #leftdragbar {
 	grid-area: leftdragbar;
-	width: 0px;
-	/* 或者您想要的宽度 */
-	background-color: #ccc;
-	/* 或者您想要的颜色 */
-	cursor: default;
+	cursor: col-resize;
 }
 
-#leftdragbar.collapsed {
+#leftdragbar .collapsed {
 	width: 5px;
 }
 
 #leftdraghandle {
 	position: absolute;
 	height: 20px;
-	width: 15px;
+	width: 12px;
 	margin: auto;
 	filter: brightness(110%);
 }
@@ -149,8 +137,6 @@ $dragBarWidth: 10px;
 	cursor: row-resize;
 
 }
-
-
 
 #tabpages.full-width {
 	top: 60px;
@@ -176,7 +162,6 @@ $dragBarWidth: 10px;
 	display: flex;
 	justify-content: flex-end;
 }
-
 
 :root {
     --text-color: #000;
