@@ -36,7 +36,7 @@ $dragBarWidth: 10px;
 }
 
 #leftcol {
-	width: 0px;
+	width: fit-content;
 	overflow: auto;
 	grid-area: leftcol;
 	background-color: var(--left-bg);
@@ -135,15 +135,10 @@ $dragBarWidth: 10px;
 	width: 5px;
 }
 
-#leftdragbar .handle {
-	display: none;
-	/* 隐藏拖动手柄 */
-}
-
 #leftdraghandle {
 	position: absolute;
 	height: 20px;
-	width: 20px;
+	width: 15px;
 	margin: auto;
 	filter: brightness(110%);
 }

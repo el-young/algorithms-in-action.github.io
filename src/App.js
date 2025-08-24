@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import './styles/App.scss';
 import Header from './components/top/Header';
-import AlgorithmMenu from './components/AlgorithmMenu';
 import { ReactComponent as Circle } from './assets/icons/circle.svg';
 import { ReactComponent as Direction } from './assets/icons/direction.svg';
 import { GlobalProvider } from './context/GlobalState';
@@ -121,9 +120,6 @@ function App() {
         onMouseMove={(event) => onDrag(event)}
       >
         <div id="header" className="header-container">
-          <div className="header-left">
-            <AlgorithmMenu />
-          </div>
           <div className="header-right">
             <Header onSetting={onSetting} />
           </div>
@@ -138,8 +134,7 @@ function App() {
           id="leftdragbar"
           tabIndex="-1"
           aria-label="Move left drag bar"
-          onDoubleClick={collapseLeftDrag}
-          onMouseDown={startLeftDrag}
+          onClick={collapseLeftDrag}
           role="button"
           className="dragbar"
         >

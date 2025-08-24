@@ -111,7 +111,7 @@ const getDefn = (page, list, status) => {
       break;
     case EXPAND_LEFT:
       tempList = addUnitToList([
-        addUnitToNum(EXPAND_COL_LEFT_SIZE, 'px'),
+        "max-content",
         addUnitToNum(list[1], 'px'),
         addUnitToNum(list[2] / (list[2] + list[4]), 'fr'),
         addUnitToNum(list[3], 'px'),
