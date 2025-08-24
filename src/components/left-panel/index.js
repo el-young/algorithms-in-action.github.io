@@ -8,11 +8,12 @@ import React, {
   import { GlobalContext } from '../../context/GlobalState';
   import { GlobalActions } from '../../context/actions';
   import '../../styles/LeftPanel.scss';
-  import { AlgorithmCategoryList, AlgorithmList } from '../../algorithms/masterList';
+  import { DeployedAlgorithmCategoryList, DeployedAlgorithmList } from '../../algorithms/masterList';
   import { setFontSize } from '../top/helper';
   import openInstructions from '../mid-panel/helper';
   
-  const LIST_COLLAPSE = true;
+  // Do not load site with categories expanded
+  const LIST_COLLAPSE = false;
   
   function LeftPanel({ fontSize, fontSizeIncrement }) {
     const { dispatch, algorithm } = useContext(GlobalContext);
@@ -23,7 +24,12 @@ import React, {
       const inputContent = e.target.value.trim().toLowerCase();
       let algorithmListChosen = null;
       if (inputContent.length > 0) {
-        algorithmListChosen = AlgorithmList.filter((i) => i.name.toLowerCase().match(inputContent));
+        algorithmListChosen = DeployedAlgorithmList.filter(({name, keywords}) => {
+          console.log(keywords)
+          console.log(`name: ${name}`)
+          return name.toLowerCase().includes(inputContent) ||
+          (keywords ?? []).some(k => k.toLowerCase().includes(inputContent))
+        })
       }
       setDisplaySearch(algorithmListChosen);
     };
@@ -41,7 +47,7 @@ import React, {
     };
   
     const initCollapseStat = () => {
-      AlgorithmCategoryList.forEach((stat, index) => {
+      DeployedAlgorithmCategoryList.forEach((stat, index) => {
         const obj = document.getElementById(`category-${index}`);
         if (LIST_COLLAPSE) {
           obj.click();
@@ -107,7 +113,7 @@ import React, {
         >
           {
             (displaySearch === null)
-              ? AlgorithmCategoryList.map((cat, index) => (
+              ? DeployedAlgorithmCategoryList.map((cat, index) => (
                 <div key={cat.id}>
                   <button
                     key={cat.id}
@@ -126,19 +132,16 @@ import React, {
                     {
                       cat.algorithms.map((algo, index) => (
                         <button
-                          key={index}
+                          key={algo.shorthand}
                           className={algorithm.name === algo.name ? 'algoItem active' : 'algoItem'}
                           type="button"
                           id={`algo-${algo.name}`}
-                          onClick={algorithm.name === algo.name ? () => {
-                            document.getElementById('startBtnGrp');
-                          }
-                            : () => {
+                          onClick= {() => {
                               openInstructions();
                               dispatch(GlobalActions.LOAD_ALGORITHM, { name: algo.shorthand, mode: algo.mode });
                             }}
                         >
-                          <div key={algo.id} className="algoItemContent">{algo.name}</div>
+                          <div key={algo.shorthand} className="algoItemContent">{algo.name}</div>
                         </button>
                       ))
                     }

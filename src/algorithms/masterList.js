@@ -1,51 +1,48 @@
 /*
- Use node AddNewAlgorithm.js to have the entry, files and export lines
- created for you.
-  
- Map from algorithm ID -> metadata used across the app.
+    Pure algorithm metadata (no imports, no JSX).
 
- Explaining an entry by example:
- 
-  isort: {
-    name: 'Insertion Sort',
-    category: 'Sort',
-    noDeploy: true,
-    keywords: ['N^2'],
-    explanationKey: 'isort',
-    paramKey: 'isort',
-    instructionsKey: 'isort',
-    extraInfoKey: 'isort',
-    pseudocode: { sort: 'isort' },
-    controller: { sort: 'isort' },
-  },
+    why: 
+        - keeping it data-only avoids circular deps
+        - keep JSX out: Node.js can’t parse JSX (<Param/>).
+          Files run directly with node (e.g. node addNewAlgorithm.js) will crash if they
+          import a module that contains JSX or imports React components. So in the previous
+          implementation these files could not retrieve metadata about algorithms.
+        - decouple UI: some files only use names/ids/categories to do their job; they shouldn’t
+          pull in UI/animation code or its dependency chain 
 
-  - Name on the menus will appear as "Insertion Sort".
-  - It is under category "Sort" on the menus.
-  - noDeploy = true, algorithm will not appear on menus but accessible through
-    http://localhost:<port>/?alg=<key> (alg=isort)
-    (optional; defaults to false if not specified)
-  - keywords: used by the main menu search (case-insensitive).
-    (optional; defaults to [])
+          Elaboration with the AlgorithmMenu: Want to access some metadata like
+            - name
+            - category
+          must import from src/algorithms/index.js which imports every directory under src/algorithms
+          which caused the uninitialised errors. Still not sure why, then, it didnt error for MainMenu 
+          but never the less. 
+          
+          The UI layer later resolves the string keys (explanationKey, paramKey, etc.) to real modules so in this
+          file we can have no imports and index.js can remain the same but dynamically inject the modules
+          with the strings defined in this file.
+*/
 
-  - explanationKey: MUST equal a named export from
-    src/algorithms/explanations/index.js.
-  - paramKey: MUST equal a named export from
-    src/algorithms/parameters/index.js.
-  - instructionsKey: MUST equal a named export in
-    src/algorithms/instructions/index.js.
-  - extraInfoKey: MUST equal a named export in
-    src/algorithms/extra-info/index.js
+/*
+ This file lists all the algorithms in the program, and imports
+ them from the relevant file. Follow the example below for how to
+ add new algorithms. There are two versions of this: algorithmMetadata
+ is all algorithms, whatever the quality etc, and algorithms is the
+ subset that are selected to be made visible and can be run. The idea is
+ that during development we can merge all algorithms into a single
+ branch of the repository but only deploy some of them to the users.
+ For developers etc we can change a single line of code below where
+ algorithms is defined to deploy all algorithms. For algorithmMetadata we use a
+ noDeploy flag for each entry; if it is missing the default is the
+ algorithm is deployed. Note that the DEFAULT_ALGORITHM from
+ src/context/actions.js had better be deployed!
+ XXX Design of noDeploy stuff was done with the aim of minimal code change
+ and should be re-thought when there are fewer merges going on.
 
-  - pseudocode: object mapping MODE -> named export from
-    src/algorithms/pseudocode/index.js.
-      Single-mode example: { sort: 'isort' }
-      Multi-mode example:  {
-        insertion: 'binaryTreeInsertion',
-        search: 'binaryTreeSearch',
-      },
+Now that we can access algorithms via the URL we should be able to use
+this mechanism for acess to "hidden" algorithms
 
-  - controller: object mapping MODE -> named export from
-    src/algorithms/controllers/index.js, same rules as pseudocode.
+ Each imported algorithm is expected to be an object of the form:
+ { pseudocode: String, explanation: String, run: Function }
 */
 
 // Very Important: The key for each algorithm MUST be unique!
@@ -62,7 +59,7 @@
 //           name="msort_arr_td"  <---- ****SAME AS KEY****
 // ...
 
-// DO NOT DELETE/MODIFY THIS COMMENT
+// DO NOT DELETE COMMENT THIS IS FOR THE addNewAlgorithm.js script
 //_MASTER_LIST_START_
 const algorithmMetadata = {
   isort: {
@@ -521,6 +518,7 @@ const generateAlgorithmList = (deployOnly = false) => {
       shorthand: key,
       id: alNum,
       mode: getDefaultMode(key),
+      keywords: value.keywords
     });
     alNum += 1;
   }
@@ -530,7 +528,7 @@ const generateAlgorithmList = (deployOnly = false) => {
 
 export default algorithmMetadata;
 export const DeployedAlgorithmCategoryList = generateAlgorithmCategoryList(true);
-export const AlgorithmCategoryList = generateAlgorithmCategoryList(); 
+export const AlgorithmCategoryList = generateAlgorithmCategoryList();
+export const DeployedAlgorithmList = generateAlgorithmList(true);
 export const AlgorithmList = generateAlgorithmList();
 export const AlgorithmNum = generateAlgorithmList().length;
-
