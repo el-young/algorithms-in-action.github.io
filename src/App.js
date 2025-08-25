@@ -132,9 +132,12 @@ function App() {
         </div>
         <div
           id="leftdragbar"
-          tabIndex="-1"
+          tabIndex="0"
           aria-label="Move left drag bar"
           onClick={collapseLeftDrag}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') collapseLeftDrag();
+          }}
           role="button"
           className="dragbar"
         >
