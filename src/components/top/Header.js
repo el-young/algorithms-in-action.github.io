@@ -20,7 +20,7 @@ function Header({ onSetting }) {
 
   return (
     <div className="header">
-      <button className="headerTitle">
+      <button className="headerTitle" type="button" onClick={handleLogoClick}>
         <img src={logo} alt="logo" />
         <h1>Algorithms in Action</h1>
       </button>
