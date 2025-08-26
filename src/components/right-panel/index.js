@@ -7,17 +7,22 @@ import Pseudocode from './Pseudocode'
 import ExtraInfo from './ExtraInfo'
 import Instruction from './Instructions'
 
-function RightPanel({ fontSize, fontSizeIncrement }) {
+export const PSEUDOCOE_INDEX    = 0;
+export const BACKGROUND_INDEX   = 1;
+export const MORE_INDEX         = 2;
+export const INSTRUCTIONS_INDEX = 3;
+
+function RightPanel({ fontSize, fontSizeIncrement, tab, setTab }) {
   const buttons = [
     {
-      id: 0,
+      id: PSEUDOCOE_INDEX,
       label: 'Code',
       display: (
         <Pseudocode fontSize={fontSize} fontSizeIncrement={fontSizeIncrement} />
       ),
     },
     {
-      id: 1,
+      id: BACKGROUND_INDEX,
       label: 'Background',
       display: (
         <Explanation
@@ -27,14 +32,14 @@ function RightPanel({ fontSize, fontSizeIncrement }) {
       ),
     },
     {
-      id: 2,
+      id: MORE_INDEX,
       label: 'More',
       display: (
         <ExtraInfo fontSize={fontSize} fontSizeIncrement={fontSizeIncrement} />
       ),
     },
     {
-      id: 3,
+      id: INSTRUCTIONS_INDEX,
       label: 'Instructions',
       display: (
         <Instruction
@@ -45,21 +50,22 @@ function RightPanel({ fontSize, fontSizeIncrement }) {
     },
   ]
 
-  const [state, setState] = React.useState(0)
-
-  const getBtnState = (val) => {
-    setState(val)
-  }
   return (
     <>
-      <HeaderButton value={buttons} onChange={getBtnState} />
-      {buttons[state].display}
+      <HeaderButton
+        items={buttons}
+        current={tab}
+        onChange={setTab}
+      />
+      {buttons[tab].display}
     </>
-  )
+  );
 }
 
 export default RightPanel
 RightPanel.propTypes = {
   fontSize: PropTypes.number.isRequired,
   fontSizeIncrement: PropTypes.number.isRequired,
-}
+  tab: PropTypes.number.isRequired,
+  setTab: PropTypes.func.isRequired,
+};

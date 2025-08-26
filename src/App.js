@@ -6,7 +6,7 @@ import { ReactComponent as Circle } from './assets/icons/circle.svg';
 import { ReactComponent as Direction } from './assets/icons/direction.svg';
 import { GlobalProvider } from './context/GlobalState';
 import LeftPanel from './components/left-panel';
-import RightPanel from './components/right-panel';
+import RightPanel, { INSTRUCTIONS_INDEX } from './components/right-panel';
 import MidPanel from './components/mid-panel';
 import ControlPanel from './components/mid-panel/ControlPanel';
 import Settings from './components/top/Settings';
@@ -99,6 +99,11 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
   }, []);
 
+  // Lifted state so that other panels can control
+  // what to set the right tabs to. When app loads
+  // set to Instruction tab.
+  const [rightTab, setRightTab] = useState(INSTRUCTIONS_INDEX);
+
   return (
     <GlobalProvider>
       {isSettingVisible ? (
@@ -128,6 +133,7 @@ function App() {
           <LeftPanel
             fontSize={LEFT_FONT_SIZE}
             fontSizeIncrement={fontSizeIncrease}
+            setRightTab={setRightTab}
           />
         </div>
         <div
@@ -170,6 +176,8 @@ function App() {
           <RightPanel
             fontSize={RIGHT_FONT_SIZE}
             fontSizeIncrement={fontSizeIncrease}
+            tab={rightTab}
+            setTab={setRightTab} 
           />
         </div>
         <div
