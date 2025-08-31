@@ -40,7 +40,7 @@ function AlgorithmMenu() {
               {activeCategory === category && (
                 <div className="subcategory">
                   {Object.entries(algs).map(([alg, url]) => (
-                    <a key={alg} href={url || "#"}>
+                    <a key={alg} href={url || "#"} onClick={() => setIsOpen(false)}>
                       {alg}
                     </a>
                   ))}

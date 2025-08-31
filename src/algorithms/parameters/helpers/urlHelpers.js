@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import algorithms from '../../../algorithms';
+import { errorParamMsg } from './ParamHelper';
 
 // const DEFAULT_ALGORITHM = 'heapSort';
 // const DEFAULT_MODE = 'sort';
@@ -21,7 +22,7 @@ import algorithms from '../../../algorithms';
 const VALID_PARAM_NAMES = [
     'alg', 'mode', 'list', 'value', 'xyCoords', 'edgeWeights',
     'size', 'start', 'end', 'string', 'pattern', 'union',
-    'heuristic', 'min', 'max'
+    'heuristic', 'min', 'max', 'expand', 'expand'
 ];
 
 // Default values for each parameter
@@ -40,7 +41,9 @@ const DEFAULT_VALUES = {
     union: '',
     heuristic: '',
     min: '',
-    max: ''
+    max: '',
+    step: '0',
+    expand: '{}'
 };
 
 
@@ -95,11 +98,11 @@ export const withAlgorithmParams = (WrappedComponent) => {
         const { alg, mode, list, value, xyCoords, edgeWeights, size, start, end, string, pattern, union, heuristic, min, max } = useUrlParams();
 
         if (!alg || !(alg in algorithms)) {
-            return <div>Invalid algorithm specified</div>;
+            return errorParamMsg(null, "Invalid alg parameter specified");
         }
 
         if (!mode || !(mode in algorithms[alg].pseudocode)) {
-            return <div>Invalid mode specified</div>;
+            return errorParamMsg(null, "Invalid mode parameter specified");
         }
 
         return <WrappedComponent

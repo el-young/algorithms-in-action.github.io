@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable import/no-named-as-default */
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Slider from '@mui/material/Slider';
 import Grid from '@mui/material/Grid';
@@ -18,6 +18,7 @@ import { GlobalActions } from '../../context/actions';
 import '../../styles/ControlPanel.scss';
 import 'reactjs-popup/dist/index.css';
 import CodeBlock from '../../markdown/code-block';
+import { useUrlParams } from '../../algorithms/parameters/helpers/urlHelpers';
 
 const muiTheme = createTheme({
   overrides: {
@@ -122,6 +123,46 @@ function ControlPanel() {
   const handleSliderChange = (event, newSpeed) => {
     setSpeed(newSpeed);
   };
+
+  // Step and expand parameter in URL
+  const { step, expand } = useUrlParams();
+  const stepApplied = useRef(false);
+
+  useEffect(() => {
+    if (!algorithm?.chunker) return;
+
+    // step
+    if (!stepApplied.current && step !== undefined) {
+      stepApplied.current = true;
+      const raw = Number(step);
+      // Clamp it and round down if decimal
+      const max = (algorithm.chunker?.chunks?.length ?? 1) - 1;
+      const target = Math.max(0, Math.min(Math.trunc(raw), max));
+      // stopAt works with doWhile then >= check so step=0 param starts it at 1
+      if (target > 0) dispatch(GlobalActions.NEXT_LINE, { stopAt: target, playing: false });
+    }
+
+    // collapse
+    if (expand) {
+      try {
+        const obj = JSON.parse(expand);
+        const modeState = obj[algorithm.id.mode] || {};
+        console.log(modeState)
+
+        Object.entries(modeState).forEach(([block, expanded]) => {
+          // Ignore codeblocknames that are not valid
+          if (algorithm.pseudocode?.hasOwnProperty(block)) {
+            dispatch(GlobalActions.COLLAPSE, {
+              codeblockname: block,
+              expandOrCollapase: expanded,
+            });
+          }
+        });
+      } catch (err) {
+        console.warn("Invalid format of expand query parameter", err);
+      }
+    }
+  }, [algorithm?.chunker]);
 
   return (
     <div className="controlContainer">

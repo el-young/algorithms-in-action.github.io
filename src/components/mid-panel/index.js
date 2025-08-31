@@ -49,6 +49,17 @@ function MidPanel({ fontSize, fontSizeIncrement }) {
     // this creates the url of the current algorithm, with required parameters
     if (share) {
       let baseUrl = `${window.location.origin}/?alg=${algorithmKey}&mode=${mode}`
+
+      // Adding step and expand to the base URL since its common to all 
+      // algorithms it makes sense to just add it here.
+
+      // Add step
+      if (algorithm?.chunker?.currentChunk) baseUrl += `&step=${algorithm.chunker.currentChunk}`;
+
+      // Add collapse state for the current algorithm only, copying the entire
+      // collapse controller is wasteful, URL would be massive.
+      const algoCollapse = algorithm?.collapse?.[algorithm.id.name];
+      if (algoCollapse) baseUrl += `&expand=${JSON.stringify(algoCollapse)}`;
       let url = createUrl(baseUrl, category, urlContext);
       setCurrentUrl(url);
     }
