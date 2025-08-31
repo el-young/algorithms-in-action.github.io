@@ -6,19 +6,13 @@ import { closeInstructions } from '../../../components/mid-panel/helper';
 import { GlobalContext } from '../../../context/GlobalState';
 import '../../../styles/Param.scss';
 
-//SIM Event - DanistyWuKids
-const mouseClickEvents = ['mousedown', 'click', 'mouseup'];
-function simulateMouseClick(element){
-  mouseClickEvents.forEach(mouseEventType => element.dispatchEvent(new MouseEvent(mouseEventType, {view: window,bubbles: true,cancelable: true,buttons: 1})));
-}
-
 /**
  * The ParamForm wraps a input, icon(optional) and a button.
  */
 function StringParamForm(props) {
   const {
     formClassName, buttonName, string, stringOnChange,
-    pattern, patternOnChange, handleSubmit, disabled,
+    pattern, patternOnChange, handleSubmit, disabled, mode
   } = props;
   // eslint-disable-next-line
   const { algorithm } = useContext(GlobalContext);
@@ -31,8 +25,6 @@ function StringParamForm(props) {
     }
     closeInstructions();
   };
-
-  useEffect(() => {var element = document.querySelector('button[id="startBtnGrp"]');simulateMouseClick(element);},[]);
 
   return (
     <form className={formClassName} onSubmit={handleSubmit}>
@@ -69,7 +61,7 @@ function StringParamForm(props) {
           <ControlButton
             className={disabled ? 'blueWordBtnDisabled' : 'blueWordBtn'}
             onClick={closeInstructionsFun}
-            id="startBtnGrp"
+            id={mode ? `startBtnGrp-${mode}`: `startBtnGrp`}
             type="submit"
             disabled={disabled}
           >

@@ -81,7 +81,7 @@ function MergesortParam({ list }) {
 
   useEffect(
     () => {
-      document.getElementById('startBtnGrp').click();
+      document.getElementById('startBtnGrp-sort').click();
     },
     [QSCase],
   );

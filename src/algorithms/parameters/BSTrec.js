@@ -84,7 +84,7 @@ function MergesortParam({ list }) {
 
   useEffect(
     () => {
-      document.getElementById('startBtnGrp').click();
+      document.getElementById('startBtnGrp-sort').click();
     },
     [QSCase],
   );
@@ -93,7 +93,7 @@ function MergesortParam({ list }) {
     <>
       <div className="form">
         <ListParam
-          name="BSTRec"
+          name="heapSort"
           buttonName="Reset"
           mode="sort"
           formClassName="formLeft"

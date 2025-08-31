@@ -4,7 +4,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import { withStyles } from '@mui/styles';
@@ -154,12 +154,16 @@ function TTFTParam({ mode, list, value }) {
     }
   };
 
-  useEffect(
-    () => {
-      document.getElementById('startBtnGrp').click();
-    },
-    [bstCase],
-  );
+  const didMount = useRef(false);
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      document.getElementById(`startBtnGrp-${mode}`)?.click();
+      return;
+    }
+
+    document.getElementById("startBtnGrp-insertion")?.click();
+  }, [bstCase]);
 
   return (
     <>

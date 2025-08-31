@@ -22,7 +22,7 @@ import { errorParamMsg } from './ParamHelper';
 const VALID_PARAM_NAMES = [
     'alg', 'mode', 'list', 'value', 'xyCoords', 'edgeWeights',
     'size', 'start', 'end', 'string', 'pattern', 'union',
-    'heuristic', 'min', 'max', 'expand', 'expand'
+    'heuristic', 'min', 'max', 'step', 'expand'
 ];
 
 // Default values for each parameter

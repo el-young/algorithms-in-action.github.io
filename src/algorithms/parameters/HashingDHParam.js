@@ -3,7 +3,7 @@ import { withAlgorithmParams } from './helpers/urlHelpers'
 
 import { URLContext } from '../../context/urlState.js';
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { GlobalContext } from '../../context/GlobalState';
 import { GlobalActions } from '../../context/actions';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -158,20 +158,16 @@ function HashingDHParam({ mode, list, value }) {
   }
 
   // Use effect to detect changes in radio box choice
-  useEffect(
-    () => {
-      document.getElementById('startBtnGrp').click();
-    },
-    [HASHSize],
-  );
+  const didMount = useRef(false);
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      document.getElementById(`startBtnGrp-${mode}`)?.click();
+      return; // Skip first mount
+    }
 
-  // Use effect to detect changes in expand radio box choice
-  useEffect(
-    () => {
-      document.getElementById('startBtnGrp').click();
-    },
-    [expand],
-  );
+    document.getElementById(`startBtnGrp-insertion`)?.click();
+  }, [HASHSize, expand]);
 
 
   return (

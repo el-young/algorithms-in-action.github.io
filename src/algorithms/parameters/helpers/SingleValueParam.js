@@ -57,6 +57,7 @@ function SingleValueParam({
     <ParamForm
       formClassName={formClassName}
       name={ALGORITHM_NAME}
+      mode={mode}
       buttonName={buttonName}
       value={paramVal}
       disabled={disabled}

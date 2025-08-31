@@ -52,6 +52,7 @@ function StringParam({
     <StringParamForm
       formClassName={formClassName}
       name={ALGORITHM_NAME}
+      mode={mode}
       buttonName={buttonName}
       string={DEFAULT_STRING}
       pattern={DEFAULT_PATTERN}

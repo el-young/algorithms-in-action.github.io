@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withStyles } from '@mui/styles';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -111,9 +111,17 @@ function UFParam({ mode, union, value }) {
     }
   };
 
+  const didMount = useRef(false);
   useEffect(() => {
-    document.getElementById('startBtnGrp').click();
+    if (!didMount.current) {
+      didMount.current = true;
+      document.getElementById(`startBtnGrp-${mode}`)?.click();
+      return;
+    }
+
+    document.getElementById('startBtnGrp-Union')?.click();
   }, [pathCompressionEnabled]);
+
 
   return (
     <>

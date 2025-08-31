@@ -82,7 +82,7 @@ function QuicksortParam({ list }) { // Parse the quicksort's parameters: list
 
   useEffect(
     () => {
-      document.getElementById('startBtnGrp').click();
+      document.getElementById('startBtnGrp-sort').click();
     },
     [QSCase],
   );

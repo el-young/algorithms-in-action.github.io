@@ -53,6 +53,7 @@ function ListParam({
     <ParamForm
       formClassName={formClassName}
       name={ALGORITHM_NAME}
+      mode={mode}
       buttonName={buttonName}
       value={DEFAULT_VAL}
       disabled={disabled}

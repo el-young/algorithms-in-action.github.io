@@ -25,6 +25,10 @@ function BFSSParam({ mode, string, pattern }) {
     setSearchValue(pattern_)
   }, [string_, pattern_]);
 
+  useEffect(() => {
+    document.getElementById('startBtnGrp-search')?.click();
+  }, []);
+
   return (
     <>
       <div className="form">

@@ -4,7 +4,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import { withStyles } from '@mui/styles';
@@ -131,12 +131,23 @@ function AVLTParam({ mode, list, value }) {
     }
   };
 
-  useEffect(
-    () => {
-      document.getElementById('startBtnGrp').click();
-    },
-    [bstCase],
-  );
+  // On first mount use URL to click correct button.
+  // After that any change to bstCase go back to insert button click
+  // (staying in search does not make sense in this case).
+  const didMount = useRef(false);
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      // Initially mount based on URL.
+      document.getElementById(`startBtnGrp-${mode}`)?.click();
+      return; // skip initial mount
+    }
+    // Whenever bstCase changes we want to go back to insert mode
+    // staying in search mode makes no sense since we are resetting the array.
+    document.getElementById('startBtnGrp-insert')?.click();
+  }, [bstCase]);
+  // Can not put in seperate use effects because all useEffects run once on mount so URL
+  // would be ignored.
 
   return (
     <>
