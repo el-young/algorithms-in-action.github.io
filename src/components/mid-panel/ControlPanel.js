@@ -19,6 +19,7 @@ import '../../styles/ControlPanel.scss';
 import 'reactjs-popup/dist/index.css';
 import CodeBlock from '../../markdown/code-block';
 import { useUrlParams } from '../../algorithms/parameters/helpers/urlHelpers';
+import { chunk } from 'lodash';
 
 const muiTheme = createTheme({
   overrides: {
@@ -147,15 +148,17 @@ function ControlPanel() {
       try {
         const obj = JSON.parse(expand);
         const modeState = obj[algorithm.id.mode] || {};
-        console.log(modeState)
 
         Object.entries(modeState).forEach(([block, expanded]) => {
           // Ignore codeblocknames that are not valid
-          if (algorithm.pseudocode?.hasOwnProperty(block)) {
+          if (algorithm.pseudocode?.hasOwnProperty(block) &&
+              typeof expanded === "boolean") {
             dispatch(GlobalActions.COLLAPSE, {
               codeblockname: block,
               expandOrCollapase: expanded,
             });
+          } else {
+            console.warn(`Ignoring invalid collapse state for block "${block}:${expanded}"`);
           }
         });
       } catch (err) {
