@@ -25,7 +25,7 @@ import { motion, AnimateSharedLayout } from 'framer-motion';
 import Renderer from '../../common/Renderer/index';
 import styles from './Array2DRenderer.module.scss';
 import { classes } from '../../common/util';
-import { mode } from '../../../top/Settings';
+import { mode } from '../../../AlgAnimationPage/top-panel/Settings';
 import PropTypes from 'prop-types';
 
 // Add your algo to this if you want to use the float box/popper

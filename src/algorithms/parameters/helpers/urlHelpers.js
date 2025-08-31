@@ -25,27 +25,6 @@ const VALID_PARAM_NAMES = [
     'heuristic', 'min', 'max', 'step', 'expand'
 ];
 
-// Default values for each parameter
-const DEFAULT_VALUES = {
-    alg: 'heapSort',
-    mode: 'sort',
-    list: '',
-    value: '',
-    xyCoords: '',
-    edgeWeights: '',
-    size: '',
-    start: '',
-    end: '',
-    string: '',
-    pattern: '',
-    union: '',
-    heuristic: '',
-    min: '',
-    max: '',
-    step: '0',
-    expand: '{}'
-};
-
 
 export function useUrlParams() {
     const [search, setSearch] = useState(window.location.search);
@@ -67,7 +46,7 @@ export function useUrlParams() {
     // Filter and parse valid URL parameters
     VALID_PARAM_NAMES.forEach((name) => {
         const value = urlParams.get(name);
-        params[name] = value !== null ? value : DEFAULT_VALUES[name];
+        params[name] = value;
     });
 
     // Log a warning if there are any invalid parameters in the URL
@@ -94,7 +73,7 @@ function extractValue(paramString, key) {
 
 export const withAlgorithmParams = (WrappedComponent) => {
     const WithAlgorithmParams = (props) => {
-
+        console.log("here")
         const { alg, mode, list, value, xyCoords, edgeWeights, size, start, end, string, pattern, union, heuristic, min, max } = useUrlParams();
 
         if (!alg || !(alg in algorithms)) {

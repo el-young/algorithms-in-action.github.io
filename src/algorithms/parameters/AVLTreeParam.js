@@ -131,6 +131,7 @@ function AVLTParam({ mode, list, value }) {
     }
   };
 
+
   // On first mount use URL to click correct button.
   // After that any change to bstCase go back to insert button click
   // (staying in search does not make sense in this case).
@@ -145,6 +146,7 @@ function AVLTParam({ mode, list, value }) {
     // Whenever bstCase changes we want to go back to insert mode
     // staying in search mode makes no sense since we are resetting the array.
     document.getElementById('startBtnGrp-insert')?.click();
+    console.log("in")
   }, [bstCase]);
   // Can not put in seperate use effects because all useEffects run once on mount so URL
   // would be ignored.

@@ -25,7 +25,7 @@ import { motion, AnimateSharedLayout } from 'framer-motion';
 import Array2DRenderer from '../Array2DRenderer/index';
 import styles from './Array1DRenderer.module.scss';
 import { classes } from '../../common/util';
-import { mode } from '../../../top/Settings';
+import { mode } from '../../../AlgAnimationPage/top-panel/Settings';
 // Add your algo to this if you want to use the float box/popper
 const ALGOS_USING_FLOAT_BOX = ["MSDRadixSort", "straightRadixSort"];
 

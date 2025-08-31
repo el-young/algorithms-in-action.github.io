@@ -1,0 +1,45 @@
+/* eslint-disable no-prototype-builtins */
+import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
+import { GlobalContext } from '../../../context/GlobalState';
+import { GlobalActions } from '../../../context/actions';
+import LineNumHighLight from './LineNumHighLight';
+import BottomButton from './BottomButton';
+import LineExplanation from './LineExplanation';
+
+function Pseudocode() {
+  const { algorithm, dispatch } = useContext(GlobalContext);
+  const show = !!algorithm.hasOwnProperty('pseudocode');
+  var explanation = "";
+
+  const onExpand = () => {
+    Object.keys(algorithm.pseudocode).forEach((key) => {
+      dispatch(GlobalActions.COLLAPSE, { codeblockname: key, expandOrCollapase: true });
+    });
+  };
+
+  const onCollapse = () => {
+    Object.keys(algorithm.pseudocode).forEach((key) => {
+      if (key !== 'Main') {
+        dispatch(GlobalActions.COLLAPSE, { codeblockname: key, expandOrCollapase: false });
+      }
+    });
+  };
+
+  return (
+    show ? (
+      <>
+        <LineNumHighLight />
+        <div className="btnPanel">
+          <BottomButton onClick={onExpand} name="Expand All" />
+          <BottomButton onClick={onCollapse} name="Collapse All" />
+        </div>
+        { explanation ? (
+        <LineExplanation explanation={explanation} />
+        ) : ''}
+      </>
+    ) : null
+  );
+}
+
+export default Pseudocode;

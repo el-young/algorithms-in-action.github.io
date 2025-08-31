@@ -1,8 +1,4 @@
 import React, { createContext, useState } from 'react';
-// generic version of collapseChunkPlugin - could probably adapt code and
-// delete some others XXX
-import { initGlobalAlgorithmGetter } from '../algorithms/controllers/collapseChunkPlugin';
-import { initGlobalAlgotithmGetter } from '../algorithms/controllers/transitiveClosureCollapseChunkPlugin';
 import { dispatcher, initialState } from './actions';
 import algorithms from '../algorithms';
 import { getDefaultMode, getCategory } from '../algorithms/masterList'
@@ -41,18 +37,9 @@ export const GlobalProvider = ({ children }) => {
     dispatch,
   };
 
-  initGlobalAlgorithmGetter(
-    () => globalState.algorithm,
-  );
-  initGlobalAlgotithmGetter(
-    () => globalState.algorithm,
-  );
-
   return (
     <GlobalContext.Provider value={globalState}>
-      <URLProvider>
         {children}
-      </URLProvider>
     </GlobalContext.Provider>
   );
 };
