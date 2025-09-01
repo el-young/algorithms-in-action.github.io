@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import algorithms from '../../../algorithms';
 import { errorParamMsg } from './ParamHelper';
+import { getDefaultMode } from '../../masterList';
 
 // const DEFAULT_ALGORITHM = 'heapSort';
 // const DEFAULT_MODE = 'sort';
@@ -74,13 +75,15 @@ function extractValue(paramString, key) {
 export const withAlgorithmParams = (WrappedComponent) => {
     const WithAlgorithmParams = (props) => {
         console.log("here")
-        const { alg, mode, list, value, xyCoords, edgeWeights, size, start, end, string, pattern, union, heuristic, min, max } = useUrlParams();
+        let { alg, mode, list, value, xyCoords, edgeWeights, size, start, end, string, pattern, union, heuristic, min, max } = useUrlParams();
 
         if (!alg || !(alg in algorithms)) {
             return errorParamMsg(null, "Invalid alg parameter specified");
         }
 
-        if (!mode || !(mode in algorithms[alg].pseudocode)) {
+        if (!mode) mode = getDefaultMode(alg);
+
+        if (!(mode in algorithms[alg].pseudocode)) {
             return errorParamMsg(null, "Invalid mode parameter specified");
         }
 

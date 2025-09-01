@@ -26,8 +26,6 @@ import {
 import PropTypes from 'prop-types'; // Import this for URL Param
 import { withAlgorithmParams } from './helpers/urlHelpers' // Import this for URL Param
 
-// import useParam from '../../context/useParam';
-
 const DEFAULT_NODES = genUniqueRandNumList(12, 1, 100);
 const DEFAULT_TARGET = '2';
 const INSERTION = 'insertion';
@@ -51,27 +49,20 @@ const BlueRadio = withStyles({
   // eslint-disable-next-line react/jsx-props-no-spreading
 })((props) => <Radio {...props} />);
 
-function AVLTParam({ mode, list, value }) {
+function AVLTParam({ alg, mode, list, value }) {
+  // Contexts
   const { algorithm, dispatch } = useContext(GlobalContext);
-  const [message, setMessage] = useState(null);
-  const [localNodes, setlocalNodes] = useState(list || DEFAULT_NODES);
   const { setNodes, setSearchValue } = useContext(URLContext);
-  const [bstCase, setBSTCase] = useState({
-    random: false,
-    sorted: false,
-    balanced: false,
-  });
-  const [localValue, setLocalValue] = useState(DEFAULT_TARGET);
 
-  useEffect(() => {
-    setNodes(localNodes);
-    setSearchValue(localValue);
-    // If input nodes are manually edited, we want to uncheck the case.
-    // This also unchecks the case when sorted and balanced are selected
-    // but (for some unknown reason) not when random is selected. This
-    // isn't ideal XXX but is not too bad.
-    setBSTCase(UNCHECKED);
-  }, [localNodes, localValue, setNodes, setSearchValue]);
+  // States
+  const [ message, setMessage ] = useState(null);
+  const [ localNodes, setlocalNodes ] = useState(list || DEFAULT_NODES);
+  const [bstCase, setBSTCase] = useState(UNCHECKED);
+  // TODO: Confirm `value` is the url query param pulled from to represent
+  // SEARCH values in algoirithms with SEARCH modes, keep things CONSISTENT!!!
+  const [ localValue, setLocalValue ] = useState(value || DEFAULT_TARGET);
+  // Default mode (Can be specified in URL)
+  const [ modeState, setModeState ] = useState(mode || INSERTION);
 
   const handleChange = (e) => {
     switch (e.target.name) {
@@ -88,68 +79,66 @@ function AVLTParam({ mode, list, value }) {
     }
 
     setBSTCase({ ...UNCHECKED, [e.target.name]: true });
+    // Switch back to insertion on case change
+    setModeState(INSERTION);
   };
-  /**
-   * For BST, since we need to insert nodes before run the search algorithm,
-   * therefore we need some extra check to make sure the tree is not empty.
-   * So we need to implement a new handle function instead of using the default one.
-   */
+  
+  // Click callbacks no longer directly call dispatch
+  // the modify the root component state.
+  const handleInsert = (e) => {
+    e.preventDefault();
+    const inputValue = e.target[0].value.replace(/\s+/g, '');
+    // Validate logic... TODO: Plan is to have validation functions
+    // defined within param file, these should return a collection of
+    // {true/false, error_msg} this way you do not have to guess
+    // what a function errored from outside of its scope, like the error code
+    // does now.
+    const numbers = inputValue.split(',').map(Number).filter(n => !isNaN(n));
+    setlocalNodes(numbers);
+    setModeState(INSERTION);
+    setBSTCase(UNCHECKED);
+  }
+
   const handleSearch = (e) => {
     e.preventDefault();
     const inputValue = e.target[0].value;
+    // Validate logic...
     setLocalValue(inputValue);
-
-    if (singleNumberValidCheck(inputValue)) {
-      const target = parseInt(inputValue, 10);
-      // make sure the tree is not empty
-      if (
-        algorithm.hasOwnProperty('visualisers')
-        && !algorithm.visualisers.graph.instance.isEmpty()
-      ) {
-        const visualiser = algorithm.chunker.visualisers;
-        // run search animation
-        dispatch(GlobalActions.RUN_ALGORITHM, {
-          name: 'AVLTree',
-          mode: 'search',
-          visualiser,
-          target,
-        });
-        setMessage(successParamMsg(SEARCH));
-      } else {
-        // when the tree is &nbsp;&nbsp;empty
-        setMessage(
-          errorParamMsg(
-            SEARCH,
-            undefined,
-            'Please fully build the tree before running a search.',
-          ),
-        );
-      }
-    } else {
-      // when the input cannot be converted to a number
-      setMessage(errorParamMsg(SEARCH, SEARCH_EXAMPLE));
-    }
+    setModeState(SEARCH);
+    setBSTCase(UNCHECKED);
   };
 
+  const handleRefresh = (e) => {
+    setlocalNodes(genUniqueRandNumList(DEFAULT_NODES.length, 1, 100));
+    setMessage(null);
+  }
 
-  // On first mount use URL to click correct button.
-  // After that any change to bstCase go back to insert button click
-  // (staying in search does not make sense in this case).
-  const didMount = useRef(false);
+  // Dispatch on any dependency change. Also this will run on first mount
+  // any simulated click logic sprinkled throughout codebase can be removed.
   useEffect(() => {
-    if (!didMount.current) {
-      didMount.current = true;
-      // Initially mount based on URL.
-      document.getElementById(`startBtnGrp-${mode}`)?.click();
-      return; // skip initial mount
+    if (modeState === INSERTION) {
+      dispatch(GlobalActions.RUN_ALGORITHM, {
+        name: alg,
+        mode: modeState,
+        nodes: localNodes
+      })
+    } else {
+      // Reuse visualisers, validation logic
+      // in search would ensure availability.
+      dispatch(GlobalActions.RUN_ALGORITHM, {
+        name: alg,
+        mode: modeState,
+        visualiser: algorithm.visualisers,
+        target: localValue
+      })
     }
-    // Whenever bstCase changes we want to go back to insert mode
-    // staying in search mode makes no sense since we are resetting the array.
-    document.getElementById('startBtnGrp-insert')?.click();
-    console.log("in")
-  }, [bstCase]);
-  // Can not put in seperate use effects because all useEffects run once on mount so URL
-  // would be ignored.
+  }, [localNodes, localValue, modeState, bstCase]);
+
+  // Hook to update the URL context container for share button
+  useEffect(() => {
+    setNodes(localNodes);
+    setSearchValue(localValue);
+  }, [localNodes, localValue]);
 
   return (
     <>
@@ -161,11 +150,8 @@ function AVLTParam({ mode, list, value }) {
           mode="insertion"
           formClassName="formLeft"
           DEFAULT_VAL={localNodes}
-          SET_VAL={setlocalNodes}
-          REFRESH_FUNCTION={(() => genUniqueRandNumList(12, 1, 100))}
-          ALGORITHM_NAME={INSERTION}
-          EXAMPLE={INSERTION_EXAMPLE}
-          setMessage={setMessage}
+          handleSubmit={handleInsert}
+          REFRESH_FUNCTION={handleRefresh}
         />
 
         {/* Search input */}
@@ -174,11 +160,10 @@ function AVLTParam({ mode, list, value }) {
           buttonName="Search"
           mode="search"
           formClassName="formRight"
-          DEFAULT_VAL={value || localValue}
+          DEFAULT_VAL={localValue}
           ALGORITHM_NAME={SEARCH}
           EXAMPLE={SEARCH_EXAMPLE}
           handleSubmit={handleSearch}
-          setMessage={setMessage}
         />
       </div>
       <span className="generalText">Re-order input: &nbsp;&nbsp;</span>
@@ -187,6 +172,7 @@ function AVLTParam({ mode, list, value }) {
           <BlueRadio
             checked={bstCase.random}
             onChange={handleChange}
+            disabled={algorithm?.playing}
             name="random"
           />
         )}
@@ -198,6 +184,7 @@ function AVLTParam({ mode, list, value }) {
           <BlueRadio
             checked={bstCase.sorted}
             onChange={handleChange}
+            disabled={algorithm?.playing}
             name="sorted"
           />
         )}
@@ -209,6 +196,7 @@ function AVLTParam({ mode, list, value }) {
           <BlueRadio
             checked={bstCase.balanced}
             onChange={handleChange}
+            disabled={algorithm?.playing}
             name="balanced"
           />
         )}

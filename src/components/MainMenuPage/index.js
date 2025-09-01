@@ -28,7 +28,7 @@ const CategorySection = ({ category, items }) => (
 const nameToInfo = DeployedAlgorithmCategoryList.flatMap(({ algorithms }) =>
   algorithms.map(({ name, shorthand, mode, keywords}) => ({
     name,
-    url: `${baseUrl}/?alg=${shorthand}&mode=${mode}`,
+    url: `${baseUrl}/animation/?alg=${shorthand}&mode=${mode}`,
     // Keywords may be undefined in master list
     keywords : (keywords ?? []).map((keyword) => keyword.toLowerCase()),
   }))
@@ -87,7 +87,7 @@ const Mainmenu = () => {
                 category={category}
                 items={algorithms.map(({ name, shorthand, mode }) => ({
                     name,
-                    url: `${baseUrl}/?alg=${shorthand}&mode=${mode}`,
+                    url: `${baseUrl}/animation/?alg=${shorthand}&mode=${mode}`,
                 }))}
             />
         ))}

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useContext,useEffect } from 'react';
+import React, { useContext,useEffect, useState } from 'react';
 import ControlButton from '../../../components/common/ControlButton';
 import '../../../styles/Param.scss';
 
@@ -11,8 +11,10 @@ import '../../../styles/Param.scss';
 function ParamForm(props) {
   const {
     formClassName, name, buttonName, value,
-    onChange, handleSubmit, children, disabled, mode
+    handleSubmit, children, disabled,
   } = props;
+
+  const [inputValue, setInputValue] = useState(value);
 
   return (
     <form className={formClassName} onSubmit={handleSubmit}>
@@ -21,8 +23,8 @@ function ParamForm(props) {
           <input
             name={name}
             type="text"
-            value={value}
-            onChange={onChange}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
           />
         </label>
         <div className="btnGrp">
@@ -30,7 +32,6 @@ function ParamForm(props) {
           {children}
           <ControlButton
             className={disabled ? 'blueWordBtnDisabled' : 'blueWordBtn'}
-            id={mode ? `startBtnGrp-${mode}`: `startBtnGrp`}
             type="submit"
             disabled={disabled}
           >
