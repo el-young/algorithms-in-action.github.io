@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import '../../../styles/RightPanel.scss'
 import HeaderButton from './HeaderButton'
@@ -15,7 +15,7 @@ function RightPanel() {
     { id: 3, label: 'Instructions', display: <Instruction /> },
   ]
 
-  const [state, setState] = React.useState(0)
+  const [state, setState] = useState(0)
 
   return (
     <>

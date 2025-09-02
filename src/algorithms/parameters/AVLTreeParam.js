@@ -115,7 +115,7 @@ function AVLTParam({ alg, mode, list, value }) {
   // any simulated click logic sprinkled throughout codebase can be removed.
   useEffect(() => {
     if (modeState === INSERTION) {
-      dispatch(GlobalActions.RUN_ALGORITHM, {
+      dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: modeState,
         nodes: localNodes
@@ -123,7 +123,7 @@ function AVLTParam({ alg, mode, list, value }) {
     } else {
       // Reuse visualisers, validation logic
       // in search would ensure availability.
-      dispatch(GlobalActions.RUN_ALGORITHM, {
+      dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: modeState,
         visualiser: algorithm.visualisers,

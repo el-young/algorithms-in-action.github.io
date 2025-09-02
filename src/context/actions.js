@@ -6,6 +6,8 @@ import Chunker from './chunker';
 import findBookmark from '../pseudocode/findBookmark';
 import React, { useState } from 'react';
 import { genRandNumList } from '../algorithms/parameters/helpers/ParamHelper';
+import { useUrlParams } from './urlState';
+import algorithmMetadata, { getDefaultMode } from '../algorithms/masterList';
 
 // Return block name for bookmark
 function bookmarkBlock(bookmark, pseudocode) {
@@ -226,34 +228,41 @@ function viewableChunks(chunker, pseudocode, collapse) {
 // the following functions. Each comment shows the expected properties in the
 // params argument.
 export const GlobalActions = {
-  // load an algorithm by returning its relevant components
+
+  // This is an indirection dispatch so that we put 
+  // param into the global state which inadvertently causes it to
+  // be rendered to the DOM which then inadvertently gets
+  // the param function to call the dispatch LOAD_ALGORITHM with all the 
+  // the params (like nodes) for the visualiser. TODO: Try thinking
+  // of a different way this is very smelly.
+  // INDIRECTION_INTO_PARAM: (state, params) => {
+  //   const { param, name, explanation, extraInfo, pseudocode, instructions } =
+  //     algorithms[params.name];
+  //   return {
+  //     id: params,
+  //     name,
+  //     explanation,
+  //     instructions,
+  //     extraInfo,
+  //     param,
+  //   };
+  // },
+  // Indirection to param was so param component could (through LOAD_ALGORITHM)
+  // pass in the param values (e.g. list of numbers) it had to the visualiser
+  // create a context for the parameter values so that when we call LOAD_ALGORITHM
+  // visualiser reads from that. We can just create another dispatch function
+  // which is more focused and simply adds the 
+
+  // Loads the selected algorithm by retrieving its associated components
+  // and placing them into the correct panes. This action is dispatched
+  // from parameter components. The `params` object is expected to contain
+  // at minimum a "mode" and a "name" (the algorithm key, e.g. "hsort" for heapSort
+  // called "name" for legacy reasons do not confuse it with "name" in master list).
+  // It should also include any other data required by the controller,
+  // visualisers, or runners defined for that algorithm.
   LOAD_ALGORITHM: (state, params) => {
-    const data = algorithms[params.name];
-    const { param, name, explanation, extraInfo, pseudocode, instructions } =
-      data;
-    const procedurePseudocode = pseudocode[params.mode];
-    addLineExplanation(procedurePseudocode);
-
-    return {
-      id: params,
-      name,
-      explanation,
-      instructions,
-      extraInfo,
-      param,
-      pseudocode: procedurePseudocode,
-      collapse:
-        state === undefined || state.collapse === undefined
-          ? getCollapseController(algorithms)
-          : state.collapse,
-      lineExplanation: '',
-    };
-  },
-
-  // run an algorithm by executing the algorithm
-  RUN_ALGORITHM: (state, params) => {
-    const data = algorithms[params.name];
-    const {
+    console.log("LOAD")
+    let {
       param,
       controller,
       name,
@@ -261,15 +270,9 @@ export const GlobalActions = {
       extraInfo,
       pseudocode,
       instructions,
-    } = data;
-    const procedurePseudocode = pseudocode[params.mode];
-    console.log("Run")
+    } = algorithms[params.name];
 
-    // Previously if we switched modes from insert to search, the search
-    // code had no in-line explanations built.
-    // XXX It seems a bit of overkill to redo the explanations whenever
-    // the algorithm is re-run (changing mode probable should LOAD the
-    // algorithm then separately RUN it) but this works for now...
+    const procedurePseudocode = pseudocode[params.mode];
     addLineExplanation(procedurePseudocode);
 
     // here we pass a function reference to Chunker() because we may want to initialise
@@ -279,13 +282,16 @@ export const GlobalActions = {
     );
     controller[params.mode].run(chunker, params);
     const bookmarkInfo = chunker.next();
-    //const firstLineExplan = findBookmark(procedurePseudocode, bookmarkInfo.bookmark).explanation;
-    const firstLineExplan = null;
+
     const collapse = state === undefined || state.collapse === undefined
       ? getCollapseController(algorithms)
       : state.collapse;
     viewableChunks(chunker, procedurePseudocode, collapse[params.name][params.mode]);
 
+    // If you think one of these properties are never used it is probably because
+    // it is not, it is just to leave options open for future development. For example in many
+    // insert/search algorithms we want to reuse the graph visualiser when we 
+    // switch to search mode that was built in insert mode, so we put visualisers into the state.
     return {
       ...state,
       id: params,
@@ -295,12 +301,12 @@ export const GlobalActions = {
       instructions,
       param,
       pseudocode: procedurePseudocode,
-      ...bookmarkInfo, // sets bookmark & finished fields
+      ...bookmarkInfo,
       chunker,
       visualisers: chunker.visualisers,
       collapse: collapse,
       playing: false,
-      lineExplanation: firstLineExplan,
+      lineExplanation: null,
     };
   },
 
@@ -474,10 +480,58 @@ export function dispatcher(state, setState) {
   };
 }
 
-export function initialState() {
-  return GlobalActions.LOAD_ALGORITHM(undefined, {
-    name: "AVLTree",
-    mode: "insertion",
-  });
-}
+// This is the initial state. This has been changed greatly,
+// this is the ONLY way a parameter component will be injected
+// with URL query parameters, it only happens ONCE when we instantiate
+// GlobalProvider. Think of this as a special dispatch(LOAD_ALGORITHM) that includes
+// the URL query params. Previously the higher order component wrapper
+// `withAlgorithmParams`, while elegant, wrapping each export with this
+// proved troublesome (assuming you do not do a full site reload through
+// changing URL when you want to look at a different algorithm
+// (which is what the old algorithm menu did)) because we create all the parameter
+// components up front with them already wrapped that means a URL intended for one sorting
+// algorithm would be used by multiple other sorting algorithms. It should not work like this
+// the url query params should be used once on site load for the algorithm loaded by the url
+// (which you can force by doing a full site reload on animation change like the old menu did).
 
+// Forcing full site reloads like this is problematic.
+// It prevents* features such as automatically opening the instructions
+// panel when a user visits an algorithm category they haven’t seen yet since 
+// that requires session state which is lost upon reload.
+// (*You could work around this with browser cache and in this case you
+//  may even want to do it this way if you want the visited cateogires to
+//  be remembered across sesions, but the browser cache is limited so it is still
+//  a bad idea to do site reloads when it could otherwise be avoided since it is not
+//  scalable.)
+
+import * as Param from '../algorithms/parameters'
+const DEFAULT_ALGORITHM_KEY = "AVLTree";
+
+// TODO: Probably should be called something else now since it does more than just 
+// getting initial state.
+export function initialState() {
+  const searchParams = new URLSearchParams(window.location.search);
+
+  let alg = searchParams.get("alg");
+  let mode = searchParams.get("mode");
+
+  // Fallback to default algorithm if query is missing or invalid
+  if (!alg || !(alg in algorithmMetadata)) alg = DEFAULT_ALGORITHM_KEY;
+
+  // Fallback to default mode if query is missing or unsupported
+  if (!mode || !(mode in algorithmMetadata[alg].pseudocode)) mode = getDefaultMode(alg);
+  
+  // Override parameter component to be an equivalent one but with URL
+  // properties injected.
+  const WrappedParam = React.createElement(Param[algorithmMetadata[alg].paramKey], useUrlParams());
+  algorithms[alg].param = WrappedParam;
+
+  return {
+    id: {name: alg, mode},
+    name : algorithms[alg].name,
+    explanation : algorithms[alg].explanation,
+    instructions : algorithms[alg].instructions,
+    extraInfo : algorithms[alg].extraInfo,
+    param : WrappedParam
+  }
+}
