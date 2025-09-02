@@ -16,7 +16,7 @@ import { motion } from 'framer-motion';
 import Renderer from '../../common/Renderer/index';
 import { classes, distance } from '../../common/util';
 import styles from './GraphRenderer.module.scss';
-import { mode } from '../../../top/Settings';
+import { mode } from '../../../AlgAnimationPage/top-panel/Settings';
 
 let modename;
 let lastnode = -1;

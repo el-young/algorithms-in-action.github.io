@@ -13,7 +13,6 @@ import {
   errorParamMsg,
 } from './ParamHelper';
 
-import useParam from '../../../context/useParam';
 import { GlobalContext } from '../../../context/GlobalState';
 
 /**

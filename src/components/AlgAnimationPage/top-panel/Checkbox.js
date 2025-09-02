@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../../styles/Checkbox.scss';
+import '../../../styles/Checkbox.scss';
 
 function Checkbox() {
   const [check, setCheck] = useState(true);

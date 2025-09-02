@@ -2,7 +2,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useContext,useEffect } from 'react';
 import ControlButton from '../../../components/common/ControlButton';
-import { closeInstructions } from '../../../components/mid-panel/helper';
 import { GlobalContext } from '../../../context/GlobalState';
 import '../../../styles/Param.scss';
 
@@ -14,17 +13,6 @@ function StringParamForm(props) {
     formClassName, buttonName, string, stringOnChange,
     pattern, patternOnChange, handleSubmit, disabled, mode
   } = props;
-  // eslint-disable-next-line
-  const { algorithm } = useContext(GlobalContext);
-
-  const closeInstructionsFun = () => {
-    if (algorithm.name === 'Quicksort') {
-      // setQuicksortPlay(false)
-      sessionStorage.setItem('isPivot', false);
-      sessionStorage.setItem('quicksortPlay', false);
-    }
-    closeInstructions();
-  };
 
   return (
     <form className={formClassName} onSubmit={handleSubmit}>
@@ -60,7 +48,6 @@ function StringParamForm(props) {
           {/* {children} */}
           <ControlButton
             className={disabled ? 'blueWordBtnDisabled' : 'blueWordBtn'}
-            onClick={closeInstructionsFun}
             id={mode ? `startBtnGrp-${mode}`: `startBtnGrp`}
             type="submit"
             disabled={disabled}

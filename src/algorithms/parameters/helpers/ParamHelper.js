@@ -3,6 +3,19 @@ import React from 'react';
 import Denque from 'denque';
 import ParamMsg from './ParamMsg';
 
+/*
+  This file provides helper functions for parameter components.
+  It includes input builders (e.g., balancedBSTArray) and input
+  validation utilities.
+
+  Validation functions should return both a status and a message:
+  - On success -> return null.
+  - On failure -> return an error message specific to the issue.
+
+  When using regex, keep matches as narrow as possible so that
+  error messages remain precise and informative.
+*/
+
 export const commaSeparatedNumberListValidCheck = (t) => {
   const regex = /^[0-9]+(,[0-9]+)*$/g;
   return t.match(regex);

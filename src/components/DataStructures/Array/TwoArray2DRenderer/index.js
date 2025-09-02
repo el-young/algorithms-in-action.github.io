@@ -24,7 +24,7 @@ import React from 'react';
 import Renderer from '../../common/Renderer/index';
 import styles from './TwoArray2DRenderer.module.scss';
 import { classes } from '../../common/util';
-import { mode } from '../../../top/Settings';
+import { mode } from '../../../AlgAnimationPage/top-panel/Settings';
 
 let modename;
 function switchmode(modetype = mode()) {

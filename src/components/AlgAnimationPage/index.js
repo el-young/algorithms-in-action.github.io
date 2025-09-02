@@ -1,10 +1,5 @@
 import React from "react";
 import { GlobalProvider } from "../../context/GlobalState";
-import {
-  Panel,
-  PanelGroup,
-  PanelResizeHandle,
-} from "react-resizable-panels";
 import LeftPanel from "./left-panel";
 import BottomPanel from "./bottom-panel";
 import TopPanel from "./top-panel";
@@ -12,6 +7,11 @@ import RightPanel from "./right-panel";
 import MidPanel from "./mid-panel";
 import "../../styles/AlgorithmAnimationPage.scss";
 import { URLProvider } from "../../context/urlState";
+
+// eslint-disable-next-line import/no-unresolved
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+// Not sure how eslint works and why it does not detect this import
+// the resizeable panels are clearly in the web app.
 
 /*
   This is the main algorithm animation page.

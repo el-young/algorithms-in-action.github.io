@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React from 'react';
+import React, { useContext } from 'react';
 import '../../../styles/Param.scss';
 import { GlobalActions } from '../../../context/actions';
 import StringParamForm from './StringParamForm';
@@ -10,8 +10,7 @@ import {
   errorParamMsg,
   stringValidCheck,
 } from './ParamHelper';
-
-import useParam from '../../../context/useParam';
+import { GlobalContext } from '../../../context/GlobalState';
 
 /**
  * This list param component can be used when
@@ -21,12 +20,8 @@ function StringParam({
   name, buttonName, mode, DEFAULT_STRING, SET_STRING, DEFAULT_PATTERN, SET_PATTERN, ALGORITHM_NAME,
   EXAMPLE, formClassName, handleSubmit, setMessage,
 }) {
-  const {
-    dispatch,
-    disabled,
-    // paramVal,
-    // setParamVal,
-  } = useParam([DEFAULT_STRING, DEFAULT_PATTERN]);
+  const { algorithm, dispatch } = useContext(GlobalContext);
+  const disabled = algorithm.hasOwnProperty('visualisers') && algorithm.playing;
 
   /**
    * The default function that uses the list of values to

@@ -18,7 +18,7 @@ import React, { useContext } from 'react';
 import Renderer from '../../common/Renderer/index';
 import { classes, distance } from '../../common/util';
 import styles from './ArrayGraphRenderer.module.scss';
-import { mode } from '../../../top/Settings';
+import { mode } from '../../../AlgAnimationPage/top-panel/Settings';
 
 let modename;
 function switchmode(modetype = mode()) {

@@ -2,15 +2,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { GlobalContext } from '../../../context/GlobalState';
-import { URLContext } from '../../../context/urlState';
+import { createUrl, URLContext } from '../../../context/urlState';
 
 import '../../../styles/MidPanel.scss';
-import Popup from 'reactjs-popup';
+import PopUpComponent from 'reactjs-popup';
 
 import ControlButton from '../../common/ControlButton';
 import ShareIcon from '@mui/icons-material/Share';
 import { increaseFontSize, setFontSize } from '../top-panel/helper';
-import { createUrl } from './urlCreator';
 
 function MidPanel() {
   const { algorithm, algorithmKey, category, mode } = useContext(GlobalContext);
@@ -26,12 +25,18 @@ function MidPanel() {
     if (share) {
       let baseUrl = `${window.location.origin}/?alg=${algorithmKey}&mode=${mode}`;
 
-      // Add step if relevant
+      // Wasteful to track these in URL context
+      // there are already pointers to them,
+      // and they update frequently, so do here.
+
+      // Add step
       if (algorithm?.chunker?.currentChunk) {
         baseUrl += `&step=${algorithm.chunker.currentChunk}`;
       }
 
-      // Add collapse state (only for current algo)
+      // Add collapse state for pseudocode
+      // (only for current algo, not the whole collapse 
+      // controller it would bloat URL.)
       const algoCollapse = algorithm?.collapse?.[algorithm.id.name];
       if (algoCollapse) {
         baseUrl += `&expand=${JSON.stringify(algoCollapse)}`;
@@ -41,7 +46,7 @@ function MidPanel() {
       const url = createUrl(baseUrl, category, urlContext);
       setCurrentUrl(url);
     }
-  }, [share, algorithm, algorithmKey, category, mode, urlContext]);
+  }, [share]);
 
   const copyToClipboard = () => {
     if (currentUrl) {
@@ -60,7 +65,7 @@ function MidPanel() {
           />
 
           {/* Share popup */}
-          <Popup open={share} closeOnDocumentClick onClose={() => setShare(false)}>
+          <PopUpComponent open={share} closeOnDocumentClick onClose={() => setShare(false)}>
             <div className="shareArea">
               <button
                 className="closeShare"
@@ -80,7 +85,7 @@ function MidPanel() {
                 Copy URL
               </button>
             </div>
-          </Popup>
+          </PopUpComponent>
         </div>
 
         <div className="algorithmTitle" id={fontID}>

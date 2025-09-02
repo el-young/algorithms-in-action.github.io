@@ -9,13 +9,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import { withStyles } from '@mui/styles';
 import { GlobalContext } from '../../context/GlobalState';
-import { URLContext } from '../../context/urlState';
+import { URLContext, withAlgorithmParams } from '../../context/urlState';
 import { GlobalActions } from '../../context/actions';
 import ListParam from './helpers/ListParam';
 import SingleValueParam from './helpers/SingleValueParam';
 import '../../styles/Param.scss';
 import {
-  singleNumberValidCheck,
   genUniqueRandNumList,
   successParamMsg,
   errorParamMsg,
@@ -24,7 +23,6 @@ import {
 } from './helpers/ParamHelper';
 
 import PropTypes from 'prop-types'; // Import this for URL Param
-import { withAlgorithmParams } from './helpers/urlHelpers' // Import this for URL Param
 
 const DEFAULT_NODES = genUniqueRandNumList(12, 1, 100);
 const DEFAULT_TARGET = '2';
