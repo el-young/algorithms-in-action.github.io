@@ -31,9 +31,6 @@ export const GlobalProvider = ({ children }) => {
 
   const globalState = {
     algorithm: state,
-    algorithmKey: Object.keys(algorithms).find(key => algorithms[key].name === state.name),
-    category: getCategory(Object.keys(algorithms).find(key => algorithms[key].name === state.name)),
-    mode: getDefaultMode(Object.keys(algorithms).find(key => algorithms[key].name === state.name)),
     dispatch,
   };
 

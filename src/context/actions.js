@@ -232,31 +232,33 @@ export const GlobalActions = {
   // This is an indirection dispatch so that we put 
   // param into the global state which inadvertently causes it to
   // be rendered to the DOM which then inadvertently gets
-  // the param function to call the dispatch LOAD_ALGORITHM with all the 
-  // the params (like nodes) for the visualiser. TODO: Try thinking
-  // of a different way this is very smelly.
-  // INDIRECTION_INTO_PARAM: (state, params) => {
-  //   const { param, name, explanation, extraInfo, pseudocode, instructions } =
-  //     algorithms[params.name];
-  //   return {
-  //     id: params,
-  //     name,
-  //     explanation,
-  //     instructions,
-  //     extraInfo,
-  //     param,
-  //   };
-  // },
-  // Indirection to param was so param component could (through LOAD_ALGORITHM)
-  // pass in the param values (e.g. list of numbers) it had to the visualiser
-  // create a context for the parameter values so that when we call LOAD_ALGORITHM
-  // visualiser reads from that. We can just create another dispatch function
-  // which is more focused and simply adds the 
+  // the param component to call the dispatch LOAD_ALGORITHM with all the 
+  // the params (like nodes) for the visualiser.
+  
+  // Parameter component must be rendered for the useEffect to kick in which kicks off LOAD_ALGORITHM, 
+  // this is why MidPanel has to use conditional rendering of (algoritm.visualisers && then render)
+  // because it is rendered before bottom panel (which renders the parameter component). 
+  // I have made the right panel also conditionally render to match the pattern of mid panel, and so
+  // indirection into param can be succinct (before it included psuedocode, extrainfo, etc.) because
+  // the right panel was not conditionally rendering those so they had to be ready.
+  // (React does not render siblings like a script top to bottom
+  // all the panels are siblings in index.js for AlgorithmAnimationPage
+  // if conditional rendering was not a feature the way things are done
+  // now would not be possible.)
+
+  // The end result means that we can just have this function which puts parameter into
+  // the global state which starts the chain.
+  // TODO: Try thinking of a different way this is very smelly.
+  INDIRECTION_INTO_PARAM: (state, params) => {
+    const { param } = algorithms[params.name];
+    return { param };
+  },
+  // TODO: Prehaps we can make dispatches more focussed?
 
   // Loads the selected algorithm by retrieving its associated components
   // and placing them into the correct panes. This action is dispatched
   // from parameter components. The `params` object is expected to contain
-  // at minimum a "mode" and a "name" (the algorithm key, e.g. "hsort" for heapSort
+  // a "mode" and a "name" (the algorithm key, e.g. "hsort" for heapSort
   // called "name" for legacy reasons do not confuse it with "name" in master list).
   // It should also include any other data required by the controller,
   // visualisers, or runners defined for that algorithm.
@@ -306,7 +308,7 @@ export const GlobalActions = {
       visualisers: chunker.visualisers,
       collapse: collapse,
       playing: false,
-      lineExplanation: null,
+      LineExplanation: null, // Any reason why?
     };
   },
 
@@ -507,8 +509,6 @@ export function dispatcher(state, setState) {
 import * as Param from '../algorithms/parameters'
 const DEFAULT_ALGORITHM_KEY = "AVLTree";
 
-// TODO: Probably should be called something else now since it does more than just 
-// getting initial state.
 export function initialState() {
   const searchParams = new URLSearchParams(window.location.search);
 
@@ -522,16 +522,11 @@ export function initialState() {
   if (!mode || !(mode in algorithmMetadata[alg].pseudocode)) mode = getDefaultMode(alg);
   
   // Override parameter component to be an equivalent one but with URL
-  // properties injected.
+  // properties injected. This happens once per algorithm page load, ensuring
+  // only a single parameter component ever uses URL query params, other algorithms
+  // navigated to through the menu are not navigated to by changing URL anr Router rerouting
+  // they just LOAD a different ALGORITHM.
   const WrappedParam = React.createElement(Param[algorithmMetadata[alg].paramKey], useUrlParams());
   algorithms[alg].param = WrappedParam;
-
-  return {
-    id: {name: alg, mode},
-    name : algorithms[alg].name,
-    explanation : algorithms[alg].explanation,
-    instructions : algorithms[alg].instructions,
-    extraInfo : algorithms[alg].extraInfo,
-    param : WrappedParam
-  }
+  return GlobalActions.INDIRECTION_INTO_PARAM(undefined, { name: alg });
 }
