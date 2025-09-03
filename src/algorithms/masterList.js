@@ -80,6 +80,7 @@ const algorithmMetadata = {
       insertion: 'AVLTreeInsertion',
       search: 'AVLTreeSearch',
     },
+    keywords: ["Hello", "World"]
   },
 };
 //_MASTER_LIST_END_
@@ -138,6 +139,7 @@ const generateAlgorithmList = (deployOnly = false) => {
       name: value.name,
       shorthand: key,
       id: alNum,
+      keywords: value.keywords,
       mode: getDefaultMode(key),
     });
     alNum += 1;
@@ -148,7 +150,8 @@ const generateAlgorithmList = (deployOnly = false) => {
 
 export default algorithmMetadata;
 export const DeployedAlgorithmCategoryList = generateAlgorithmCategoryList(true);
-export const AlgorithmCategoryList = generateAlgorithmCategoryList(); 
+export const AlgorithmCategoryList = generateAlgorithmCategoryList();
+export const DeployedAlgorithmList = generateAlgorithmList(true);
 export const AlgorithmList = generateAlgorithmList();
 export const AlgorithmNum = generateAlgorithmList().length;
 

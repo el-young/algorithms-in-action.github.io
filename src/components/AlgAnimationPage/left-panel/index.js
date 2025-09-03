@@ -7,7 +7,7 @@ import React, {
 import { GlobalContext } from '../../../context/GlobalState';
 import { GlobalActions } from '../../../context/actions';
 import '../../../styles/LeftPanel.scss';
-import { AlgorithmCategoryList, AlgorithmList } from '../../../algorithms/masterList';
+import { DeployedAlgorithmCategoryList, DeployedAlgorithmList } from '../../../algorithms/masterList';
 
 const LIST_COLLAPSE = true;
 
@@ -20,8 +20,9 @@ function LeftPanel() {
     const inputContent = e.target.value.trim().toLowerCase();
     let algorithmListChosen = null;
     if (inputContent.length > 0) {
-      algorithmListChosen = AlgorithmList.filter((i) =>
-        i.name.toLowerCase().includes(inputContent)
+      algorithmListChosen = DeployedAlgorithmList.filter((i) =>
+        i.name.toLowerCase().includes(inputContent) ||
+        (i.keywords ?? []).some((k) => k.toLowerCase().includes(inputContent))
       );
     }
     setDisplaySearch(algorithmListChosen);
@@ -38,7 +39,7 @@ function LeftPanel() {
   };
 
   const initCollapseStat = () => {
-    AlgorithmCategoryList.forEach((_, index) => {
+    DeployedAlgorithmCategoryList.forEach((_, index) => {
       const obj = document.getElementById(`category-${index}`);
       if (LIST_COLLAPSE && obj) {
         obj.click();
@@ -71,9 +72,9 @@ function LeftPanel() {
         />
       </span>
 
-      <div className="algorithmList">
+      <div className="DeployedAlgorithmList">
         {displaySearch === null
-          ? AlgorithmCategoryList.map((cat, index) => (
+          ? DeployedAlgorithmCategoryList.map((cat, index) => (
               <div key={cat.id}>
                 <button
                   id={`category-${index}`}
