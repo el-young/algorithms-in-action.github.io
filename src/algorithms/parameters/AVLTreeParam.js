@@ -56,7 +56,7 @@ function AVLTreeParam({ alg, mode, list, value }) {
   // components do not have special requirments. i.e. for all ListParam
   // users the `list` requirements are the same. Maybe just do some baseline
   // preprocessing then parameter components can opt to have further constraints
-  // but then lost error messages in bottom pane.
+  // but then lose error messages in bottom pane.
   let initialMessage = null;
 
   list = !list

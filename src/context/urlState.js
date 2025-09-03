@@ -132,7 +132,7 @@ URLProvider.propTypes = {
 // Builds the URL string when the share button is clicked.
 // This is what will be copied into the users clipboard.
 export function createUrl(globalContext) {
-  let baseUrl = `${window.location.origin}/?`;
+  let baseUrl = `${window.location.origin}/animation/?`;
 
   // Can get everything from global context,
   // parameter specific is in globalContext.id

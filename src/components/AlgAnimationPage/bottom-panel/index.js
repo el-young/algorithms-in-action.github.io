@@ -14,6 +14,7 @@ import { GlobalContext } from '../../../context/GlobalState';
 import { GlobalActions } from '../../../context/actions';
 import '../../../styles/ControlPanel.scss';
 import 'reactjs-popup/dist/index.css';
+import { getUrlParams } from '../../../context/urlState';
 
 const muiTheme = createTheme({
   overrides: {
@@ -98,10 +99,22 @@ function ControlPanel() {
     setSpeed(newSpeed);
   };
 
-  // I guess it makes most sense to put the check for step in URL here
+  // I guess it makes sense to go here.
+  const stepApplied = useRef(false);
   useEffect(() => {
-    
-  }, [algorithm.chunker])
+    if (!algorithm?.chunker || stepApplied.current) return;
+    let { step } = getUrlParams();
+
+    if (step && !isNaN(step)) {
+      const maxStep = algorithm.chunker.chunks.length - 1;
+      const clampedStep = Math.max(0, Math.min(parseInt(step, 10), maxStep));
+
+      dispatch(GlobalActions.NEXT_LINE, { stopAt: clampedStep });
+    }
+
+    stepApplied.current = true;
+  }, [algorithm?.chunker]); // When algorithm chunker changes. Make sure it only
+  // runs once however, do not want step param to influence every algorithm.
 
   return (
     <div className="controlContainer">
