@@ -1,7 +1,7 @@
 import React, { createContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import { errorParamMsg } from '../algorithms/parameters/helpers/ParamHelper';
-import algorithmMetadata, { getDefaultMode } from '../algorithms/masterList';
+import algorithmMetadata, { getCategory, getDefaultMode } from '../algorithms/masterList';
 
 /*
   Centralized module for all URL-related logic in the app.
@@ -134,48 +134,62 @@ URLProvider.propTypes = {
 export function createUrl(globalContext) {
   let baseUrl = `${window.location.origin}/?`;
 
+  // Can get everything from global context,
+  // parameter specific is in globalContext.id
+  // stuff like step and collapse controller can be retrieved also
   console.log(globalContext);
-   const { 
-     nodes, 
-     searchValue, 
-     graphSize, 
-     graphStart, 
-     graphEnd, 
-     heuristic, 
-     graphMin, 
-     graphMax
-   } = globalContext.id;
-  let category = "hello"
+  const {
+    name,  // Name is alg key in global context for some reason
+    mode,
+    nodes,
+    target
+  } = globalContext.id;
 
-   let url = baseUrl;
+  baseUrl += `alg=${name}`;
+  baseUrl += `&mode=${mode}`;
+
+  let steps = globalContext?.chunker?.currentChunk || 0;
+  baseUrl += `&step=${steps}`;
+
+  // For some reason collapseController contains all algorithm
+  // data, just grab relevant controller to avoid bloating URL.
+  // When going from URL to animation the code needs to remember this.
+  let collapseController = globalContext?.collapse?.[name] || {};
+  collapseController = JSON.stringify(collapseController);
+  baseUrl += `&expand=${collapseController}`;
+
+  switch (getCategory(name)) {
+    case 'Sort':
+      baseUrl += `&list=${nodes}`;
+      break;
+
+    case 'Insert/Search':
+      // url += `&list=${nodes}&value=${searchValue}`;
+      // TODO: need to have better consistency with whats names are
+      // used to represent what. `searchValue` is called `target`
+      // when being dispatched with the global actions.
+      baseUrl += `&list=${nodes}&value=${target}`;
+      break;
+
+    case 'String Search':
+      baseUrl += `&string=${nodes}&pattern=${target}`;
+      break;
+
+    case 'Set':
+      baseUrl += `&union=${nodes}&value=${target}`;
+      break;
+
+    // TODO:
+    // case 'Graph':
+    //   url += `&size=${graphSize}&start=${graphStart}&end=${graphEnd}&xyCoords=${nodes}&edgeWeights=${searchValue}&heuristic=${heuristic}
+    //     &min=${graphMin}&${graphMax}`;
+    //   break;
+
+    default:
+      break;
+  }
  
-   switch (category) {
-     case 'Sort':
-       url += `&list=${nodes}`;
-       break;
- 
-     case 'Insert/Search':
-       url += `&list=${nodes}&value=${searchValue}`;
-       break;
- 
-     case 'String Search':
-       url += `&string=${nodes}&pattern=${searchValue}`;
-       break;
- 
-     case 'Set':
-       url += `&union=${nodes}&value=${searchValue}`;
-       break;
- 
-     case 'Graph':
-       url += `&size=${graphSize}&start=${graphStart}&end=${graphEnd}&xyCoords=${nodes}&edgeWeights=${searchValue}&heuristic=${heuristic}
-         &min=${graphMin}&${graphMax}`;
-       break;
- 
-     default:
-       break;
-   }
- 
-   return url;
+   return baseUrl;
  }
  
 

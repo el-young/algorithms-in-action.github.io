@@ -297,8 +297,8 @@ Note: The default port should be 3000 but it may be something else, see npm star
     await retrieveDataFromUser();
 
     /* Run commands */
-    shell.exec(`git switch ${NAME_OF_DEV_BRANCH}`);
-    shell.exec(`git pull`);
+    // shell.exec(`git switch ${NAME_OF_DEV_BRANCH}`);
+    // shell.exec(`git pull`);
     shell.exec(`git switch -c add_${algorithmId}`);
 
     // New entry in master list

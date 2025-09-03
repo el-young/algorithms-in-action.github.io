@@ -19,7 +19,7 @@ import { GlobalContext } from '../../../context/GlobalState';
  */
 function SingleValueParam({
   name, buttonName, mode, DEFAULT_VAL, ALGORITHM_NAME,
-  EXAMPLE, formClassName, handleSubmit, setMessage,
+  EXAMPLE, formClassName, handleSubmit, setMessage, UNCHECK_CASES
 }) {
   const { algorithm } = useContext(GlobalContext);
   
@@ -32,6 +32,7 @@ function SingleValueParam({
       value={DEFAULT_VAL}
       disabled={algorithm.hasOwnProperty('visualisers') && algorithm.playing}
       handleSubmit={handleSubmit}
+      UNCHECK_CASES={UNCHECK_CASES}
     />
   );
 }

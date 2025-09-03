@@ -94,7 +94,6 @@ function MidPanel() {
       </div>
 
       <div className="midPanelBody">
-        {console.log("rendering")}
         {algorithm.chunker &&
           algorithm.chunker.getVisualisers().map((o) => o.render())}
       </div>

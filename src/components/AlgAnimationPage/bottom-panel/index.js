@@ -98,6 +98,11 @@ function ControlPanel() {
     setSpeed(newSpeed);
   };
 
+  // I guess it makes most sense to put the check for step in URL here
+  useEffect(() => {
+    
+  }, [algorithm.chunker])
+
   return (
     <div className="controlContainer">
       <div className="controlPanel">

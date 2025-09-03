@@ -229,39 +229,50 @@ function viewableChunks(chunker, pseudocode, collapse) {
 // params argument.
 export const GlobalActions = {
 
-  // Parameter component must be rendered for the simulated click to call dispatch(LOAD_ALGORITH, params)
-  // the indirection is necessary because the Parameter components contain the default values they can use
-  // inside them so if we want to have the visualiser (mid panel (sibling)) reflect what default values the parameter has
-  // we must first go into the Parameter Component and then that passes back the values in params through
-  // dispatch(LOAD_ALGORITHM, params). This is why MidPanel has to use conditional rendering of 
-  // (algoritm.visualisers && then render) because it is rendered before bottom panel (which renders the parameter component). 
-  // I have made the right panel also conditionally render to match the pattern of mid panel, and so
-  // indirection into param can be succinct (before it included psuedocode, extrainfo, etc.) because
-  // the right panel was not conditionally rendering those like the mid panel so they had to be ready.
-  // (React does not render siblings like a script top to bottom
-  // all the panels are siblings in index.js. Without conditional rendering
-  // timing issues would cause crashes.)
-  INDIRECTION_INTO_PARAM: (state, params) => {
-    // No longer do <Param /> in master list may want the Parameter component
-    // to be fresh when you revisit an algorithm. (same behaviour as before
-    // but that behaviour was only because of the forced page reload.)
+  // How stuff is loaded is somewhat convoluted, but basically, the mid panel
+  // and right panel (updated right panel (it did not conditionally render before) which was why
+  // the old LOAD_ALGORITHM had to inject pseudocode, instruction, etc. into the global state) have
+  // parts that are conditionally rendered more specifically, visualisers, psuedocode, instruction, etc.
+  // are conditionally rendered. Once these things are in the global state they will draw
+  // to the screen. What actually puts these in global state? The clicks on the parameter
+  // "mode" buttons are what trigger it. However, when we launch the site we do not want the user
+  // to have to press the button to see the visualiser, pseudocode etc. hence the simulated clicks.
+  // Simulated clicks get messy very fast, in fact many algorithms had duplicate simulated clicks
+  // which resulted in redundant calls to the old RUN_ALGORITHM. Conditional rendering???
+  // In React sibling components do not load synchronously, without conditional rendering
+  // wait && render something the design of this codebase with the global state would not work.
 
+  // Decided to simplify the old LOAD_ALGORITHM now called INDIRECTION_INTO_PARAM
+  // parameter components are expected to then have a useEffect that calls LOAD_ALGORITHM
+  // on mount, which will load all the other stuff into state and thus indirectly cause those
+  // conditional renders to render.
+
+  // Another change made is that index.js no longer does <ParamComponent />, this did not allow
+  // you to reset the parameter component (although this was "fixed" by reloading the entire site
+  // on algorithm change by changing the URL see my comment above initialState at the bottom as to why we think
+  // reloading the site like this is a bad idea), so when we use the menu to switch algorithms we dispatch
+  // INDIRECTION_INTO_PARAM to get a fresh parameter component which should indirectly kick off LOAD_ALGORITHM
+  // through mounting the new parameter component and the components useEffects() running.
+
+  // The old "LOAD_ALGORITHM" still the same idea just now that the right panel
+  // stuff is conditionally rendered (matching the pattern mid panel used) we can
+  // just put the param into state.
+  // This will be called from menu buttons. Most importantly this provides
+  // us with a way to switch algorithms without doing a reloading the site.
+  INDIRECTION_INTO_PARAM: (state, params) => {
     // Params here will either be empty (Parameter component will use its defaults) 
     // or URL query parameters that Parameter component will use.
-
-    console.log("INDIRECTION");
     return {
-      // Parameter components are expected to contain code which triggers
-      // LOAD_ALGORITHM whenever they first run so they can communicate
-      // the default values back to other siblings. 
-      
       // Date.now() because
-      // if we call this and props do not change we will not mount the new
+      // if we call this and props do not change React will not mount the new
       // parameter component, which means we will not dispatch LOAD_ALGORITHM.
       // This was the reason why clicking on the same menu item caused
-      // mid panel and right panel to disappear. The initial mount simulated
-      // click would not rerun because the component was not actually remounted.
-      // Need to give React a reason to rerender when props/state of a component has not changed, 
+      // mid panel and right panel to disappear. The parameters component
+      // useEffect would not be called because we did not mount a new
+      // parameter component as far as React is concerned but LOAD_ALGORITHM
+      // would still be called which replaced the state and got rid of visualisers.
+
+      // Need to give React a reason to remount when props/state of a component has not changed, 
       // this is exactly what the `key` prop in React is for.
       param : React.createElement(algorithms[params.name].param, {
         key: `${Date.now()}`,
@@ -273,12 +284,12 @@ export const GlobalActions = {
 
   // Parameter components will have buttons that when clicked
   // need to change the psuedocode (right panel) with that also
-  // comes things like collapse controller, line explanations, etc. Parameter component
+  // comes things like collapse controller, line explanations, visualiser etc. Parameter component
   // is expected to be in state when this is called since that is the only thing
-  // that should call load algorithm. Other components that want to call LOAD_ALGORITHM
+  // that should call LOAD_ALGORITHM. Other components that want to call LOAD_ALGORITHM
   // should go through INDIRECTION_INTO_PARAM.
   LOAD_ALGORITHM: (state, params) => {
-    console.log("LOADING")
+    console.log("LOAD");
     const {
       controller,
       name,
@@ -288,7 +299,8 @@ export const GlobalActions = {
       instructions,
     } = algorithms[params.name];
 
-    // initialise / reuse visualisers
+    // initialise / reuse visualisers (visualisers are reused
+    // if `visualiser` is in `params` here)
     const chunker = new Chunker(() =>
       controller[params.mode].initVisualisers(params)
     );
