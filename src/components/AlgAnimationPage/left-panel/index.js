@@ -54,21 +54,11 @@ function LeftPanel() {
     }
   }, []);
 
-  // Auto-click start button on mount (legacy hack for some algos)
-  const mouseEvs = ['mousedown', 'click', 'mouseup'];
-  const startButtonClick = () => {
-    const startButton = document.getElementById('startBtnGrp');
-    if (startButton) {
-      mouseEvs.forEach((ev) =>
-        startButton.dispatchEvent(
-          new MouseEvent(ev, { view: window, bubbles: true, cancelable: true, buttons: 1 })
-        )
-      );
-    }
+  const handleAlgorithmClick = (algo) => {
+    dispatch(GlobalActions.INDIRECTION_INTO_PARAM, {
+      name: algo.shorthand,
+    });
   };
-  useEffect(() => {
-    startButtonClick();
-  }, []);
 
   return (
     <div className="container">
@@ -98,18 +88,10 @@ function LeftPanel() {
                     <button
                       key={i}
                       className={
-                        algorithm.name === algo.name ? 'algoItem active' : 'algoItem'
+                        algorithm?.name === algo.name ? 'algoItem active' : 'algoItem'
                       }
                       type="button"
-                      onClick={
-                        algorithm.name === algo.name
-                          ? () => document.getElementById('startBtnGrp')
-                          : () =>
-                              dispatch(GlobalActions.LOAD_ALGORITHM, {
-                                name: algo.shorthand,
-                                mode: algo.mode,
-                              })
-                      }
+                      onClick={() => handleAlgorithmClick(algo)}
                     >
                       <div className="algoItemContent">{algo.name}</div>
                     </button>
@@ -117,19 +99,14 @@ function LeftPanel() {
                 </div>
               </div>
             ))
-          : displaySearch.map((algo) => (
+          : displaySearch.map((algo, i) => (
               <button
-                key={algo.id}
+                key={i}
                 type="button"
                 className={
-                  algorithm.name === algo.name ? 'algoItem active' : 'algoItem'
+                  algorithm?.name === algo.name ? 'algoItem active' : 'algoItem'
                 }
-                onClick={() =>
-                  dispatch(GlobalActions.LOAD_ALGORITHM, {
-                    name: algo.shorthand,
-                    mode: algo.mode,
-                  })
-                }
+                onClick={() => handleAlgorithmClick(algo)}
               >
                 <div className="algoItemContent">{algo.name}</div>
               </button>

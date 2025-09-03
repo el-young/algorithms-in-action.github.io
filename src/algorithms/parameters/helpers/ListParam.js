@@ -7,11 +7,6 @@ import '../../../styles/Param.scss';
 import { ReactComponent as RefreshIcon } from '../../../assets/icons/refresh.svg';
 import { GlobalActions } from '../../../context/actions';
 import ParamForm from './ParamForm';
-import {
-  commaSeparatedNumberListValidCheck,
-  genRandNumList,
-  errorParamMsg,
-} from './ParamHelper';
 
 import { GlobalContext } from '../../../context/GlobalState';
 
@@ -20,7 +15,7 @@ import { GlobalContext } from '../../../context/GlobalState';
  * the param input accepts a list
  */
 function ListParam({
-  buttonName, mode, DEFAULT_VAL, formClassName, handleSubmit, REFRESH_FUNCTION
+  buttonName, DEFAULT_VAL, formClassName, handleSubmit, REFRESH_FUNCTION, UNCHECK_CASES
 }) {
   const { algorithm } = useContext(GlobalContext);
   const disabled = algorithm.hasOwnProperty('visualisers') && algorithm.playing;
@@ -28,11 +23,11 @@ function ListParam({
   return (
     <ParamForm
       formClassName={formClassName}
-      mode={mode}
       buttonName={buttonName}
       value={DEFAULT_VAL}
       disabled={disabled}
       handleSubmit={handleSubmit}
+      UNCHECK_CASES={UNCHECK_CASES}
     >
       <ControlButton
         icon={<RefreshIcon />}

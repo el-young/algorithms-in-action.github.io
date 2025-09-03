@@ -6,7 +6,7 @@ import Chunker from './chunker';
 import findBookmark from '../pseudocode/findBookmark';
 import React, { useState } from 'react';
 import { genRandNumList } from '../algorithms/parameters/helpers/ParamHelper';
-import { useUrlParams } from './urlState';
+import { getUrlParams } from './urlState';
 import algorithmMetadata, { getDefaultMode } from '../algorithms/masterList';
 
 // Return block name for bookmark
@@ -229,43 +229,57 @@ function viewableChunks(chunker, pseudocode, collapse) {
 // params argument.
 export const GlobalActions = {
 
-  // This is an indirection dispatch so that we put 
-  // param into the global state which inadvertently causes it to
-  // be rendered to the DOM which then inadvertently gets
-  // the param component to call the dispatch LOAD_ALGORITHM with all the 
-  // the params (like nodes) for the visualiser.
-  
-  // Parameter component must be rendered for the useEffect to kick in which kicks off LOAD_ALGORITHM, 
-  // this is why MidPanel has to use conditional rendering of (algoritm.visualisers && then render)
-  // because it is rendered before bottom panel (which renders the parameter component). 
+  // Parameter component must be rendered for the simulated click to call dispatch(LOAD_ALGORITH, params)
+  // the indirection is necessary because the Parameter components contain the default values they can use
+  // inside them so if we want to have the visualiser (mid panel (sibling)) reflect what default values the parameter has
+  // we must first go into the Parameter Component and then that passes back the values in params through
+  // dispatch(LOAD_ALGORITHM, params). This is why MidPanel has to use conditional rendering of 
+  // (algoritm.visualisers && then render) because it is rendered before bottom panel (which renders the parameter component). 
   // I have made the right panel also conditionally render to match the pattern of mid panel, and so
   // indirection into param can be succinct (before it included psuedocode, extrainfo, etc.) because
-  // the right panel was not conditionally rendering those so they had to be ready.
+  // the right panel was not conditionally rendering those like the mid panel so they had to be ready.
   // (React does not render siblings like a script top to bottom
-  // all the panels are siblings in index.js for AlgorithmAnimationPage
-  // if conditional rendering was not a feature the way things are done
-  // now would not be possible.)
-
-  // The end result means that we can just have this function which puts parameter into
-  // the global state which starts the chain.
-  // TODO: Try thinking of a different way this is very smelly.
+  // all the panels are siblings in index.js. Without conditional rendering
+  // timing issues would cause crashes.)
   INDIRECTION_INTO_PARAM: (state, params) => {
-    const { param } = algorithms[params.name];
-    return { param };
-  },
-  // TODO: Prehaps we can make dispatches more focussed?
+    // No longer do <Param /> in master list may want the Parameter component
+    // to be fresh when you revisit an algorithm. (same behaviour as before
+    // but that behaviour was only because of the forced page reload.)
 
-  // Loads the selected algorithm by retrieving its associated components
-  // and placing them into the correct panes. This action is dispatched
-  // from parameter components. The `params` object is expected to contain
-  // a "mode" and a "name" (the algorithm key, e.g. "hsort" for heapSort
-  // called "name" for legacy reasons do not confuse it with "name" in master list).
-  // It should also include any other data required by the controller,
-  // visualisers, or runners defined for that algorithm.
+    // Params here will either be empty (Parameter component will use its defaults) 
+    // or URL query parameters that Parameter component will use.
+
+    console.log("INDIRECTION");
+    return {
+      // Parameter components are expected to contain code which triggers
+      // LOAD_ALGORITHM whenever they first run so they can communicate
+      // the default values back to other siblings. 
+      
+      // Date.now() because
+      // if we call this and props do not change we will not mount the new
+      // parameter component, which means we will not dispatch LOAD_ALGORITHM.
+      // This was the reason why clicking on the same menu item caused
+      // mid panel and right panel to disappear. The initial mount simulated
+      // click would not rerun because the component was not actually remounted.
+      // Need to give React a reason to rerender when props/state of a component has not changed, 
+      // this is exactly what the `key` prop in React is for.
+      param : React.createElement(algorithms[params.name].param, {
+        key: `${Date.now()}`,
+        alg : params.name,
+        ...params
+      }),
+    }
+  },
+
+  // Parameter components will have buttons that when clicked
+  // need to change the psuedocode (right panel) with that also
+  // comes things like collapse controller, line explanations, etc. Parameter component
+  // is expected to be in state when this is called since that is the only thing
+  // that should call load algorithm. Other components that want to call LOAD_ALGORITHM
+  // should go through INDIRECTION_INTO_PARAM.
   LOAD_ALGORITHM: (state, params) => {
-    console.log("LOAD")
-    let {
-      param,
+    console.log("LOADING")
+    const {
       controller,
       name,
       explanation,
@@ -274,41 +288,36 @@ export const GlobalActions = {
       instructions,
     } = algorithms[params.name];
 
-    const procedurePseudocode = pseudocode[params.mode];
-    addLineExplanation(procedurePseudocode);
-
-    // here we pass a function reference to Chunker() because we may want to initialise
-    // a visualiser using a previous one
+    // initialise / reuse visualisers
     const chunker = new Chunker(() =>
       controller[params.mode].initVisualisers(params)
     );
     controller[params.mode].run(chunker, params);
     const bookmarkInfo = chunker.next();
 
-    const collapse = state === undefined || state.collapse === undefined
-      ? getCollapseController(algorithms)
-      : state.collapse;
+    const procedurePseudocode = pseudocode[params.mode];
+    addLineExplanation(procedurePseudocode);
+
+    // TODO: Why is collapse controller inclusive of every algorithm? Only one
+    // shown at a time?
+    const collapse = state?.collapse || getCollapseController(algorithms);
+
     viewableChunks(chunker, procedurePseudocode, collapse[params.name][params.mode]);
 
-    // If you think one of these properties are never used it is probably because
-    // it is not, it is just to leave options open for future development. For example in many
-    // insert/search algorithms we want to reuse the graph visualiser when we 
-    // switch to search mode that was built in insert mode, so we put visualisers into the state.
     return {
       ...state,
-      id: params,
+      id: params, // TODO: id captures params used, do we need URLContext, can just pull from global context at share click?
       name,
       explanation,
       extraInfo,
       instructions,
-      param,
       pseudocode: procedurePseudocode,
       ...bookmarkInfo,
       chunker,
       visualisers: chunker.visualisers,
-      collapse: collapse,
+      collapse,
       playing: false,
-      LineExplanation: null, // Any reason why?
+      lineExplanation: null, // TODO: Why?
     };
   },
 
@@ -496,7 +505,7 @@ export function dispatcher(state, setState) {
 // the url query params should be used once on site load for the algorithm loaded by the url
 // (which you can force by doing a full site reload on animation change like the old menu did).
 
-// Forcing full site reloads like this is problematic.
+// Forcing full site reloads like this to make things functional is problematic.
 // It prevents* features such as automatically opening the instructions
 // panel when a user visits an algorithm category they haven’t seen yet since 
 // that requires session state which is lost upon reload.
@@ -506,9 +515,7 @@ export function dispatcher(state, setState) {
 //  a bad idea to do site reloads when it could otherwise be avoided since it is not
 //  scalable.)
 
-import * as Param from '../algorithms/parameters'
 const DEFAULT_ALGORITHM_KEY = "AVLTree";
-
 export function initialState() {
   const searchParams = new URLSearchParams(window.location.search);
 
@@ -516,17 +523,11 @@ export function initialState() {
   let mode = searchParams.get("mode");
 
   // Fallback to default algorithm if query is missing or invalid
-  if (!alg || !(alg in algorithmMetadata)) alg = DEFAULT_ALGORITHM_KEY;
+  if (!alg || !(alg in algorithms)) alg = DEFAULT_ALGORITHM_KEY;
 
   // Fallback to default mode if query is missing or unsupported
-  if (!mode || !(mode in algorithmMetadata[alg].pseudocode)) mode = getDefaultMode(alg);
-  
-  // Override parameter component to be an equivalent one but with URL
-  // properties injected. This happens once per algorithm page load, ensuring
-  // only a single parameter component ever uses URL query params, other algorithms
-  // navigated to through the menu are not navigated to by changing URL anr Router rerouting
-  // they just LOAD a different ALGORITHM.
-  const WrappedParam = React.createElement(Param[algorithmMetadata[alg].paramKey], useUrlParams());
-  algorithms[alg].param = WrappedParam;
-  return GlobalActions.INDIRECTION_INTO_PARAM(undefined, { name: alg });
+  if (!mode || !(mode in algorithms[alg].pseudocode)) mode = getDefaultMode(alg);
+
+  // The ONLY time URL params are injected into the param component.
+  return GlobalActions.INDIRECTION_INTO_PARAM(undefined, {name : alg, mode, ...getUrlParams()} );
 }

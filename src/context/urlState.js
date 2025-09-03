@@ -9,21 +9,24 @@ import algorithmMetadata, { getDefaultMode } from '../algorithms/masterList';
   now everything is consolidated here for clarity and maintainability.
 */
 
-// List of valid parameter names
+// List of extra valid parameter names (excluding alg and mode)
 const VALID_PARAM_NAMES = [
-    'alg', 'mode', 'list', 'value', 'xyCoords', 'edgeWeights',
+    'list', 'value', 'xyCoords', 'edgeWeights',
     'size', 'start', 'end', 'string', 'pattern', 'union',
     'heuristic', 'min', 'max', 'step', 'expand'
 ];
 
 // Helper to get all query parametes (that are valid)
-export function useUrlParams() {
+// and convert them into data types the parameter components 
+// can interpret. This will not convert the data, parameter
+// components are expected to transform passed in components
+// to the data they want.
+export function getUrlParams() {
     // just grab search params directly once
     const search = window.location.search;
     const urlParams = new URLSearchParams(search);
     const params = {};
 
-    // Filter and parse valid URL parameters
     VALID_PARAM_NAMES.forEach((name) => {
         const value = urlParams.get(name);
         params[name] = value ? value : '';
@@ -38,61 +41,6 @@ export function useUrlParams() {
 
     return params;
 }
-
-/*
-  Higher-order component (HOC) that wraps a given component
-  and injects URL query parameters as props.
-
-  The wrapped component can then selectively use the parameters
-  it cares about by destructuring them from its props.
-
-   Example:
-    // URL: http://localhost:3000/?alg=heapSort&mode=sort&list=1,2,3
-
-    const MyComponent = ({ alg, mode, list }) => (
-      <div>
-        <p>Algorithm: {alg}</p>
-        <p>Mode: {mode}</p>
-        <p>List: {list}</p>
-      </div>
-    );
-
-    // Injects those query params as props here.
-    export default withAlgorithmParams(MyComponent);
-
-    // Renders:
-    // Algorithm: heapSort
-    // Mode: sort
-    // List: 1,2,3
-
-    Reduced the need for boiler plate code in components that need 
-    access to URL query parameters. Very clever.
-*/
-export const withAlgorithmParams = (WrappedComponent) => {
-    const WithAlgorithmParams = (props) => {
-        // Object containing all the query params
-        const params = useUrlParams();
-        let { alg, mode } = params;
-
-        if (!alg || !(alg in algorithmMetadata)) {
-            return errorParamMsg(null, "Invalid alg parameter specified");
-        }
-
-        // Fine to not have mode just use default.
-        if (!mode) mode = getDefaultMode(alg);
-
-        // Not fine for it to have been specified and not actually be a valid
-        // mode for the algorithm.
-        if (!(mode in algorithmMetadata[alg].pseudocode)) {
-            return errorParamMsg(null, "Invalid mode parameter specified");
-        }
-
-        return <WrappedComponent {...params} alg={alg} mode={mode} {...props} />;
-
-    };
-
-    return WithAlgorithmParams;
-};
 
 // TODO: Understand and fix this.
 // prepend graph from URL if defined
@@ -183,7 +131,10 @@ URLProvider.propTypes = {
 
 // Builds the URL string when the share button is clicked.
 // This is what will be copied into the users clipboard.
-export function createUrl(baseUrl, category, context) {
+export function createUrl(globalContext) {
+  let baseUrl = `${window.location.origin}/?`;
+
+  console.log(globalContext);
    const { 
      nodes, 
      searchValue, 
@@ -192,8 +143,9 @@ export function createUrl(baseUrl, category, context) {
      graphEnd, 
      heuristic, 
      graphMin, 
-     graphMax 
-   } = context;
+     graphMax
+   } = globalContext.id;
+  let category = "hello"
 
    let url = baseUrl;
  
