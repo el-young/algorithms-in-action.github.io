@@ -1,57 +1,56 @@
-/* eslint-disable react/prop-types */
-import React, { useState, useEffect } from 'react';
+/* eslint-disable jsx-a11y/label-has-associated-control */
+import React, { useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
 import ControlButton from '../../../components/common/ControlButton';
 import '../../../styles/Param.scss';
+import { GlobalContext } from '../../../context/GlobalState';
 
+/**
+ * ParamForm:
+ * - Wraps an input, optional icons, and a submit button.
+ * - Keeps its own local state for typing, but syncs with `value` prop on changes.
+ */
 function ParamForm({
   formClassName,
-  name,
   buttonName,
   value,
   handleSubmit,
   children,
   disabled,
-  UNCHECK_CASES,
+  onInputChange,
 }) {
 
-  // local state for typing to be reflected
+  const { algorithm } = useContext(GlobalContext);
+  const isDisabled = disabled ? disabled : 
+                    ('visualisers' in algorithm && algorithm.playing);
+  
+  // Local state for typing
   const [inputValue, setInputValue] = useState(value);
 
-  // Whenever parent changes `value` (like clicking `case` buttons),
-  // sync it down into the local state so the box updates. useState
-  // only reads from a prop once on mount, changing value prop will not
-  // update inputValue without the next line. Before this was achieved
-  // through simulating a click on the submit button.
+  // Sync parent changes down into local state
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
-  // Have to do it in this unorthodox way because we need the input box
-  // to update as user types.
-
   return (
-    <form
-      className={formClassName}
-      onSubmit={handleSubmit}
-    >
+    <form className={formClassName} onSubmit={handleSubmit}>
       <div className="outerInput">
         <label className="inputText">
           <input
-            name={name}
             type="text"
             value={inputValue}
             onChange={(e) => {
-              setInputValue(e.target.value); 
-              UNCHECK_CASES();
+              setInputValue(e.target.value);
+              if (onInputChange) onInputChange();
             }}
           />
         </label>
         <div className="btnGrp">
           {children}
           <ControlButton
-            className={disabled ? 'blueWordBtnDisabled' : 'blueWordBtn'}
+            className={isDisabled ? 'blueWordBtnDisabled' : 'blueWordBtn'}
             type="submit"
-            disabled={disabled}
+            disabled={isDisabled}
           >
             {buttonName}
           </ControlButton>
@@ -60,5 +59,15 @@ function ParamForm({
     </form>
   );
 }
+
+ParamForm.propTypes = {
+  formClassName: PropTypes.string.isRequired,
+  buttonName: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  children: PropTypes.node,
+  disabled: PropTypes.bool.isRequired,
+  onInputChange: PropTypes.func,
+};
 
 export default ParamForm;

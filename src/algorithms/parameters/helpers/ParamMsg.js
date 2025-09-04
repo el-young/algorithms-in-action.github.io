@@ -1,6 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
+/*
+  This file defines the parameter message component.
+
+  Parameter components should include a placeholder in their markup
+  where validation or status messages can be displayed. This component
+  is rendered in that space.
+
+  See also the utility wrappers `successParamMsg` and `errorParamMsg`
+  at the bottom of the file.
+*/
+
 function ParamMsg({ logWarning, logTag, logMsg }) {
   const warningCol = '#FB3640';
   const successCol = '#52AA5E';
@@ -14,7 +25,7 @@ function ParamMsg({ logWarning, logTag, logMsg }) {
 
     ref.current.scrollIntoView({
       behavior: 'smooth',
-      block: 'center',
+      block: 'center', // TODO: email
       inline: 'nearest',
     });
   });
@@ -40,3 +51,29 @@ ParamMsg.propTypes = ({
 });
 
 export default ParamMsg;
+
+export const successParamMsg = (type) => (
+  <ParamMsg
+    logWarning={false}
+    logTag=""
+    logMsg=""
+  />
+);
+
+/**
+ *
+ * @param {string} type algorithm type
+ * @param {string} example optional provided
+ * @param {string} reason optional provided, if not provide, use default value
+ */
+export const errorParamMsg = (
+  type,
+  example,
+  reason = `It seems the ${type} algorithm does not accept this data.`,
+) => (
+  <ParamMsg
+    logWarning
+    logTag="Oops..."
+    logMsg={`${example || ''}`}
+  />
+);

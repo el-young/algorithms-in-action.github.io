@@ -1,21 +1,26 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
 import ControlButton from '../../../components/common/ControlButton';
 import '../../../styles/Param.scss';
 import { ReactComponent as RefreshIcon } from '../../../assets/icons/refresh.svg';
-import { GlobalActions } from '../../../context/actions';
 import ParamForm from './ParamForm';
-
 import { GlobalContext } from '../../../context/GlobalState';
 
 /**
- * This list param component can be used when
- * the param input accepts a list
+ * Stateless list param component.
+ * - Only renders UI.
+ * - Parent must pass in callbacks (handleSubmit, refreshFunction, etc.).
+ * - ParamForm with refresh button added.
  */
 function ListParam({
-  buttonName, DEFAULT_VAL, formClassName, handleSubmit, REFRESH_FUNCTION, UNCHECK_CASES
+  buttonName,
+  defaultVal,
+  formClassName,
+  handleSubmit,
+  refreshFunction,
+  onInputChange,
 }) {
   const { algorithm } = useContext(GlobalContext);
   const disabled = algorithm.hasOwnProperty('visualisers') && algorithm.playing;
@@ -24,19 +29,28 @@ function ListParam({
     <ParamForm
       formClassName={formClassName}
       buttonName={buttonName}
-      value={DEFAULT_VAL}
+      value={defaultVal}
       disabled={disabled}
       handleSubmit={handleSubmit}
-      UNCHECK_CASES={UNCHECK_CASES}
+      onInputChange={onInputChange}
     >
       <ControlButton
         icon={<RefreshIcon />}
         className={disabled ? 'greyRoundBtnDisabled' : 'greyRoundBtn'}
         disabled={disabled}
-        onClick={REFRESH_FUNCTION}
+        onClick={refreshFunction}
       />
     </ParamForm>
   );
 }
+
+ListParam.propTypes = {
+  buttonName: PropTypes.string.isRequired,
+  defaultVal: PropTypes.arrayOf(PropTypes.number).isRequired,
+  formClassName: PropTypes.string.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  refreshFunction: PropTypes.func.isRequired,
+  onInputChange: PropTypes.func,
+};
 
 export default ListParam;

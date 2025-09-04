@@ -1,7 +1,6 @@
 import React, { createContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import { errorParamMsg } from '../algorithms/parameters/helpers/ParamHelper';
-import algorithmMetadata, { getCategory, getDefaultMode } from '../algorithms/masterList';
+import { getCategory } from '../algorithms/masterList';
 
 /*
   Centralized module for all URL-related logic in the app.

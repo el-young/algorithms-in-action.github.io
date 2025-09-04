@@ -80,7 +80,24 @@ const algorithmMetadata = {
       insertion: 'AVLTreeInsertion',
       search: 'AVLTreeSearch',
     },
-    keywords: ["Hello", "World"]
+    keywords: ["Hello", "World"],
+  },
+
+  'msort_arr_nat': {
+    name: 'Merge Sort (natural)',
+    noDeploy: false,
+    category: 'Sort',
+    explanation: 'msort_arr_nat',
+    param: 'msort_arr_nat',
+    instructions: 'msort_arr_nat',
+    extraInfo: 'msort_arr_nat',
+    pseudocode: {
+      sort: 'msort_arr_nat',
+    },
+    controller: {
+      sort: 'msort_arr_nat',
+    },
+    keywords: ["Hello", "World"],
   },
 };
 //_MASTER_LIST_END_

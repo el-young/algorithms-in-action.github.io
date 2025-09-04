@@ -4,31 +4,34 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-
 import { GlobalContext } from '../../context/GlobalState';
 import { GlobalActions } from '../../context/actions';
-
 import ListParam from './helpers/ListParam';
-import SingleValueParam from './helpers/SingleValueParam';
 import '../../styles/Param.scss';
-
 import {
   genUniqueRandNumList,
   balanceBSTArray,
   shuffleArray,
-  commaSeparatedNumberListValidCheck,
-  singleNumberValidCheck,
-  errorParamMsg,
-} from './helpers/ParamHelper';
+} from './helpers/SpecialInputBuilders';
+import { errorParamMsg } from './helpers/ParamMsg';
+import { 
+  commaSeparatedNumberListValidCheck, 
+  singleNumberValidCheck 
+} from './helpers/ValidateInput';
+import ParamForm from './helpers/ParamForm';
 
 const INSERTION = 'insertion';
 const SEARCH = 'search';
 
-const defaultProps = {
-  mode: INSERTION,
-  list: genUniqueRandNumList(12, 1, 100),
-  value: '2',
-};
+const defaultProps = (() => {
+  const list = genUniqueRandNumList(12, 1, 100);
+  const value = list[Math.floor(Math.random() * list.length)].toString();
+  return {
+    mode: INSERTION,
+    list,
+    value,
+  };
+})();
 
 const UNCHECKED = {
   random: false,
@@ -48,7 +51,10 @@ const BlueRadio = withStyles({
 
 function AVLTreeParam({ alg, mode, list, value }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
+  
 
+  // Redoing validation logic here, simulated click prevented this by filling
+  // form and clicking.
   let initialMessage = null;
 
   list = !list
@@ -146,10 +152,12 @@ function AVLTreeParam({ alg, mode, list, value }) {
   const handleSearch = (e) => {
     e.preventDefault();
     const inputValue = e.target[0].value;
-    if (!singleNumberValidCheck(inputValue)) {
-      setMessage(errorParamMsg(null, "Enter a number."));
+
+    let err;
+    if ((err = singleNumberValidCheck(inputValue))) {
+      setMessage(errorParamMsg(null, err));
       return;
-    } else if (algorithm?.visualisers?.graph?.instance.isEmpty()) {
+    } else if ((err = algorithm?.visualisers?.graph?.instance.isEmpty())) {
       setMessage(errorParamMsg(null, "Build a tree first!"));
     } else {
       setSearchTarget(inputValue);
@@ -172,22 +180,19 @@ function AVLTreeParam({ alg, mode, list, value }) {
         <ListParam
           buttonName="Insert"
           formClassName="formLeft"
-          DEFAULT_VAL={nodes.join(',')}
+          defaultVal={nodes.join(',')}
           handleSubmit={handleInsert}
-          REFRESH_FUNCTION={handleRefresh}
-          UNCHECK_CASES={uncheckCases}
+          refreshFunction={handleRefresh}
+          onInputChange={uncheckCases}
         />
 
         {/* Search input */}
-        <SingleValueParam
-          name={alg}
-          buttonName="Search"
-          mode={SEARCH}
+        <ParamForm
           formClassName="formRight"
-          DEFAULT_VAL={searchTarget}
-          ALGORITHM_NAME={SEARCH}
+          buttonName="Search"
+          value={searchTarget}
           handleSubmit={handleSearch}
-          UNCHECK_CASES={uncheckCases}
+          onInputChange={uncheckCases}
         />
       </div>
 

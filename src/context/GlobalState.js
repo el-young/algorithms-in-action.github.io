@@ -1,9 +1,6 @@
 import React, { createContext, useState } from 'react';
 import { dispatcher, initialState } from './actions';
-import algorithms from '../algorithms';
-import { getDefaultMode, getCategory } from '../algorithms/masterList'
-import { Search } from '@mui/icons-material';
-import { URLProvider, URLContext } from './urlState';
+import { initGlobalAlgorithmGetter } from '../algorithms/controllers/collapseChunkPlugin';
 
 /* What's going on here?
  * We maintain a global state to hold info about the currently executing algorithm.
@@ -33,6 +30,10 @@ export const GlobalProvider = ({ children }) => {
     algorithm: state,
     dispatch,
   };
+
+  initGlobalAlgorithmGetter(
+    () => globalState.algorithm,
+  );
 
   return (
     <GlobalContext.Provider value={globalState}>

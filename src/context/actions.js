@@ -3,11 +3,9 @@
 /* eslint-disable max-len */
 import algorithms from '../algorithms';
 import Chunker from './chunker';
-import findBookmark from '../pseudocode/findBookmark';
 import React, { useState } from 'react';
-import { genRandNumList } from '../algorithms/parameters/helpers/ParamHelper';
 import { getUrlParams } from './urlState';
-import algorithmMetadata, { getDefaultMode } from '../algorithms/masterList';
+import { getDefaultMode } from '../algorithms/masterList';
 
 // Return block name for bookmark
 function bookmarkBlock(bookmark, pseudocode) {
