@@ -25,7 +25,6 @@ const INSERTION = 'insertion';
 const SEARCH = 'search';
 
 const defaultProps = {
-  alg: 'AVLTree',
   mode: INSERTION,
   list: genUniqueRandNumList(12, 1, 100),
   value: '2',
@@ -50,13 +49,6 @@ const BlueRadio = withStyles({
 function AVLTreeParam({ alg, mode, list, value }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
 
-  // Validate fed in params, these are from the URL, and it was
-  // decided to leave it to the parameter components to validate.
-  // TODO: query params could be validated before, if parameter
-  // components do not have special requirments. i.e. for all ListParam
-  // users the `list` requirements are the same. Maybe just do some baseline
-  // preprocessing then parameter components can opt to have further constraints
-  // but then lose error messages in bottom pane.
   let initialMessage = null;
 
   list = !list
@@ -71,7 +63,7 @@ function AVLTreeParam({ alg, mode, list, value }) {
     ? defaultProps.value
     : singleNumberValidCheck(value)
       ? value
-      : (initialMessage = errorParamMsg(null, "URL: `value` format was not appropriate!"), defaultProps.target);
+      : (initialMessage = errorParamMsg(null, "URL: `value` format was not appropriate!"), defaultProps.value);
 
   mode && mode !== INSERTION &&
     (initialMessage = errorParamMsg(null, "URL: `mode` can only start as insertion!"));
@@ -90,10 +82,10 @@ function AVLTreeParam({ alg, mode, list, value }) {
   useEffect(() => {
     // Add both nodes and target
     // global states id container can be used
-    // to construct URL on share button. Convinient
+    // to construct URL on share button. Convenient
     // since global state is also used for stuff like step
     // and expansions of psuedocode so now share button
-    // just pull from global state, do not need to maintain
+    // just pulls from global state, do not need to maintain
     // two containers.
     if (modeState === INSERTION) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
