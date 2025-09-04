@@ -2,6 +2,7 @@
 import React from 'react';
 import Denque from 'denque';
 import ParamMsg from './ParamMsg';
+import { MESSAGE_1 } from './ErrorMsgs';
 
 export const commaSeparatedNumberListValidCheck = (t) => {
   if (!t || t.trim() === "") {
@@ -30,7 +31,7 @@ export const stringValidCheck = (t) => {
   }
 
   if (!regex.test(t)) {
-    return { valid: false, error: "Only lowercase letters and spaces are allowed." };
+    return { valid: false, error: MESSAGE_1 };
   }
 
   return { valid: true, error: null };
