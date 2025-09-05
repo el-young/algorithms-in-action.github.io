@@ -1,3 +1,4 @@
 export { default as AVLTreeInsertion } from './AVLTreeInsertion';
 export { default as AVLTreeSearch } from './AVLTreeSearch';
-export { default as msort_arr_nat} from './msort_arr_nat';
+export { default as unionFindUnion } from './unionFindUnion';
+export { default as unionFindFind } from './unionFindFind';

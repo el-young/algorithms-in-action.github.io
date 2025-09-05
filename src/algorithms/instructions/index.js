@@ -165,3 +165,4 @@ const unionFindInstructions = [{
 
 export const AVLInstruction = bstInstructions;
 export const msort_arr_nat = sortInstructions;
+export const UFInstruction = unionFindInstructions;

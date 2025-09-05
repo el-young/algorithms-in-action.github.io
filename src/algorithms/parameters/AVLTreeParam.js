@@ -12,12 +12,12 @@ import {
   genUniqueRandNumList,
   balanceBSTArray,
   shuffleArray,
-} from './helpers/SpecialInputBuilders';
+} from './helpers/InputBuilders';
 import { errorParamMsg } from './helpers/ParamMsg';
 import { 
   commaSeparatedNumberListValidCheck, 
   singleNumberValidCheck 
-} from './helpers/ValidateInput';
+} from './helpers/InputValidators';
 import ParamForm from './helpers/ParamForm';
 
 const INSERTION = 'insertion';
@@ -49,32 +49,12 @@ const BlueRadio = withStyles({
   checked: {},
 })((props) => <Radio {...props} />);
 
+// A parameter component holds all its own state, whenever
+// its state is modified, trigger a side effect where global
+// state is notified of the change through dispatch.
 function AVLTreeParam({ alg, mode, list, value }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
   
-
-  // Redoing validation logic here, simulated click prevented this by filling
-  // form and clicking.
-  let initialMessage = null;
-
-  list = !list
-    ? defaultProps.list
-    : commaSeparatedNumberListValidCheck(list)
-      ? list.split(',').map(Number)
-      : (initialMessage = errorParamMsg(null, "URL: `list` format was not appropriate!"), defaultProps.list);
-
-  
-  console.log(value);
-  value = !value
-    ? defaultProps.value
-    : singleNumberValidCheck(value)
-      ? value
-      : (initialMessage = errorParamMsg(null, "URL: `value` format was not appropriate!"), defaultProps.value);
-
-  mode && mode !== INSERTION &&
-    (initialMessage = errorParamMsg(null, "URL: `mode` can only start as insertion!"));
-
-
   // Own the state centrally
   const [nodes, setNodes] = useState(list);
   const [searchTarget, setSearchTarget] = useState(value);
@@ -86,13 +66,6 @@ function AVLTreeParam({ alg, mode, list, value }) {
   // If any of these change we should notify the other panels
   // through dispatch. This will also occur on first mount as well.
   useEffect(() => {
-    // Add both nodes and target
-    // global states id container can be used
-    // to construct URL on share button. Convenient
-    // since global state is also used for stuff like step
-    // and expansions of psuedocode so now share button
-    // just pulls from global state, do not need to maintain
-    // two containers.
     if (modeState === INSERTION) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
@@ -111,8 +84,6 @@ function AVLTreeParam({ alg, mode, list, value }) {
     }
   }, [modeState, nodes, searchTarget]);
 
-  // Let child components uncheck the buttons
-  // (typing in param form)
   const uncheckCases = () => setBSTCase({...UNCHECKED});
 
   const handleCaseChange = (e) => {
@@ -138,7 +109,7 @@ function AVLTreeParam({ alg, mode, list, value }) {
     e.preventDefault();
     const inputValue = e.target[0].value.replace(/\s+/g, '');
     if (!commaSeparatedNumberListValidCheck(inputValue)) {
-      setMessage(errorParamMsg(null, "Invalid params"));
+      setMessage(errorParamMsg(null));
     } else {
       const newNodes = inputValue.split(',')
                                  .map(Number)

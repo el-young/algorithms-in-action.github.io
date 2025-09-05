@@ -52,28 +52,18 @@ ParamMsg.propTypes = ({
 
 export default ParamMsg;
 
-export const successParamMsg = (type) => (
-  <ParamMsg
-    logWarning={false}
-    logTag=""
-    logMsg=""
-  />
-);
-
 /**
  *
- * @param {string} type algorithm type
  * @param {string} example optional provided
  * @param {string} reason optional provided, if not provide, use default value
  */
 export const errorParamMsg = (
-  type,
+  reason,
   example,
-  reason = `It seems the ${type} algorithm does not accept this data.`,
 ) => (
   <ParamMsg
     logWarning
     logTag="Oops..."
-    logMsg={`${example || ''}`}
+    logMsg={`${reason}\n${example ? example : ''}`}
   />
 );

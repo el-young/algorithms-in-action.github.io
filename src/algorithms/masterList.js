@@ -83,21 +83,21 @@ const algorithmMetadata = {
     keywords: ["Hello", "World"],
   },
 
-  'msort_arr_nat': {
-    name: 'Merge Sort (natural)',
-    noDeploy: false,
-    category: 'Sort',
-    explanation: 'msort_arr_nat',
-    param: 'msort_arr_nat',
-    instructions: 'msort_arr_nat',
-    extraInfo: 'msort_arr_nat',
+  unionFind: {
+    name: 'Union Find',
+    category: 'Set',
+    explanationKey: 'UFExp',
+    paramKey: 'UFParam',
+    instructionsKey: 'UFInstruction',
+    extraInfoKey: 'UFInfo',
     pseudocode: {
-      sort: 'msort_arr_nat',
+      union: 'unionFindUnion',
+      find: 'unionFindFind',
     },
     controller: {
-      sort: 'msort_arr_nat',
+      union: 'unionFindUnion',
+      find: 'unionFindFind',
     },
-    keywords: ["Hello", "World"],
   },
 };
 //_MASTER_LIST_END_
