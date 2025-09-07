@@ -6,7 +6,7 @@ import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
 import { GlobalContext } from '../../context/GlobalState';
 import { GlobalActions } from '../../context/actions';
-import ListParam from './helpers/ListParam';
+import ParamFormRefresh from './helpers/ParamFormRefresh';
 import '../../styles/Param.scss';
 import {
   genUniqueRandNumList,
@@ -24,8 +24,9 @@ const INSERTION = 'insertion';
 const SEARCH = 'search';
 
 const defaultProps = (() => {
-  const list = genUniqueRandNumList(12, 1, 100);
-  const value = list[Math.floor(Math.random() * list.length)].toString();
+  const listArray = genUniqueRandNumList(12, 1, 100);  // [1,23,45,...]
+  const list = listArray.join(',');                    // "1,23,45,..."
+  const value = listArray[Math.floor(Math.random() * listArray.length)].toString();
   return {
     mode: INSERTION,
     list,
@@ -52,56 +53,70 @@ const BlueRadio = withStyles({
 // A parameter component holds all its own state, whenever
 // its state is modified, trigger a side effect where global
 // state is notified of the change through dispatch.
-function AVLTreeParam({ alg, mode, list, value }) {
+function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
   
   // Own the state centrally
-  const [nodes, setNodes] = useState(list);
-  const [searchTarget, setSearchTarget] = useState(value);
+  const [list, setList] = useState(urlList || defaultProps.list);
+  const [value, setValue] = useState(urlValue || defaultProps.value);
   const [bstCase, setBSTCase] = useState(UNCHECKED);
-  // Must start in insertion mode.
-  const [modeState, setModeState] = useState(defaultProps.mode);
-  const [message, setMessage] = useState(initialMessage);
+  // Must start in insertion mode. TODO: This can be worked
+  // around, build the tree first in insertion mode then switch
+  // to search mode, if search mode was specified in URL. If no "insertStep"
+  // query param specified then assume "insertStep" means till last step in insert mode. Should be doable
+  // by passing in custom param to dispatch, id (footprint) is set to (spread) ...params.
+  const [modeState, setModeState] = useState(urlMode || defaultProps.mode);
+  const [message, setMessage] = useState(null);
 
   // If any of these change we should notify the other panels
   // through dispatch. This will also occur on first mount as well.
   useEffect(() => {
+    // Convert the comma-separated string into an array of numbers
+    const nodesArray = list
+      .split(',')
+      .map((n) => Number(n))
+      .filter((n) => !isNaN(n));
+
     if (modeState === INSERTION) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: INSERTION,
-        nodes,
-        target: searchTarget,
+        nodes: nodesArray,
+        target: value,
       });
     } else if (modeState === SEARCH) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: SEARCH,
-        nodes,
-        target: searchTarget,
+        nodes: nodesArray,
+        target: value,
         visualiser: algorithm?.chunker?.visualisers,
       });
     }
-  }, [modeState, nodes, searchTarget]);
+  }, [modeState, list, value]);
 
   const uncheckCases = () => setBSTCase({...UNCHECKED});
 
   const handleCaseChange = (e) => {
-    let newNodes = [...nodes];
+    let nums = list.split(',').map(Number).filter((n) => !isNaN(n));
+
     switch (e.target.name) {
       case 'random':
-        newNodes = shuffleArray(newNodes);
+        nums = shuffleArray(nums);
         break;
       case 'sorted':
-        newNodes = [...newNodes].sort((a, b) => a - b);
+        nums = nums.sort((a, b) => a - b);
         break;
       case 'balanced':
-        newNodes = balanceBSTArray([...newNodes].sort((a, b) => a - b));
+        nums = balanceBSTArray([...nums].sort((a, b) => a - b));
         break;
       default:
     }
-    setNodes(newNodes);
+
+    // Convert back to string
+    setList(nums.join(','));
     setBSTCase({ ...UNCHECKED, [e.target.name]: true });
+    // Switch back to insertion mode on case change
     setModeState(INSERTION);
   };
 
@@ -111,10 +126,7 @@ function AVLTreeParam({ alg, mode, list, value }) {
     if (!commaSeparatedNumberListValidCheck(inputValue)) {
       setMessage(errorParamMsg(null));
     } else {
-      const newNodes = inputValue.split(',')
-                                 .map(Number)
-                                 .filter((n) => !isNaN(n));
-      setNodes(newNodes);
+      setList(inputValue);
       setModeState(INSERTION);
       setMessage(null);
     }
@@ -124,21 +136,21 @@ function AVLTreeParam({ alg, mode, list, value }) {
     e.preventDefault();
     const inputValue = e.target[0].value;
 
-    let err;
-    if ((err = singleNumberValidCheck(inputValue))) {
-      setMessage(errorParamMsg(null, err));
+    let {valid, reason} = singleNumberValidCheck(inputValue);
+    if (!valid) {
+      setMessage(errorParamMsg(null, reason));
       return;
-    } else if ((err = algorithm?.visualisers?.graph?.instance.isEmpty())) {
+    } else if (algorithm?.visualisers?.graph?.instance.isEmpty()) {
       setMessage(errorParamMsg(null, "Build a tree first!"));
     } else {
-      setSearchTarget(inputValue);
+      setValue(inputValue);
       setModeState(SEARCH);
       setMessage(null);
     }
   };
 
   const handleRefresh = () => {
-    setNodes(genUniqueRandNumList(defaultProps.list.length, 1, 100));
+    setList(genUniqueRandNumList(defaultProps.list.length, 1, 100).join(','));
     setBSTCase(UNCHECKED);
     setModeState(INSERTION);
     setMessage(null);
@@ -148,10 +160,10 @@ function AVLTreeParam({ alg, mode, list, value }) {
     <>
       <div className="form">
         {/* Insert input */}
-        <ListParam
+        <ParamFormRefresh
           buttonName="Insert"
           formClassName="formLeft"
-          defaultVal={nodes.join(',')}
+          value={list}
           handleSubmit={handleInsert}
           refreshFunction={handleRefresh}
           onInputChange={uncheckCases}
@@ -161,7 +173,7 @@ function AVLTreeParam({ alg, mode, list, value }) {
         <ParamForm
           formClassName="formRight"
           buttonName="Search"
-          value={searchTarget}
+          value={value}
           handleSubmit={handleSearch}
           onInputChange={uncheckCases}
         />

@@ -12,126 +12,63 @@ import { getCategory } from '../algorithms/masterList';
 const VALID_PARAM_NAMES = [
     'list', 'value', 'xyCoords', 'edgeWeights',
     'size', 'start', 'end', 'string', 'pattern', 'union',
-    'heuristic', 'min', 'max', 'step', 'expand'
+    'heuristic', 'min', 'max', 'step', 'expand', 'compress'
 ];
 
-// Helper to get all query parametes (that are valid)
-// and convert them into data types the parameter components 
-// can interpret. This will not convert the data, parameter
-// components are expected to transform passed in components
-// to the data they want.
+/**
+ * Parse and validate query parameters from the current URL.
+ *
+ * This function:
+ *  - Collects all query parameters from `window.location.search`.
+ *  - Filters against `VALID_PARAM_NAMES` to allow only supported parameters.
+ *  - Performs validation logic on each recognized parameter so that only
+ *    well-formed values are passed into parameter components.
+ *  - Logs a warning for any parameters not in `VALID_PARAM_NAMES`.
+ *
+ * Rationale:
+ *  Validation used to happen inside form callbacks (triggered by simulated clicks).
+ *  That worked for parameters backed by forms, since the form handlers already
+ *  enforced constraints. However, not all parameters are tied to forms
+ *  (e.g., toggle buttons like path compression in Union-Find). Without
+ *  central validation, some parameters were validated while others weren’t,
+ *  creating confusion for new developers.
+ *
+ *  By moving validation here, every parameter, whether it is intended for a form
+ *  or not, is checked consistently before being injected into components.
+ * 
+ *
+ * @returns {Object} An object mapping each valid parameter name to its validated value,
+ *                   or an empty string if missing or invalid.
+ */
+
+// TODO: Parameter components should still convert to appropriate type? Nah.
 export function getUrlParams() {
-    // just grab search params directly once
-    const search = window.location.search;
-    const urlParams = new URLSearchParams(search);
-    const params = {};
+  const search = window.location.search;
+  const urlParams = new URLSearchParams(search);
+  const params = {};
 
-    VALID_PARAM_NAMES.forEach((name) => {
-        const value = urlParams.get(name);
-        params[name] = value ? value : '';
-    });
+  VALID_PARAM_NAMES.forEach((name) => {
+    const value = urlParams.get(name);
 
-    // Log a warning if there are any invalid parameters in the URL
-    urlParams.forEach((_, key) => {
-        if (!VALID_PARAM_NAMES.includes(key)) {
-            console.warn(`Invalid URL parameter ignored: ${key}`);
-        }
-    });
+    // TODO: add specific validation per parameter type here
+    // e.g., number ranges, boolean coercion, list formatting, etc.
+    params[name] = value ? value : '';
+  });
 
-    return params;
+  // Warn about unexpected query parameters
+  urlParams.forEach((_, key) => {
+    if (!VALID_PARAM_NAMES.includes(key)) {
+      console.warn(`Invalid URL parameter ignored: ${key}`);
+    }
+  });
+
+  return params;
 }
-
-// TODO: Understand and fix this.
-// prepend graph from URL if defined
-export function addURLGraph(GRAPH_EGS, xyCoords, edgeWeights, start, DEFAULT_START) {
-  let graph_egs = [...GRAPH_EGS];
-  // XXX using size causes weirdness - BFSParam() somehow gets
-  // re-evaluated when we cycle around to the URL graph and size and/or
-  // other things get out of whack - maybe something gets triggered,
-  // maybe because the identifier size is overloaded in different ways -
-  // someone who know JS better than me might be able to figure it out.
-  // So, we avoid using the size parameter and use number of xyCoords
-  // (if defined) or GRAPH_EGS[0].size otherwise.
-  let size1 = GRAPH_EGS[0].size;
-  // if coords+weights non-empty we must have info from the URL so we add an
-  // extra graph to the start of the list
-  if (xyCoords && edgeWeights) {
-    size1 = xyCoords.split(",").length;
-    const urlGraph =  {
-      name: 'URL Graph',
-          size: size1,
-          coords: xyCoords,
-          edges: edgeWeights
-    };
-    graph_egs.unshift({...urlGraph});
-  } else {
-    start = DEFAULT_START
-  }
-  if (start > size1)
-    start = size1;
-  // XXX should pass in end node(s) and check they are in range???
-  return [start, size1, graph_egs];
-}
-
-/*
-  Context container used throughout the app.
-  Provides a central place to store and access
-  values that need to be reflected in the URL
-  (e.g., when generating a share link).
-
-  Example: if the parameter pane is filled with [1,2,3,4,5],
-  we would call setNodes([1,2,3,4,5]). When the share button
-  is clicked, this would ideally become &nodes=1,2,3,4,5.
-
-  However, it doesn’t map directly like that, see urlCreator below. 
-  The actual query parameter depends on the
-  algorithm’s category. For example, if the algorithm is in
-  the "sort" category, it will become &list=1,2,3,4,5.
-
-  TODO: There is coupling here — parameter component names
-  must align with the expected query param keys.
-*/
-
-// Create a new context specifically for values needed for the url
-export const URLContext = createContext();
-
-// Provider component for values needed
-export const URLProvider = ({ children }) => {
-  const [nodes, setNodes] = useState([]);
-  const [searchValue, setSearchValue] = useState([]);
-  const [graphSize, setGraphSize] = useState([]);
-  const [graphStart, setGraphStart] = useState([]);
-  const [graphEnd, setGraphEnd] = useState([]);
-  const [heuristic, setHeuristic] = useState([]);
-  const [graphMin, setGraphMin] = useState([]);
-  const [graphMax, setGraphMax] = useState([]);
-  const value = {
-    nodes, setNodes,
-    searchValue, setSearchValue,
-    graphSize, setGraphSize,
-    graphStart, setGraphStart,
-    graphEnd, setGraphEnd,
-    heuristic, setHeuristic,
-    graphMin, setGraphMin,
-    graphMax, setGraphMax,
-  };
-
-  return (
-    <URLContext.Provider value={value}>
-      {children}
-    </URLContext.Provider>
-  );
-};
-
-// Add prop-types to validate children
-URLProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 // Builds the URL string when the share button is clicked.
 // This is what will be copied into the users clipboard.
 export function createUrl(globalContext) {
-  let baseUrl = `${window.location.origin}/animation/?`;
+  let baseUrl = `${window.location.origin}/animation/`;
 
   // Can get everything from global context,
   // parameter specific is in globalContext.id
@@ -144,7 +81,7 @@ export function createUrl(globalContext) {
     target
   } = globalContext.id;
 
-  baseUrl += `alg=${name}`;
+  baseUrl += `?alg=${name}`;
   baseUrl += `&mode=${mode}`;
 
   let steps = globalContext?.chunker?.currentChunk || 0;

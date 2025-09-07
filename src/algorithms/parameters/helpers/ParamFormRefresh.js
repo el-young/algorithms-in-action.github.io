@@ -9,14 +9,14 @@ import ParamForm from './ParamForm';
 import { GlobalContext } from '../../../context/GlobalState';
 
 /**
- * Stateless list param component.
+ * Stateless component.
  * - Only renders UI.
  * - Parent must pass in callbacks (handleSubmit, refreshFunction, etc.).
  * - ParamForm with refresh button added.
  */
-function ListParam({
+function ParamFormRefresh({
   buttonName,
-  defaultVal,
+  value,
   formClassName,
   handleSubmit,
   refreshFunction,
@@ -29,7 +29,7 @@ function ListParam({
     <ParamForm
       formClassName={formClassName}
       buttonName={buttonName}
-      value={defaultVal}
+      value={value}
       disabled={disabled}
       handleSubmit={handleSubmit}
       onInputChange={onInputChange}
@@ -44,13 +44,13 @@ function ListParam({
   );
 }
 
-ListParam.propTypes = {
+ParamFormRefresh.propTypes = {
   buttonName: PropTypes.string.isRequired,
-  defaultVal: PropTypes.arrayOf(PropTypes.number).isRequired,
+  value: PropTypes.string.isRequired,
   formClassName: PropTypes.string.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   refreshFunction: PropTypes.func.isRequired,
   onInputChange: PropTypes.func,
 };
 
-export default ListParam;
+export default ParamFormRefresh;

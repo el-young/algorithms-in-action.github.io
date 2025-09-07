@@ -6,7 +6,6 @@ import TopPanel from "./top-panel";
 import RightPanel from "./right-panel";
 import MidPanel from "./mid-panel";
 import "../../styles/AlgorithmAnimationPage.scss";
-import { URLProvider } from "../../context/urlState";
 import { ReactComponent as Circle } from "../../assets/icons/circle.svg";
 
 // eslint-disable-next-line import/no-unresolved
@@ -96,7 +95,6 @@ function AlgorithmAnimationPage() {
   const leftRef = useRef(null);
   return (
     <GlobalProvider>
-      <URLProvider>
         <div className="app-grid">
 
           <div className="top-row">
@@ -180,7 +178,6 @@ function AlgorithmAnimationPage() {
             </PanelGroup>
           </div>
         </div>
-      </URLProvider>
     </GlobalProvider>
   );
 }

@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { GlobalContext } from '../../../context/GlobalState';
-import { createUrl, URLContext } from '../../../context/urlState';
+import { createUrl } from '../../../context/urlState';
 
 import '../../../styles/MidPanel.scss';
 import PopUpComponent from 'reactjs-popup';
@@ -12,8 +12,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import { increaseFontSize, setFontSize } from '../top-panel/helper';
 
 function MidPanel() {
-  const { algorithm, algorithmKey, category, mode } = useContext(GlobalContext);
-  const urlContext = useContext(URLContext);
+  const { algorithm } = useContext(GlobalContext);
 
   const fontID = 'algorithmTitle';
 
@@ -23,25 +22,6 @@ function MidPanel() {
   // build share URL when share popup is open
   useEffect(() => {
     if (share) {
-      // let baseUrl = `${window.location.origin}/?alg=${algorithmKey}&mode=${mode}`;
-
-      // // Wasteful to track these in URL context
-      // // there are already pointers to them,
-      // // and they update frequently, so do here.
-
-      // // Add step
-      // if (algorithm?.chunker?.currentChunk) {
-      //   baseUrl += `&step=${algorithm.chunker.currentChunk}`;
-      // }
-
-      // // Add collapse state for pseudocode
-      // // (only for current algo, not the whole collapse 
-      // // controller it would bloat URL.)
-      // const algoCollapse = algorithm?.collapse?.[algorithm.id.name];
-      // if (algoCollapse) {
-      //   baseUrl += `&expand=${JSON.stringify(algoCollapse)}`;
-      // }
-
       // Final URL includes category + URLContext data
       const url = createUrl(algorithm);
       setCurrentUrl(url); // display in box

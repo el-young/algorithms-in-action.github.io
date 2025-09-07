@@ -63,7 +63,7 @@ function ParamForm({
 ParamForm.propTypes = {
   formClassName: PropTypes.string.isRequired,
   buttonName: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  value: PropTypes.string.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   children: PropTypes.node,
   disabled: PropTypes.bool.isRequired,

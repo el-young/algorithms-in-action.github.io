@@ -7,15 +7,11 @@ import Radio from '@mui/material/Radio';
 import { GlobalActions } from '../../context/actions';
 import { GlobalContext } from '../../context/GlobalState';
 import { errorParamMsg } from './helpers/ParamMsg';
-import { URLContext } from '../../context/urlState';
-
-import SingleValueParam from './helpers/SingleValueParam';
-import ListParam from './helpers/ListParam';
-
+import ParamFormRefresh from './helpers/ParamFormRefresh';
 import '../../styles/Param.scss';
 import PropTypes from 'prop-types'; // Import this for URL Param
-import { withAlgorithmParams } from './helpers/urlHelpers' // Import this for URL Param
 import { ERRORS, EXAMPLES } from './helpers/ErrorExampleStrings';
+import ParamForm from './helpers/ParamForm';
 
 // button styling
 const BlueRadio = withStyles({
@@ -35,46 +31,60 @@ const N_ARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 const FIND_EXAMPLE = EXAMPLES.UF_FIND;
 const UNION_EXAMPLE = EXAMPLES.UF_UNION;
 
-const defaultProps = (() => {
-  const union = ['1-2', '3-4', '2-4', '1-5', '6-8', '3-6'];
-  const value = '2';
-  return {
-    mode: UNION,
-    union,
-    value,
-  };
-})();
+const defaultProps = {
+  mode: UNION,
+  union: "1-2,3-4,2-4,1-5,6-8,3-6",
+  value : '2',
+  compress: true,
+};
 
-function UFParam({ alg, mode, union, value }) {
+// Use aliasing if name space collisions are annoying
+function UFParam({ alg, mode: urlMode, union: urlUnion, value: urlValue, compress }) {
   const [ message, setMessage ] = useState(null);
   const { algorithm, dispatch } = useContext(GlobalContext);
-  const [ unions, setUnions ] = useState(union || defaultProps.union);
-  const [ pathCompressionEnabled, setPathCompressionEnabled ] = useState(true);
-  const [ value, setValue ] = useState(value || defaultProps.value);
+  const [ unions, setUnions ]   = useState(urlUnion || defaultProps.union);
+  const [ isPathCompression, setIsPathCompression ] = useState(compress || defaultProps.compress);
+  const [ value, setValue ]     = useState(urlValue || defaultProps.value);
+  const [ mode, setMode ]       = useState(urlMode || defaultProps.mode);
+
+  useEffect(() => {
+    // Transfrom data to what controller code expects here.
+    if (mode === UNION) {
+      dispatch(GlobalActions.LOAD_ALGORITHM, {
+        name: 'unionFind',
+        mode: UNION,
+        target: {
+          arg1: unions
+                .split(',')
+                .map((pair) => pair.trim().split('-').map(Number)), 
+          arg2: isPathCompression
+        },
+      });
+    } else {
+      dispatch(GlobalActions.LOAD_ALGORITHM, {
+        name: 'unionFind',
+        mode: FIND,
+        visualiser: algorithm?.chunker?.visualisers,
+        target: {
+          arg1: parseInt(value, 10), 
+          arg2: isPathCompression
+        },
+      });
+    }
+  }, [unions, value, isPathCompression, mode]);
 
   // toggling path compression (i.e., a boolean value)
-  const handleChange = () => setPathCompressionEnabled((prevState) => !prevState);
+  const handleChange = () => setIsPathCompression((prevState) => !prevState);
 
   // validating input before find submission
   const handleFind = (e) => {
     e.preventDefault();
     const inputValue = e.target[0].value;
-    setValue(inputValue);
-
     // eslint-disable-next-line no-restricted-globals
-    if (!(isNaN(inputValue) || !N_ARRAY.includes(inputValue))) {
-      const target = {
-        arg1: parseInt(inputValue, 10),
-        arg2: pathCompressionEnabled,
-      };
-
-      const visualiser = algorithm?.chunker?.visualisers;
-      dispatch(GlobalActions.RUN_ALGORITHM, {
-        name: 'unionFind',
-        mode: 'find',
-        visualiser,
-        target,
-      });
+    if (!Number.isNaN(Number(inputValue)) || !N_ARRAY.includes(inputValue)) {
+      setValue(inputValue);
+      setMode(FIND);
+      // Clear error message, if it exists.
       setMessage(null);
     } else {
       setMessage(errorParamMsg(ERRORS.UF_FIND, FIND_EXAMPLE));
@@ -83,60 +93,33 @@ function UFParam({ alg, mode, union, value }) {
 
   const handleUnion = (e) => {
     e.preventDefault();
-
     const textInput = e.target[0].value.replace(/\s+/g, '');
-
     if (validateTextInput(textInput)) {
-      const target = {
-        arg1: textInput
-          .split(',')
-          .map((pair) => pair.trim().split('-').map(Number)),
-        arg2: pathCompressionEnabled,
-      };
-
-      // running animation
-      dispatch(GlobalActions.RUN_ALGORITHM, {
-        name: 'unionFind',
-        mode: 'union',
-        target,
-      });
+      setUnions(textInput);
+      setMode(UNION);
+      // Clear error message, if it exists.
       setMessage(null);
     } else {
       setMessage(errorParamMsg(ERRORS.UF_UNION, UNION_EXAMPLE));
     }
   };
 
-  useEffect(() => {
-    document.getElementById('startBtnGrp').click();
-  }, [pathCompressionEnabled]);
-
   return (
     <>
       <div className="form">
-        <ListParam
-          name="unionFind"
+        <ParamFormRefresh
           buttonName="Union"
-          mode="union"
           formClassName="formLeft"
-          DEFAULT_VAL={unions}
-          SET_VAL={setUnions}
+          value={unions}
           handleSubmit={handleUnion}
-          REFRESH_FUNCTION={() => DEFAULT_UNION}
-          ALGORITHM_NAME={UNION}
-          EXAMPLE={UNION_EXAMPLE}
-          setMessage={setMessage}
+          refreshFunction={() => defaultProps.union}
         />
 
-        <SingleValueParam
-          name="unionFind"
+        <ParamForm
           buttonName="Find"
-          mode="find"
           formClassName="formRight"
-          DEFAULT_VAL={value || DEFAULT_FIND}
-          ALGORITHM_NAME={FIND}
-          EXAMPLE={FIND_EXAMPLE}
+          value={value}
           handleSubmit={handleFind}
-          setMessage={setMessage}
         />
       </div>
 
@@ -144,7 +127,7 @@ function UFParam({ alg, mode, union, value }) {
       <FormControlLabel
         control={
           <BlueRadio
-            checked={pathCompressionEnabled === true}
+            checked={isPathCompression}
             onChange={handleChange}
             name="on"
           />
@@ -155,7 +138,7 @@ function UFParam({ alg, mode, union, value }) {
       <FormControlLabel
         control={
           <BlueRadio
-            checked={pathCompressionEnabled === false}
+            checked={!isPathCompression}
             onChange={handleChange}
             name="off"
           />
@@ -174,10 +157,11 @@ UFParam.propTypes = {
   alg: PropTypes.string.isRequired,
   mode: PropTypes.string.isRequired,
   union: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired
+  value: PropTypes.string.isRequired,
+  compress: PropTypes.string,
 };
 
-export default withAlgorithmParams(UFParam); // Export with the wrapper for URL Params
+export default UFParam;
 
 
 /**

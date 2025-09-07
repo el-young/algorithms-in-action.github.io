@@ -4,7 +4,7 @@ import {
   N_IDX,
   PARENT_IDX,
   default as unionFind,
-} from './unionFindUnion.js';
+} from './UnionFindUnion.js';
 import Array2DTracer from '../../components/DataStructures/Array/Array2DTracer.js';
 import NTreeTracer from '../../components/DataStructures/Graph/NAryTreeTracer/NTreeTracer.js';
 

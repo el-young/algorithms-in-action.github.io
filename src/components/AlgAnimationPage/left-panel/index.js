@@ -41,7 +41,7 @@ function LeftPanel() {
   const initCollapseStat = () => {
     DeployedAlgorithmCategoryList.forEach((_, index) => {
       const obj = document.getElementById(`category-${index}`);
-      if (LIST_COLLAPSE && obj) {
+      if (LIST_COLLAPSE) {
         obj.click();
       }
     });
@@ -72,7 +72,7 @@ function LeftPanel() {
         />
       </span>
 
-      <div className="DeployedAlgorithmList">
+      <div className="algorithmList">
         {displaySearch === null
           ? DeployedAlgorithmCategoryList.map((cat, index) => (
               <div key={cat.id}>
@@ -80,7 +80,7 @@ function LeftPanel() {
                   id={`category-${index}`}
                   className="algoCat"
                   type="button"
-                  onClick={onCollapse}
+                  onClick={(event) => onCollapse(event)}
                 >
                   {cat.category}
                 </button>
