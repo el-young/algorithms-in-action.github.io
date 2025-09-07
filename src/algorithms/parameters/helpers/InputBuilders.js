@@ -422,3 +422,43 @@ const arrayRange = (start, stop, step) =>
   { length: (stop - start) / step + 1 },
   (value, index) => start + index * step
   );
+
+// TODO: These func assume input is already valid do checks anyway.
+export const parseCoords = (coordString) => coordString
+    .split(",")
+    .map((pair) => pair.split("-").map(Number)); // [[x1,y1], [x2,y2], ...]}
+  
+export const parseEdges = (edgeString, size) => {
+  // Initialize empty matrix with 0s
+  const matrix = Array.from({ length: size }, () => Array(size).fill(0));
+  edgeString.split(",").forEach(edge => {
+    const parts = edge.split("-").map(Number);
+    const [a, b, weight = 1] = parts; // default weight = 1 TODO: going to have to look at visualiser code not sure how it chooses to not display edges
+    // assuming for now that weight = 1 does it, but then weights of 1 are allowed for AStar? Maybe the controller code just feeds a prop
+    // to visualiser saying do not draw edge weights.
+    matrix[a - 1][b - 1] = weight; // make zero indexed
+  });
+
+  return matrix;
+};
+
+// Recalculates Edge string using function distanceFn
+// distanceFn should accept 4 Numbers.
+// Curry by distanceFn.
+export const recalcEdges = (distanceFn) => (coordString, edgeString) => {
+  const coords = parseCoords(coordString);
+
+  return edgeString.split(",").map(edge => {
+    const [aStr, bStr] = edge.split("-");
+    const a = Number(aStr);
+    const b = Number(bStr);
+
+    // arrays are 0-indexed but nodes are 1-indexed
+    const [x1, y1] = coords[a - 1];
+    const [x2, y2] = coords[b - 1];
+
+    const dist = distanceFn(x1, y1, x2, y2);
+    return `${a}-${b}-${dist}`;
+  }).join(",");
+};
+

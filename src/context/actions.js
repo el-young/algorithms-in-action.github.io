@@ -261,6 +261,7 @@ export const GlobalActions = {
     // Params here will either be empty (Parameter component will use its defaults ) (left menu clicks do this)
     // or URL query parameters that Parameter component will use (this happens when parameter component
     // is pushed into state by the initialState function (first load of algorithm page))
+    console.log("indirection" + params.name);
     return {
       // key=Date.now()
       // Need to give React a reason to remount when props/state of a component has not changed, 
@@ -270,8 +271,8 @@ export const GlobalActions = {
       // will not run because React did not re-mount.
       param : React.createElement(algorithms[params.name].param, {
         key: `${Date.now()}`,
+        ...params,
         alg : params.name,
-        ...params
       }),
     }
   },
@@ -283,6 +284,7 @@ export const GlobalActions = {
   // that should call LOAD_ALGORITHM. Other components that want to call LOAD_ALGORITHM
   // should go through INDIRECTION_INTO_PARAM.
   LOAD_ALGORITHM: (state, params) => {
+    console.log(params)
     const {
       controller,
       name,
@@ -534,6 +536,7 @@ export function initialState() {
   // Fallback to default mode if query is missing or unsupported
   if (!mode || !(mode in algorithms[alg].pseudocode)) mode = getDefaultMode(alg);
 
+  console.log(alg);
   // The ONLY time URL params are injected into the param component.
   return GlobalActions.INDIRECTION_INTO_PARAM(undefined, {name : alg, mode, ...getUrlParams()} );
 }

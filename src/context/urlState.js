@@ -8,9 +8,9 @@ import { getCategory } from '../algorithms/masterList';
   now everything is consolidated here for clarity and maintainability.
 */
 
-// List of extra valid parameter names (excluding alg and mode)
+// List of extra valid parameter names
 const VALID_PARAM_NAMES = [
-    'list', 'value', 'xyCoords', 'edgeWeights',
+    'alg', 'mode', 'list', 'value', 'xyCoords', 'edgeWeights',
     'size', 'start', 'end', 'string', 'pattern', 'union',
     'heuristic', 'min', 'max', 'step', 'expand', 'compress'
 ];

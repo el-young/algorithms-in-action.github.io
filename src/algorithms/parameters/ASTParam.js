@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import '../../styles/Param.scss';
 import PropTypes from 'prop-types';
-import EuclideanMatrixParamsTest from './helpers/EuclidMatrixParamTest';
+import EuclideanMatrixParamsTest from './EuclidMatrixParamTest';
 
 // Note: 'A* Algorithm' currently used in EuclideanMatrixParams.js -
 // change both or neither!
@@ -30,9 +30,9 @@ const GRAPH_EGS = [ // XXX think up better examples?
           edges:
 '1-2-10,1-4-4,2-3-6,3-4-10,3-5-5,4-7-3,5-6-7,6-7-8,7-8-2,7-9,8-9-3,9-10-5,9-11-7, 10-11-7,11-13-4,12-13-8,12-14-6,13-14-7,13-15-7,14-16-6,15-16-2,15-17-5,16-17-2'
         }];
-function ASTParam( { mode, xyCoords, edgeWeights, size, start, end, heuristic, min, max } ) {
+function ASTParam( { alg, mode, xyCoords, edgeWeights, size, start, end, heuristic, min, max } ) {
   return (
-    <EuclideanMatrixParamsTest/>
+    <EuclideanMatrixParamsTest alg={alg} />
   )
   // const [message, setMessage] = useState(null);
   // let [start1, size1, graph_egs] =

@@ -17,7 +17,7 @@ The loading flow of the codebase is fairly complex. When the algorithm page load
 it conditionally renders components based on what is inside global state. What kicks
 it all off is an initial entry into global state, which is the parameter component.
 
-On mount, parameter components must then immediately dispatch defaults to global state 
+On mount, parameter components must then immediately dispatch data to be used by the controller to global state 
 so the rest of the app knows what parameters exist. Without this, 
 the user would need to enter values and click *Run* before other panels render.
 
@@ -69,14 +69,15 @@ Previously, simulated click events were used to trigger these initial dispatches
      }, [modeState, list, value]);
      ```
 
-   * Even if some fields aren’t strictly required in a mode (e.g. nodes in *search*), we still include them to keep the global `id` footprint complete for URL generation. See URL Parameters below.
+   \* Even if some fields aren’t strictly required in a mode (e.g. nodes in *search*), we still include them to keep the global `id` footprint complete for URL generation. See URL Parameters note below.
 
 ---
 
 ### Benefits
 
 * **Clarity**: Only one place (`useEffect`) ever calls dispatch.
-* **Consistency**: All parameters are stored as raw strings/booleans in state, not half-transformed values, this was inconsistently applied before.
+* **Consistency**: All parameters are stored as raw strings in state, not half-transformed values, this was inconsistently applied before,
+some would hold the transformed state required by controller for dispatch the entire time some would not and would transform right before dispatch.
 * **Debuggability**: Easier to trace when and why dispatch happens.
 * **Onboarding**: Developers no longer need to hunt for hidden simulated clicks/default dispatches inside helpers.
 
@@ -89,9 +90,9 @@ Previously, URL query params were managed via a separate `URLContext`. This crea
 Changes:
 
 * Drop `URLContext`.
-* Use the existing `id` in `GlobalContext` for URL generation (now extended to also include `step`, pseudocode expansions which
-  are not specific to a Parameter component but are stored in global state thus making even more sence to use the 
-  global context for URL generation, etc).
+* Use the existing `id` in `GlobalContext` for URL generation (URL gen now extended to also include `step`, pseudocode expansions which
+  are not specific to a Parameter component but are stored in global state thus making even more sense to use the 
+  global context for URL generation).
 * This reduces namespace collisions and keeps all parameter state in one place.
 * Quality of life change, If query param names would otherwise collide with reserved names (`mode`, `value`, etc), use **JavaScript destructuring aliases**
   do not use hacky aliases for state like localUnion, localValue, modeState inside the parameter component, alias the props, for example:
@@ -120,5 +121,8 @@ This new approach comes with a tradeoff:
 So under the old system this URL query param would need to be validated in the root parameter component code creating inconsistency:
 - Some URL params would be seemingly ignored (indirectly validated through form callback).
 - Others would be explicitly validated.
+- Creates confusion for newer devs.
 
-This would create confusion for new developers.
+Another benefit peformance wise is that useEffect hooks only run when dependencies change where "change"
+means a shallow comparison of the state shows differences, if the user spam clicks the start button the global dispatch
+does not occur.
