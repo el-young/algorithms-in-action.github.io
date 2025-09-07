@@ -260,6 +260,7 @@ export const GlobalActions = {
   INDIRECTION_INTO_PARAM: (state, params) => {
     // Params here will either be empty (Parameter component will use its defaults) 
     // or URL query parameters that Parameter component will use.
+    console.log(params.name)
     return {
       // Date.now() because
       // if we call this and props do not change React will not mount the new

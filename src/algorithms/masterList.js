@@ -99,6 +99,22 @@ const algorithmMetadata = {
       find: 'unionFindFind',
     },
   },
+
+  'horspoolStringSearch': {
+    noDeploy: false,
+    name: 'Horspool\'s',
+    category: 'String Search',
+    explanationKey: "HSSExp",
+    paramKey: "HSSParam",
+    instructionsKey: "HSSInstruction",
+    extraInfoKey: "HSSInfo",
+    pseudocode: {
+      search: "horspoolStringSearching",
+    },
+    controller: {
+      search: "horspoolStringSearch",
+    },
+  }
 };
 //_MASTER_LIST_END_
 

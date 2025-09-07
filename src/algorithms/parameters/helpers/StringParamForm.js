@@ -23,7 +23,7 @@ function StringParamForm({
 }) {
   const { algorithm } = useContext(GlobalContext);
   const isDisabled = disabled ? disabled : 
-                    (algorithm.hasOwnProperty('visualisers') && algorithm.playing);
+                    ('visualisers' in algorithm && algorithm.playing);
 
   // Local state for typing
   const [stringValue, setStringValue] = useState(string);
@@ -86,9 +86,9 @@ StringParamForm.propTypes = {
   string: PropTypes.string.isRequired,
   pattern: PropTypes.string.isRequired,
   handleSubmit: PropTypes.func.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  stringOnChange: PropTypes.func.isRequired,
-  patternOnChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  stringOnChange: PropTypes.func,
+  patternOnChange: PropTypes.func,
 };
 
 export default StringParamForm;
