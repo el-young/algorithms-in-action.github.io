@@ -1,22 +1,6 @@
-import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { GlobalActions } from '../../../context/actions';
-import {
-  makeColumnArray,
-  makeColumnCoords,
-  makeXYCoords,
-  makeWeights,
-  euclidean,
-  manhattan,
-  singleNumberValidCheck,
-  errorParamMsg,
-  successParamMsg, matrixValidCheck,
-} from './ParamHelper';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import '../../../styles/EuclideanMatrix.scss';
-import { ReactComponent as RefreshIcon } from '../../../assets/icons/refresh.svg';
-import { ReactComponent as AddIcon } from '../../../assets/icons/add.svg';
-import { ReactComponent as MinusIcon } from '../../../assets/icons/minus.svg';
-import ControlButton from '../../../components/common/ControlButton';
 import '../../../styles/Param.scss';
 import ParamFormRefresh from './ParamFormRefresh';
 
@@ -26,6 +10,8 @@ import ParamFormRefresh from './ParamFormRefresh';
 // circular  // Parent im assuming this is for random node gen
 // unweighted, // Might not be relevant if parent visualiser makes edges unweighted when we pass in 1-2
 
+
+// TODO: Needs some CSS polish.
 function EuclideanMatrixParams({
     size,           // Number nodes in the graph
     start,          // Node to start search from
@@ -71,15 +57,15 @@ function EuclideanMatrixParams({
         {size !== undefined && (
         <form className="formLeft" onSubmit={handleSizeSubmit}>
             <div className="outerInput">
-                <label className="inputText">
-                    <input
-                        type="text"
-                        value={sizeInput}
-                        onChange={(e) => {
-                            setSizeInput(e.target.value);
-                        }}
-                    />
-                </label>
+            <label className="inputText" htmlFor="sizeInput">
+                Size:&nbsp;
+            </label>
+            <input
+                id="sizeInput"
+                type="text"
+                value={sizeInput}
+                onChange={(e) => setSizeInput(e.target.value)}
+            />
             </div>
         </form>
         )}
@@ -87,15 +73,15 @@ function EuclideanMatrixParams({
         {start !== undefined && (
         <form className="formLeft" onSubmit={handleStartSubmit}>
             <div className="outerInput">
-            <label className="inputText">
-                <input
-                    type="text"
-                    value={startInput}
-                    onChange={(e) => {
-                        setStartInput(e.target.value);
-                    }}
-                />
+            <label className="inputText" htmlFor="startInput">
+                Start:&nbsp;
             </label>
+            <input
+                id="startInput"
+                type="text"
+                value={startInput}
+                onChange={(e) => setStartInput(e.target.value)}
+            />
             </div>
         </form>
         )}
@@ -121,15 +107,15 @@ function EuclideanMatrixParams({
         {end !== undefined && (
         <form className="formLeft" onSubmit={handleEndSubmit}>
             <div className="outerInput">
-                <label className="inputText">
-                    <input
-                        type="text"
-                        value={endInput}
-                        onChange={(e) => {
-                            setEndInput(e.target.value);
-                        }}
-                    />
-                </label>
+            <label className="inputText" htmlFor="endInput">
+                End:&nbsp;
+            </label>
+            <input
+                id="endInput"
+                type="text"
+                value={endInput}
+                onChange={(e) => setEndInput(e.target.value)}
+            />
             </div>
         </form>
         )}
@@ -159,6 +145,15 @@ function EuclideanMatrixParams({
 
         {/* Matrix representation */}
 
+        {
+        /* 
+            Two approaches, parent can pass in callback that uses the row/cell idx to modify
+            the string encoding
+            OR
+            Parent can maintan a matrix representation and the setter updates that
+        */
+        }
+
     </>
     )
 }
@@ -185,3 +180,5 @@ EuclideanMatrixParams.propTypes = {
   onCoordsChange: PropTypes.func,
   onEdgesChange: PropTypes.func,
 };
+
+export default EuclideanMatrixParams;

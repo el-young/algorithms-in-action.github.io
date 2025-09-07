@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import '../../styles/Param.scss';
-import EuclideanMatrixParams from './helpers/EuclideanMatrixParams';
 import PropTypes from 'prop-types';
-import { addURLGraph } from './helpers/urlHelpers'
+import EuclideanMatrixParamsTest from './helpers/EuclidMatrixParamTest';
 
 // Note: 'A* Algorithm' currently used in EuclideanMatrixParams.js -
 // change both or neither!
@@ -32,35 +31,38 @@ const GRAPH_EGS = [ // XXX think up better examples?
 '1-2-10,1-4-4,2-3-6,3-4-10,3-5-5,4-7-3,5-6-7,6-7-8,7-8-2,7-9,8-9-3,9-10-5,9-11-7, 10-11-7,11-13-4,12-13-8,12-14-6,13-14-7,13-15-7,14-16-6,15-16-2,15-17-5,16-17-2'
         }];
 function ASTParam( { mode, xyCoords, edgeWeights, size, start, end, heuristic, min, max } ) {
-  const [message, setMessage] = useState(null);
-  let [start1, size1, graph_egs] =
-         addURLGraph(GRAPH_EGS, xyCoords, edgeWeights, start, DEFAULT_START);
-
   return (
-    <>
-      {/* Matrix input */}
-      <EuclideanMatrixParams
-        name="aStar"
-        mode="find"
-        defaultSize={ size1 }
-        defaultStart={ start1 }
-        defaultEnd={ end || DEFAULT_END }
-        heuristic = { heuristic || DEFAULT_HEUR }
-        min={ min || 1 }
-        max={ max || 49 }
-        symmetric
-        graphEgs={ graph_egs }
-        ALGORITHM_NAME={ASTAR}
-        EXAMPLE={ASTAR_EXAMPLE}
-        EXAMPLE2={ASTAR_EXAMPLE2}
-        setMessage={setMessage} 
-        
-      />
+    <EuclideanMatrixParamsTest/>
+  )
+  // const [message, setMessage] = useState(null);
+  // let [start1, size1, graph_egs] =
+  //        addURLGraph(GRAPH_EGS, xyCoords, edgeWeights, start, DEFAULT_START);
 
-      {/* render success/error message */}
-      {message}
-    </>
-  );
+  // return (
+  //   <>
+  //     {/* Matrix input */}
+  //     <EuclideanMatrixParams
+  //       name="aStar"
+  //       mode="find"
+  //       defaultSize={ size1 }
+  //       defaultStart={ start1 }
+  //       defaultEnd={ end || DEFAULT_END }
+  //       heuristic = { heuristic || DEFAULT_HEUR }
+  //       min={ min || 1 }
+  //       max={ max || 49 }
+  //       symmetric
+  //       graphEgs={ graph_egs }
+  //       ALGORITHM_NAME={ASTAR}
+  //       EXAMPLE={ASTAR_EXAMPLE}
+  //       EXAMPLE2={ASTAR_EXAMPLE2}
+  //       setMessage={setMessage} 
+        
+  //     />
+
+  //     {/* render success/error message */}
+  //     {message}
+  //   </>
+  // );
 }
 
 // Define the prop types for URL Params
