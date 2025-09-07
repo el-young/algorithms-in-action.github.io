@@ -2,3 +2,4 @@
 export { default as AVLTreeParam } from './AVLTreeParam';
 export { default as UFParam } from './UFParam';
 export { default as HSSParam } from './HSSParam';
+export { default as ASTARParam } from './ASTParam';

@@ -256,23 +256,18 @@ export const GlobalActions = {
   // stuff is conditionally rendered (matching the pattern mid panel used) we can
   // just put the param into state.
   // This will be called from menu buttons. Most importantly this provides
-  // us with a way to switch algorithms without doing a reloading the site.
+  // us with a way to switch algorithms without reloading the site.
   INDIRECTION_INTO_PARAM: (state, params) => {
-    // Params here will either be empty (Parameter component will use its defaults) 
-    // or URL query parameters that Parameter component will use.
-    console.log(params.name)
+    // Params here will either be empty (Parameter component will use its defaults ) (left menu clicks do this)
+    // or URL query parameters that Parameter component will use (this happens when parameter component
+    // is pushed into state by the initialState function (first load of algorithm page))
     return {
-      // Date.now() because
-      // if we call this and props do not change React will not mount the new
-      // parameter component, which means we will not dispatch LOAD_ALGORITHM.
-      // This was the reason why clicking on the same menu item caused
-      // mid panel and right panel to disappear. The parameters component
-      // useEffect would not be called because we did not mount a new
-      // parameter component as far as React is concerned but LOAD_ALGORITHM
-      // would still be called which replaced the state and got rid of visualisers.
-
+      // key=Date.now()
       // Need to give React a reason to remount when props/state of a component has not changed, 
-      // this is exactly what the `key` prop in React is for.
+      // this is exactly what the `key` prop in React is for. Without this two clicks
+      // on the left menu, will cause conditional renders to disappear. This function
+      // will run but the first mount logic in parameter components that calls LOAD_ALGORITHM 
+      // will not run because React did not re-mount.
       param : React.createElement(algorithms[params.name].param, {
         key: `${Date.now()}`,
         alg : params.name,
@@ -288,7 +283,6 @@ export const GlobalActions = {
   // that should call LOAD_ALGORITHM. Other components that want to call LOAD_ALGORITHM
   // should go through INDIRECTION_INTO_PARAM.
   LOAD_ALGORITHM: (state, params) => {
-    console.log("LOAD");
     const {
       controller,
       name,
@@ -317,7 +311,8 @@ export const GlobalActions = {
 
     return {
       ...state,
-      id: params, // TODO: id captures params used, do we need URLContext, can just pull from global context at share click?
+      // Footprint, captures all params used, used for URL generation.
+      id: params,
       name,
       explanation,
       extraInfo,

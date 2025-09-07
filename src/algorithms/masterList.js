@@ -114,7 +114,22 @@ const algorithmMetadata = {
     controller: {
       search: "horspoolStringSearch",
     },
-  }
+  },
+
+  'aStar': {
+    name: 'A* (heuristic search)',
+    category: 'Graph',
+    paramKey: "ASTARParam",
+    instructionsKey: "ASTARInstruction",
+    explanationKey: "ASTARExp",
+    extraInfoKey: "ASTARInfo",
+    pseudocode: {
+      find: "AStar",
+    },
+    controller: {
+      find: "AStar",
+    },
+  },
 };
 //_MASTER_LIST_END_
 

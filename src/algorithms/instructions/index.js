@@ -166,3 +166,4 @@ const unionFindInstructions = [{
 export const AVLInstruction = bstInstructions;
 export const UFInstruction = unionFindInstructions;
 export const HSSInstruction = stringInstructions;
+export const ASTARInstruction = graphInstructions;

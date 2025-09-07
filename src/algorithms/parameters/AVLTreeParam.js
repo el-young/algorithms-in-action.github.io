@@ -71,7 +71,9 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
   // If any of these change we should notify the other panels
   // through dispatch. This will also occur on first mount as well.
   useEffect(() => {
-    // Convert the comma-separated string into an array of numbers
+    // Convert the comma-separated string into an array of numbers.
+    // Pass everything needed to construct URL in also even not neccesary for the
+    // controller in this mode, so algorithm.id (footprint) holds everything needed for reconstruction.
     const nodesArray = list
       .split(',')
       .map((n) => Number(n))
@@ -227,7 +229,7 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
 AVLTreeParam.propTypes = {
   alg: PropTypes.string.isRequired,
   mode: PropTypes.string.isRequired,
-  list: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
+  list: PropTypes.string,
   value: PropTypes.string,
 };
 

@@ -92,7 +92,6 @@ function AlgorithmAnimationPage() {
   //   document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
   // }, []);
 
-  const leftRef = useRef(null);
   return (
     <GlobalProvider>
         <div className="app-grid">
@@ -106,7 +105,7 @@ function AlgorithmAnimationPage() {
             />
           </div>
 
-          {/* TODO: Experiment smooth menu animation on hover */}
+          {/* TODO: Experiment smooth menu animation on hover smooth close on exit */}
           <div className="main-row">
             <PanelGroup direction="horizontal">
               {/* 
@@ -114,21 +113,13 @@ function AlgorithmAnimationPage() {
                 Sizes in this library are represented as percentages
                 of the panel group.
               */}
-              <Panel ref={leftRef} collapsible collapsedSize={0} defaultSize={10} minSize={0}>
-                <div 
-                  className="left-panel"
-                  onMouseLeave={() => leftRef.current?.collapse()}
-                >
+              <Panel defaultSize={10} minSize={0}>
+                <div className="left-panel">
                   <LeftPanel />
                 </div>
               </Panel>
 
-              <PanelResizeHandle 
-                className="resize-handle"
-                onMouseEnter={() => {
-                  leftRef.current?.resize(10)
-                }}
-              >
+              <PanelResizeHandle className="resize-handle">
                 <div className="handle left-handle">
                   <Circle />
                   <Circle />
