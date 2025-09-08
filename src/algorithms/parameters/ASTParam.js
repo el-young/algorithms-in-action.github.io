@@ -1,83 +1,241 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
-import '../../styles/Param.scss';
-import PropTypes from 'prop-types';
-import EuclideanMatrixParamsTest from './EuclidMatrixParamTest';
+import React, { useContext, useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import EuclideanMatrixParams from "./helpers/EuclidMatrixParam";
+import { GlobalContext } from "../../context/GlobalState";
+import { GlobalActions } from "../../context/actions";
+import { euclidean, manhattan, parseCoords, parseEdges, recalcEdges } from "./helpers/InputBuilders";
 
-// Note: 'A* Algorithm' currently used in EuclideanMatrixParams.js -
-// change both or neither!
-const ASTAR = 'A* Algorithm';
-const ASTAR_EXAMPLE = 'Please provided positive numbers: 0,1'; //TODO
-const ASTAR_EXAMPLE2 = 'Please enter the symmetrical value in matrix'; //TODO
+// Default values if url props not provided
+const defaultProps = {
+  mode: "find",
+  size: "14",
+  start: "1",
+  end: "13",
+  xyCoords: "4-3,2-7,7-11,9-3,12-6,13-2,12-16,17-2,20-4,34-4,26-9,30-6,34-10,38-5",
+  edgeWeights: "1-2-3,1-4-6,2-3-4,3-4-2,3-5-4,4-5-3,5-6-2,5-7-10,6-8-5,7-11-10,8-9-6,9-10-3,10-12-8,11-12-5,12-13-3,13-14-4",
+  heuristic: "Manhattan",
+  weight: "Euclidean",
+};
 
-const DEFAULT_SIZE = 14; // gets overwritten in any case
-const DEFAULT_START = 5; // XXX null should disable
-// const DEFAULT_END = null; // disable end nodes display/input
-// XXX For now we support at most one end node
-// const DEFAULT_END = [8,9] // XXX not currently supported
-// const DEFAULT_END = [0] // enable end node but start with none
-const DEFAULT_END = [12] // start with 12 as end node
-const DEFAULT_HEUR = 0;  // 0 = Euclidean
-const GRAPH_EGS = [ // XXX think up better examples?
-        { name: 'Graph 1',
-          size: 14,
-          coords: '4-3,2-7,7-11,9-3,12-6,13-2,12-16,17-2,20-4,34-4,26-9,30-6,34-10,38-5',
-          edges: '1-2-3,1-4-6,2-3-4,3-4-2,3-5-4,4-5-3,5-6-2,5-7-10,6-8-5,7-11-10,8-9-6,9-10-3,10-12-8,11-12-5,12-13-3,13-14-4'
-        },
-        { name: 'Graph 2',
-          size: 17,
-          coords: '2-13,6-6,7-11,9-15,12-2,15-6,16-12,19-5,25-7,23-16,28-14,29-10,35-13,36-6,40-15, 39-2,42-10',
-          edges:
-'1-2-10,1-4-4,2-3-6,3-4-10,3-5-5,4-7-3,5-6-7,6-7-8,7-8-2,7-9,8-9-3,9-10-5,9-11-7, 10-11-7,11-13-4,12-13-8,12-14-6,13-14-7,13-15-7,14-16-6,15-16-2,15-17-5,16-17-2'
-        }];
-function ASTParam( { alg, mode, xyCoords, edgeWeights, size, start, end, heuristic, min, max } ) {
+const weightOptions = ["Euclidean", "Manhattan", "As input"];
+const weightFnMap = {
+  "Euclidean": recalcEdges(euclidean),
+  "Manhattan": recalcEdges(manhattan),
+  "As input": (coords, edges) => edges,
+};
+const heuristicOptions = ["Euclidean", "Manhattan"];
+const heuristicFnMap = {
+  "Euclidean": euclidean,
+  "Manhattan": manhattan,
+};
+
+// TODO: These are important somewhere in the original code
+// graphExamples // Parent component
+// minXYCoord, maxXYCoord, // For random node generation define in parent param which will define callback for random gen
+// symmetric // Parent im assuming this is for random node gen
+// circular  // Parent im assuming this is for random node gen
+// unweighted, // Might not be relevant if parent visualiser makes edges unweighted when we pass in 1-2
+
+function ASTParam({
+  alg,
+  mode,
+  start: urlStart,
+  end: urlEnd,
+  size: urlSize,
+  xyCoords: urlCoords,
+  edgeWeights: urlEdges,
+  heuristic: urlHeuristic,
+  weight: urlWeight,
+}) {
+  // TODO: URL prop validation here
+
+  const { dispatch } = useContext(GlobalContext);
+  const [message, setMessage] = useState(null);
+  const [size, setSize] = useState(urlSize || defaultProps.size);
+  const [start, setStart] = useState(urlStart || defaultProps.start);
+  const [end, setEnd] = useState(urlEnd || defaultProps.end);
+  const [xyCoords, setXyCoords] = useState(urlCoords || defaultProps.xyCoords);
+  const [edgeWeights, setEdgeWeights] = useState(urlEdges || defaultProps.edgeWeights);
+  const [weight, setWeight] = useState(urlWeight || defaultProps.weight);
+  const [heuristic, setHeuristic] = useState(urlHeuristic || defaultProps.heuristic);
+
+  // Callback for controller code, allows movement of nodes with mouse
+  // to make changes to the coords and edge weights.
+  const moveNode = (nodeID, x, y) => {
+    const coordsArray = xyCoords.split(",").map(pair =>
+      pair.split("-").map(n => Number(n))
+    );
+
+    // Update the node’s coordinates
+    coordsArray[nodeID] = [x, y];
+
+    // Rebuild the string
+    const newCoords = coordsArray.map(([cx, cy]) => `${cx}-${cy}`).join(",");
+    
+    setXyCoords(newCoords);
+    setEdgeWeights(weightFnMap[weight](newCoords, edgeWeights));
+  };
+
+  // TODO: Create callback which will get the targets col and row index
+  // and use that to update coords, edge string.
+
+  useEffect(() => {
+    // Transform to data type controller code expects before dispatch.
+    const startNode = Number(start);
+    // Original code leaves possibility for multiple end nodes open, controller expects array of nums
+    const endNodes = end.split(",").map((num) => Number(num));
+    const coordsMatrix = parseCoords(xyCoords);
+    const edgeValueMatrix = parseEdges(edgeWeights, Number(size));
+
+    dispatch(GlobalActions.LOAD_ALGORITHM, {
+      name: alg,
+      mode: defaultProps.mode,
+
+      // Add everything here required for URL to rebuild
+      // this component. Make sure keys are the same
+      // as the property names.
+      url : {
+        alg,
+        mode,
+        size,
+        start,
+        end,
+        xyCoords,
+        edgeWeights,
+        weight,
+        heuristic
+      },
+
+      // Add everything your controller code needs here, make sure
+      // the data types have been converted to what your controller code
+      // expects and the key names here is the same names that your
+      // controller destructures with.
+      startNode,
+      endNodes,
+      coordsMatrix,
+      edgeValueMatrix,
+      heuristicFn: heuristicFnMap[heuristic],
+      moveNode,
+    });
+  }, [size, start, end, xyCoords, edgeWeights, weight, heuristic]);
+
+  const handleSizeSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Validation logic
+    setSize(e.target[0].value);
+    console.log("Size submitted:", e.target[0].value);
+  };
+
+  const handleStartSubmit = (e) => {
+    e.preventDefault();
+    setStart(e.target[0].value);
+    console.log("Start submitted:", e.target[0].value);
+  };
+
+  const handleEndSubmit = (e) => {
+    e.preventDefault();
+    setEnd(e.target[0].value);
+    console.log("End submitted:", e.target[0].value);
+  };
+
+  const handleCoordsSubmit = (e) => {
+    e.preventDefault();
+    const newCoords = e.target[0].value;
+    const nodeCount = newCoords.split(",").length;
+
+    setXyCoords(newCoords);
+    setSize(nodeCount.toString());
+  };
+
+  const handleEdgesSubmit = (e) => {
+    e.preventDefault();
+    setEdgeWeights(e.target[0].value);
+    console.log("Edges submitted:", e.target[0].value);
+  };
+
+  // Cycle to next value
+  const handleChangeWeightCalc = () => {
+    setWeight((prev) => {
+      const currentIndex = weightOptions.indexOf(prev);
+      const nextIndex = (currentIndex + 1) % weightOptions.length;
+      const nextWeight = weightOptions[nextIndex];
+
+      setEdgeWeights((prevEdges) => weightFnMap[nextWeight](xyCoords, prevEdges));
+
+      return nextWeight;
+    });
+    console.log("Changing weight.");
+  };
+
+  const handleChangeHeuristic = () => {
+    setHeuristic((prev) => {
+      const currentIndex = heuristicOptions.indexOf(prev);
+      const nextIndex = (currentIndex + 1) % heuristicOptions.length;
+      return heuristicOptions[nextIndex];
+    });
+    console.log("Changing heuristic.");
+  };
+
+  const generateRandomCoords = () => {
+    const dummyCoords = "1-1,2-2,3-3";
+    const newSize = "3";
+    const newStart = "1";
+    const newEnd = "3";
+    setSize(newSize);
+    setStart(newStart);
+    setEnd(newEnd);
+    setXyCoords(dummyCoords);
+    setEdgeWeights((prevEdges) => weightFnMap[weight](dummyCoords, prevEdges));
+    return dummyCoords;
+  };
+
+  const generateRandomEdges = () => {
+    const dummyEdges = "1-2,2-3";
+    const newSize = "3";
+    const newStart = "1";
+    const newEnd = "3";
+    setSize(newSize);
+    setStart(newStart);
+    setEnd(newEnd);
+    setEdgeWeights(weightFnMap[weight](xyCoords, dummyEdges));
+    return dummyEdges;
+  };
+
   return (
-    <EuclideanMatrixParamsTest alg={alg} />
-  )
-  // const [message, setMessage] = useState(null);
-  // let [start1, size1, graph_egs] =
-  //        addURLGraph(GRAPH_EGS, xyCoords, edgeWeights, start, DEFAULT_START);
-
-  // return (
-  //   <>
-  //     {/* Matrix input */}
-  //     <EuclideanMatrixParams
-  //       name="aStar"
-  //       mode="find"
-  //       defaultSize={ size1 }
-  //       defaultStart={ start1 }
-  //       defaultEnd={ end || DEFAULT_END }
-  //       heuristic = { heuristic || DEFAULT_HEUR }
-  //       min={ min || 1 }
-  //       max={ max || 49 }
-  //       symmetric
-  //       graphEgs={ graph_egs }
-  //       ALGORITHM_NAME={ASTAR}
-  //       EXAMPLE={ASTAR_EXAMPLE}
-  //       EXAMPLE2={ASTAR_EXAMPLE2}
-  //       setMessage={setMessage} 
-        
-  //     />
-
-  //     {/* render success/error message */}
-  //     {message}
-  //   </>
-  // );
+    <div style={{ padding: "20px" }}>
+      <EuclideanMatrixParams
+        size={size}
+        start={start}
+        end={end}
+        weightCalc={weight}
+        heuristic={heuristic}
+        coords={xyCoords}
+        edges={edgeWeights}
+        handleSizeSubmit={handleSizeSubmit}
+        handleStartSubmit={handleStartSubmit}
+        handleEndSubmit={handleEndSubmit}
+        changeWeightCalc={handleChangeWeightCalc}
+        changeHeuristic={handleChangeHeuristic}
+        generateRandomCoords={generateRandomCoords}
+        generateRandomEdges={generateRandomEdges}
+        handleCoordsSubmit={handleCoordsSubmit}
+        handleEdgesSubmit={handleEdgesSubmit}
+      />
+      {message}
+    </div>
+  );
 }
 
-// Define the prop types for URL Params
 ASTParam.propTypes = {
   alg: PropTypes.string.isRequired,
-  mode: PropTypes.string.isRequired,
-  size: PropTypes.string.isRequired,
-  start: PropTypes.string.isRequired,
-  end: PropTypes.string.isRequired,
-  heuristic: PropTypes.string.isRequired,
-  xyCoords: PropTypes.string.isRequired,
-  edgeWeights: PropTypes.string.isRequired,
-  min: PropTypes.string.isRequired,
-  max: PropTypes.string.isRequired,
+  mode: PropTypes.string,
+  start: PropTypes.string,
+  end: PropTypes.string,
+  size: PropTypes.string,
+  xyCoords: PropTypes.string,
+  edgeWeights: PropTypes.string,
+  heuristic: PropTypes.string,
+  weight: PropTypes.string,
 };
 
 export default ASTParam;
-

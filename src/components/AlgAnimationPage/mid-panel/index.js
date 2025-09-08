@@ -2,7 +2,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { GlobalContext } from '../../../context/GlobalState';
-import { createUrl } from '../../../context/urlState';
 
 import '../../../styles/MidPanel.scss';
 import PopUpComponent from 'reactjs-popup';
@@ -10,6 +9,7 @@ import PopUpComponent from 'reactjs-popup';
 import ControlButton from '../../common/ControlButton';
 import ShareIcon from '@mui/icons-material/Share';
 import { increaseFontSize, setFontSize } from '../top-panel/helper';
+import { createUrl } from './urlCreator';
 
 function MidPanel() {
   const { algorithm } = useContext(GlobalContext);

@@ -12,6 +12,7 @@ import '../../styles/Param.scss';
 import PropTypes from 'prop-types'; // Import this for URL Param
 import { ERRORS, EXAMPLES } from './helpers/ErrorExampleStrings';
 import ParamForm from './helpers/ParamForm';
+import { union } from 'lodash';
 
 // button styling
 const BlueRadio = withStyles({
@@ -39,35 +40,80 @@ const defaultProps = {
 };
 
 // Use aliasing if name space collisions are annoying
-function UFParam({ alg, mode: urlMode, union: urlUnion, value: urlValue, compress }) {
+function UFParam({ alg, mode: urlMode, union: urlUnion, value: urlValue, compress, unionStep }) {
   const [ message, setMessage ] = useState(null);
   const { algorithm, dispatch } = useContext(GlobalContext);
   const [ unions, setUnions ]   = useState(urlUnion || defaultProps.union);
-  const [ isPathCompression, setIsPathCompression ] = useState(compress || defaultProps.compress);
+  const [isPathCompression, setIsPathCompression] = useState(
+    compress === "true" ? true : compress === "false" ? false : defaultProps.compress
+  );
   const [ value, setValue ]     = useState(urlValue || defaultProps.value);
   const [ mode, setMode ]       = useState(urlMode || defaultProps.mode);
 
+
   useEffect(() => {
-    // Transfrom data to what controller code expects here.
     if (mode === UNION) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: 'unionFind',
         mode: UNION,
+
+        url: {
+          alg,
+          mode: UNION,
+          union: unions,
+          value,
+          compress: isPathCompression.toString(),
+        },
+
         target: {
           arg1: unions
-                .split(',')
-                .map((pair) => pair.trim().split('-').map(Number)), 
-          arg2: isPathCompression
+            .split(',')
+            .map((pair) => pair.trim().split('-').map(Number)),
+          arg2: isPathCompression,
         },
       });
     } else {
+      if (!algorithm?.chunker?.visualisers) {
+        // This is the first call to LOAD_ALGORITHM and the URL is 
+        // specifying this mode, but this mode requires a built
+        // visualiser from the other mode, build this visualiser
+        // first
+        dispatch(GlobalActions.LOAD_ALGORITHM, {
+          name: 'unionFind',
+          mode: UNION,
+          target: {
+            arg1: unions
+              .split(',')
+              .map((pair) => pair.trim().split('-').map(Number)),
+            arg2: isPathCompression,
+          },
+        });
+
+        // TODO: clamp union step if null just run till the end.
+        // convert to int too.
+        dispatch(GlobalActions.NEXT_LINE, {stopAt: unionStep});
+        // Visualiser should be in global state now.
+      }
+
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: 'unionFind',
         mode: FIND,
         visualiser: algorithm?.chunker?.visualisers,
+
+        url: {
+          alg,
+          mode: FIND,
+          union: unions,
+          value,
+          compress: isPathCompression.toString(),
+          // If user wants to load in other mode need to build
+          // visualiser in insert mode first.
+          unionStep: algorithm?.chunker?.currentChunk
+        },
+
         target: {
-          arg1: parseInt(value, 10), 
-          arg2: isPathCompression
+          arg1: parseInt(value, 10),
+          arg2: isPathCompression,
         },
       });
     }

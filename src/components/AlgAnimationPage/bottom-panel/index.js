@@ -14,7 +14,6 @@ import { GlobalContext } from '../../../context/GlobalState';
 import { GlobalActions } from '../../../context/actions';
 import '../../../styles/ControlPanel.scss';
 import 'reactjs-popup/dist/index.css';
-import { getUrlParams } from '../../../context/urlState';
 
 const muiTheme = createTheme({
   overrides: {
@@ -103,13 +102,16 @@ function ControlPanel() {
   const stepApplied = useRef(false);
   useEffect(() => {
     if (!algorithm?.chunker || stepApplied.current) return;
-    let { step } = getUrlParams();
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const step = searchParams.get("step");
 
     if (step && !isNaN(step)) {
       const maxStep = algorithm.chunker.chunks.length - 1;
       const clampedStep = Math.max(0, Math.min(parseInt(step, 10), maxStep));
 
-      dispatch(GlobalActions.NEXT_LINE, { stopAt: clampedStep });
+      // NEXT_LINE uses a do while only do if greater than 0.
+      if (clampedStep > 0) dispatch(GlobalActions.NEXT_LINE, { stopAt: clampedStep });
     }
 
     stepApplied.current = true;

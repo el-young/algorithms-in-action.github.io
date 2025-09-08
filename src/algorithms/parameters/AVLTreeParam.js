@@ -68,12 +68,9 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
   const [modeState, setModeState] = useState(urlMode || defaultProps.mode);
   const [message, setMessage] = useState(null);
 
-  // If any of these change we should notify the other panels
-  // through dispatch. This will also occur on first mount as well.
+
   useEffect(() => {
     // Convert the comma-separated string into an array of numbers.
-    // Pass everything needed to construct URL in also even not neccesary for the
-    // controller in this mode, so algorithm.id (footprint) holds everything needed for reconstruction.
     const nodesArray = list
       .split(',')
       .map((n) => Number(n))
@@ -83,14 +80,28 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: INSERTION,
+
+        url: {
+          alg,
+          mode: INSERTION,
+          list,
+          value,
+        },
+
         nodes: nodesArray,
-        target: value,
       });
     } else if (modeState === SEARCH) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: SEARCH,
-        nodes: nodesArray,
+
+        url: {
+          alg,
+          mode: SEARCH,
+          list,
+          value,
+        },
+
         target: value,
         visualiser: algorithm?.chunker?.visualisers,
       });

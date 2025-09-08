@@ -42,16 +42,21 @@ function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
   };
 
   useEffect(() => {
-    // No transformation of data needed controller
-    // expects strings, also only one mode available at time
-    // of writing.
     dispatch(GlobalActions.LOAD_ALGORITHM, {
-      name: alg, 
-      mode: defaultProps.mode, 
-      nodes: [string, pattern] 
+      name: alg,
+      mode: defaultProps.mode,
+
+      url: {
+        alg,
+        mode: defaultProps.mode,
+        string,
+        pattern,
+      },
+
+      nodes: [string, pattern],
     });
   }, [string, pattern]);
-
+  
   return (
     <>
       <div className="form">

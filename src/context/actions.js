@@ -4,7 +4,6 @@
 import algorithms from '../algorithms';
 import Chunker from './chunker';
 import React, { useState } from 'react';
-import { getUrlParams } from './urlState';
 import { getDefaultMode } from '../algorithms/masterList';
 
 // Return block name for bookmark
@@ -227,48 +226,22 @@ function viewableChunks(chunker, pseudocode, collapse) {
 // params argument.
 export const GlobalActions = {
 
-  // How stuff is loaded is somewhat convoluted, but basically, the mid panel
-  // and right panel (updated right panel (it did not conditionally render before) which was why
-  // the old LOAD_ALGORITHM had to inject pseudocode, instruction, etc. into the global state) have
-  // parts that are conditionally rendered more specifically, visualisers, psuedocode, instruction, etc.
-  // are conditionally rendered. Once these things are in the global state they will draw
-  // to the screen. What actually puts these in global state? The clicks on the parameter
-  // "mode" buttons are what trigger it. However, when we launch the site we do not want the user
-  // to have to press the button to see the visualiser, pseudocode etc. hence the simulated clicks.
-  // Simulated clicks get messy very fast, in fact many algorithms had duplicate simulated clicks
-  // which resulted in redundant calls to the old RUN_ALGORITHM. Conditional rendering???
-  // In React sibling components do not load synchronously, without conditional rendering
-  // wait && render something the design of this codebase with the global state would not work.
-
-  // Decided to simplify the old LOAD_ALGORITHM now called INDIRECTION_INTO_PARAM
-  // parameter components are expected to then have a useEffect that calls LOAD_ALGORITHM
-  // on mount, which will load all the other stuff into state and thus indirectly cause those
-  // conditional renders to render.
-
-  // Another change made is that index.js no longer does <ParamComponent />, this did not allow
-  // you to reset the parameter component (although this was "fixed" by reloading the entire site
-  // on algorithm change by changing the URL see my comment above initialState at the bottom as to why we think
-  // reloading the site like this is a bad idea), so when we use the menu to switch algorithms we dispatch
-  // INDIRECTION_INTO_PARAM to get a fresh parameter component which should indirectly kick off LOAD_ALGORITHM
-  // through mounting the new parameter component and the components useEffects() running.
-
-  // The old "LOAD_ALGORITHM" still the same idea just now that the right panel
-  // stuff is conditionally rendered (matching the pattern mid panel used) we can
-  // just put the param into state.
-  // This will be called from menu buttons. Most importantly this provides
-  // us with a way to switch algorithms without reloading the site.
   INDIRECTION_INTO_PARAM: (state, params) => {
-    // Params here will either be empty (Parameter component will use its defaults ) (left menu clicks do this)
+    // Params here will either be empty (Parameter component will use its defaults) (left menu clicks do this)
     // or URL query parameters that Parameter component will use (this happens when parameter component
     // is pushed into state by the initialState function (first load of algorithm page))
-    console.log("indirection" + params.name);
     return {
       // key=Date.now()
       // Need to give React a reason to remount when props/state of a component has not changed, 
       // this is exactly what the `key` prop in React is for. Without this two clicks
       // on the left menu, will cause conditional renders to disappear. This function
       // will run but the first mount logic in parameter components that calls LOAD_ALGORITHM 
-      // will not run because React did not re-mount.
+      // will not run because React did not re-mount. 
+      
+      // Why cant those buttons just call RUN_ALGORITHM directly? We need to indirect into param 
+      // to get the default values for the visualiser, we go in, retrieve them and then pass back out into
+      // global state. Seems unorthodox? It is, but if we did not do this the user would
+      // have to click the start button themselves for the visualiser to appear.
       param : React.createElement(algorithms[params.name].param, {
         key: `${Date.now()}`,
         ...params,
@@ -313,7 +286,8 @@ export const GlobalActions = {
 
     return {
       ...state,
-      // Footprint, captures all params used, used for URL generation.
+      // Footprint, if your parameter component puts custom properties
+      // into global state they will be under this id key.
       id: params,
       name,
       explanation,
@@ -499,34 +473,11 @@ export function dispatcher(state, setState) {
   };
 }
 
-// This is the initial state. This has been changed greatly,
-// this is the ONLY way a parameter component will be injected
-// with URL query parameters, it only happens ONCE when we instantiate
-// GlobalProvider. Think of this as a special dispatch(LOAD_ALGORITHM) that includes
-// the URL query params. Previously the higher order component wrapper
-// `withAlgorithmParams`, while elegant, wrapping each export with this
-// proved troublesome (assuming you do not do a full site reload through
-// changing URL when you want to look at a different algorithm
-// (which is what the old algorithm menu did)) because we create all the parameter
-// components up front with them already wrapped that means a URL intended for one sorting
-// algorithm would be used by multiple other sorting algorithms. It should not work like this
-// the url query params should be used once on site load for the algorithm loaded by the url
-// (which you can force by doing a full site reload on animation change like the old menu did).
-
-// Forcing full site reloads like this to make things functional is problematic.
-// It prevents* features such as automatically opening the instructions
-// panel when a user visits an algorithm category they haven’t seen yet since 
-// that requires session state which is lost upon reload.
-// (*You could work around this with browser cache and in this case you
-//  may even want to do it this way if you want the visited cateogires to
-//  be remembered across sesions, but the browser cache is limited so it is still
-//  a bad idea to do site reloads when it could otherwise be avoided since it is not
-//  scalable.)
-
 const DEFAULT_ALGORITHM_KEY = "AVLTree";
 export function initialState() {
   const searchParams = new URLSearchParams(window.location.search);
 
+  // These two must be verified before proceeding
   let alg = searchParams.get("alg");
   let mode = searchParams.get("mode");
 
@@ -536,7 +487,14 @@ export function initialState() {
   // Fallback to default mode if query is missing or unsupported
   if (!mode || !(mode in algorithms[alg].pseudocode)) mode = getDefaultMode(alg);
 
-  console.log(alg);
+  const otherParams = Object.fromEntries(
+    Array.from(searchParams.entries()).filter(([key]) => key !== "alg" && key !== "mode")
+  );
+
   // The ONLY time URL params are injected into the param component.
-  return GlobalActions.INDIRECTION_INTO_PARAM(undefined, {name : alg, mode, ...getUrlParams()} );
+  return GlobalActions.INDIRECTION_INTO_PARAM(undefined, {
+    name : alg, 
+    mode,
+    ...otherParams
+  } );
 }

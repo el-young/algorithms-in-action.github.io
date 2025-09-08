@@ -6,7 +6,6 @@ import { GlobalActions } from '../../../context/actions';
 import LineNumHighLight from './LineNumHighLight';
 import BottomButton from './BottomButton';
 import LineExplanation from './LineExplanation';
-import { getUrlParams } from '../../../context/urlState';
 
 function Pseudocode() {
   const { algorithm, dispatch } = useContext(GlobalContext);
@@ -32,7 +31,8 @@ function Pseudocode() {
   useEffect(() => {
     if (!algorithm?.pseudocode || expandApplied.current) return;
 
-    let { expand } = getUrlParams();
+    const searchParams = new URLSearchParams(window.location.search);
+    const expand = searchParams.get("expand");
 
     try {
       // expand is expected to be a JSON string from the URL
