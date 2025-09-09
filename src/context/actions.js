@@ -477,24 +477,20 @@ const DEFAULT_ALGORITHM_KEY = "AVLTree";
 export function initialState() {
   const searchParams = new URLSearchParams(window.location.search);
 
-  // These two must be verified before proceeding
   let alg = searchParams.get("alg");
   let mode = searchParams.get("mode");
 
-  // Fallback to default algorithm if query is missing or invalid
+  // These two must be verified
   if (!alg || !(alg in algorithms)) alg = DEFAULT_ALGORITHM_KEY;
-
-  // Fallback to default mode if query is missing or unsupported
   if (!mode || !(mode in algorithms[alg].pseudocode)) mode = getDefaultMode(alg);
 
-  const otherParams = Object.fromEntries(
-    Array.from(searchParams.entries()).filter(([key]) => key !== "alg" && key !== "mode")
-  );
-
-  // The ONLY time URL params are injected into the param component.
+  // Make codebase aware of the query params set, this only happens
+  // in this function, ensuring that other algorithms are not indirectly
+  // effected by the URL, this is important since we only load the algorithm
+  // page once now.
   return GlobalActions.INDIRECTION_INTO_PARAM(undefined, {
-    name : alg, 
+    name: alg,
     mode,
-    ...otherParams
-  } );
+    ...Object.fromEntries(searchParams.entries()), // Other params
+  });
 }

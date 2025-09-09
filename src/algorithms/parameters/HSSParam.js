@@ -20,6 +20,22 @@ function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
   const [string, setString] = useState(urlString || defaultProps.string);
   const [pattern, setPattern] = useState(urlPattern || defaultProps.pattern);
 
+  useEffect(() => {
+    dispatch(GlobalActions.LOAD_ALGORITHM, {
+      name: alg,
+      mode: defaultProps.mode,
+
+      url: {
+        alg,
+        mode: defaultProps.mode,
+        string,
+        pattern,
+      },
+
+      nodes: [string, pattern],
+    });
+  }, [string, pattern]);
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     const stringVal = e.target[0].value;
@@ -40,22 +56,6 @@ function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
       }
     }
   };
-
-  useEffect(() => {
-    dispatch(GlobalActions.LOAD_ALGORITHM, {
-      name: alg,
-      mode: defaultProps.mode,
-
-      url: {
-        alg,
-        mode: defaultProps.mode,
-        string,
-        pattern,
-      },
-
-      nodes: [string, pattern],
-    });
-  }, [string, pattern]);
   
   return (
     <>

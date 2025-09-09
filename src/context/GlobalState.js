@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { dispatcher, initialState } from './actions';
 
 /* What's going on here?
@@ -14,13 +14,11 @@ import { dispatcher, initialState } from './actions';
 
 // Create context
 export const GlobalContext = createContext();
-// only call this function once
-const init = initialState();
 
 // Provider components
 // eslint-disable-next-line react/prop-types
 export const GlobalProvider = ({ children }) => {
-  const [state, setState] = useState(init);
+  const [state, setState] = useState(initialState());
   // Think of this as partial function application to get state & setState in scope
   // for later calls from elsewhere in the app.
   const dispatch = dispatcher(state, setState);

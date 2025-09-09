@@ -98,26 +98,54 @@ function ControlPanel() {
     setSpeed(newSpeed);
   };
 
-  // I guess it makes sense to go here.
-  const stepApplied = useRef(false);
+  // XXXTODO really do not like how step and expand have to be included
+  // like this, a newer dev is not going to find this place intuitive
+  // the only fix is to pass step and expand into parameter components
+  // since they know exactly when LOAD_ALGORITHM is called and finished.
+  // But should parameter components really be responsible for holding
+  // step and expand as props? Also this would be the only way to get insertStep
+  // searchStep, working, etc. for supporting the visualiser must be
+  // built first issues. Expand must be applied before step
+  // otherwise line highlighting of pseudocode is off, this is why
+  // I do not seperate expand into the pseudocode file in right panel
+  // even though it makes semantic sense to put that there and put step here
+  // since we lose control over the timings.
+  const expandAndStepApplied = useRef(false);
   useEffect(() => {
-    if (!algorithm?.chunker || stepApplied.current) return;
+    if (!algorithm?.chunker || expandAndStepApplied.current) return;
 
     const searchParams = new URLSearchParams(window.location.search);
-    const step = searchParams.get("step");
 
-    if (step && !isNaN(step)) {
-      const maxStep = algorithm.chunker.chunks.length - 1;
-      const clampedStep = Math.max(0, Math.min(parseInt(step, 10), maxStep));
-
-      // NEXT_LINE uses a do while only do if greater than 0.
-      if (clampedStep > 0) dispatch(GlobalActions.NEXT_LINE, { stopAt: clampedStep });
+    const expand = searchParams.get("expand");
+    if (expand) {
+      try {
+        const expandState = JSON.parse(expand);
+        Object.entries(expandState).forEach(([modeName, blocks]) => {
+          Object.entries(blocks).forEach(([blockName, shouldExpand]) => {
+            dispatch(GlobalActions.COLLAPSE, {
+              codeblockname: blockName,
+              expandOrCollapase: shouldExpand,
+            });
+          });
+        });
+      } catch (err) {
+        console.error("Invalid expand param:", expand, err);
+      }
     }
 
-    stepApplied.current = true;
-  }, [algorithm?.chunker]); // When algorithm chunker changes. Make sure it only
-  // runs once however, do not want step param to influence every algorithm.
+    // Must apply expand before step otherwise line highlighting is wrong
+    const step = searchParams.get("step");
+    if (step && !isNaN(step)) {
+      const stepNum = parseInt(step, 10);
+      const maxStep = algorithm.chunker.chunks.length - 1;
+      const clamped = Math.max(0, Math.min(stepNum, maxStep));
 
+      // NEXT_LINE uses do-while starting at 0, step=0 starts at step 1
+      if (clamped > 0) dispatch(GlobalActions.NEXT_LINE, { stopAt: clamped });
+    }
+    expandAndStepApplied.current = true;
+}, [algorithm?.chunker]);
+  
   return (
     <div className="controlContainer">
       <div className="controlPanel">

@@ -109,3 +109,120 @@ export const checkAllRangesValid = (values) => {
   }
   return { valid: true, error: null };
 };
+
+export const coordsValidCheck = (t) => {
+  if (!t || t.trim() === "") {
+    return { valid: false, error: ERRORS.GEN_EMPTY_INPUT };
+  }
+  const regex = /^(\d+-\d+)(,\d+-\d+)*$/;
+  if (!regex.test(t)) {
+    return { valid: false, error: ERRORS.GEN_GRAPH_COORDS };
+  }
+  return { valid: true, error: null };
+};
+
+export const edgesValidCheck = (t, size) => {
+  if (!t || t.trim() === "") {
+    return { valid: false, error: ERRORS.GEN_EMPTY_INPUT };
+  }
+  const edges = t.split(",");
+  const seen = new Set();
+
+  for (let edge of edges) {
+    const parts = edge.split("-").map(Number);
+
+    // TODO: Still not sure how unweighted works going to leave 
+    // the possibility of edges not including third part for unweighted
+    // algorithms like BFS.
+    if (parts.length < 2 || parts.length > 3 || parts.some(isNaN)) {
+      return { valid: false, error: ERRORS.GEN_GRAPH_INVALID_EDGES };
+    }
+
+    const [a, b, w] = parts;
+    if (a < 1 || a > size || b < 1 || b > size) {
+      return { valid: false, error: ERRORS.GEN_GRAPH_EDGE_OUT_OF_RANGE(1, size) };
+    }
+
+    // TODO: Circular in original code allows this?
+    // if (a === b) {
+    //   return { valid: false, error: ERRORS.GEN_GRAPH_NO_SELF_LOOPS };
+    // }
+
+    const key = `${Math.min(a,b)}-${Math.max(a,b)}`;
+    if (seen.has(key)) {
+      return { valid: false, error: ERRORS.GEN_GRAPH_DUPLICATE_EDGES };
+    }
+    seen.add(key);
+
+    // TODO: Again leaving possibility of third part being excluded.
+    if (w !== undefined && w <= 0) {
+      return { valid: false, error: ERRORS.GEN_POSITIVE_EDGE_WEIGHTS };
+    }
+  }
+
+  return { valid: true, error: null };
+};
+
+export const startEndValidCheck = (value, size, isEnd=false) => {
+  if (!value || value.trim() === "") {
+    return { valid: false, error: ERRORS.GEN_EMPTY_INPUT };
+  }
+
+  const nums = value.split(",").map(Number);
+  if (nums.some(isNaN)) {
+    return { valid: false, error: isEnd 
+      ? ERRORS.GEN_GRAPH_INVALID_ENDNODES 
+      : ERRORS.GEN_ONLY_POSITIVE_INTEGERS };
+  }
+
+  for (let n of nums) {
+    if (n < 1 || n > size) {
+      return { valid: false, error: isEnd
+        ? ERRORS.GEN_GRAPH_ENDS_OUT_OF_RANGE(1, size)
+        : ERRORS.GEN_GRAPH_START_OUT_OF_RANGE(1, size) };
+    }
+  }
+
+  return { valid: true, error: null };
+};
+
+/**
+ * Validate comma-separated pairs of numbers (e.g., "1-2,3-4").
+ * Each pair must have exactly two numbers and be within N_ARRAY.
+ * @param {String} value The text input.
+ * @param {Array<String|Number>} N_ARRAY The valid domain of node IDs (as strings or numbers).
+ * @returns {{ valid: boolean, error: string|null }}
+ */
+export function dualValueParamValidCheck(value, N_ARRAY) {
+  if (!value || value.trim() === "") {
+    return { valid: false, error: ERRORS.GEN_EMPTY_INPUT };
+  }
+
+  // Ensure only digits, commas, hyphens, and spaces
+  if (!/^[0-9,\-\s]+$/.test(value)) {
+    return { valid: false, error: ERRORS.GEN_TEXT_PAIR_FORMAT };
+  }
+
+  const pairs = value.split(",").map((pair) => pair.trim());
+
+  for (let i = 0; i < pairs.length; i++) {
+    const parts = pairs[i].split("-");
+
+    // Must be exactly 2 values in each pair
+    if (parts.length !== 2) {
+      return { valid: false, error: ERRORS.GEN_TEXT_PAIR_FORMAT };
+    }
+
+    // Each value must be a number and in domain
+    for (const val of parts) {
+      if (isNaN(val)) {
+        return { valid: false, error: ERRORS.GEN_LIST_INVALID_NUMBER };
+      }
+      if (!N_ARRAY.includes(val.toString())) {
+        return { valid: false, error: ERRORS.GEN_NUMBER_NOT_IN_DOMAIN };
+      }
+    }
+  }
+
+  return { valid: true, error: null };
+}

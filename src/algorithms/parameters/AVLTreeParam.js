@@ -19,6 +19,7 @@ import {
   singleNumberValidCheck 
 } from './helpers/InputValidators';
 import ParamForm from './helpers/ParamForm';
+import { ERRORS, EXAMPLES } from './helpers/ErrorExampleStrings';
 
 const INSERTION = 'insertion';
 const SEARCH = 'search';
@@ -50,32 +51,19 @@ const BlueRadio = withStyles({
   checked: {},
 })((props) => <Radio {...props} />);
 
-// A parameter component holds all its own state, whenever
-// its state is modified, trigger a side effect where global
-// state is notified of the change through dispatch.
-function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
+function AVLTreeParam({ alg, 
+  //mode: urlMode, // TODO: Not supported. 
+  list: urlList, value: urlValue }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
   
-  // Own the state centrally
+  // TODO: URL validation
   const [list, setList] = useState(urlList || defaultProps.list);
   const [value, setValue] = useState(urlValue || defaultProps.value);
   const [bstCase, setBSTCase] = useState(UNCHECKED);
-  // Must start in insertion mode. TODO: This can be worked
-  // around, build the tree first in insertion mode then switch
-  // to search mode, if search mode was specified in URL. If no "insertStep"
-  // query param specified then assume "insertStep" means till last step in insert mode. Should be doable
-  // by passing in custom param to dispatch, id (footprint) is set to (spread) ...params.
-  const [modeState, setModeState] = useState(urlMode || defaultProps.mode);
+  const [modeState, setModeState] = useState(defaultProps.mode);
   const [message, setMessage] = useState(null);
 
-
   useEffect(() => {
-    // Convert the comma-separated string into an array of numbers.
-    const nodesArray = list
-      .split(',')
-      .map((n) => Number(n))
-      .filter((n) => !isNaN(n));
-
     if (modeState === INSERTION) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
@@ -88,7 +76,10 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
           value,
         },
 
-        nodes: nodesArray,
+        nodes: list
+              .split(',')
+              .map((n) => Number(n))
+              .filter((n) => !isNaN(n)),
       });
     } else if (modeState === SEARCH) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
@@ -151,10 +142,10 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
 
     let {valid, reason} = singleNumberValidCheck(inputValue);
     if (!valid) {
-      setMessage(errorParamMsg(null, reason));
+      setMessage(errorParamMsg(reason, EXAMPLES.GEN_SINGLE_INT));
       return;
     } else if (algorithm?.visualisers?.graph?.instance.isEmpty()) {
-      setMessage(errorParamMsg(null, "Build a tree first!"));
+      setMessage(errorParamMsg(ERRORS.GEN_BUILD_VISUALISER_FIRST("tree", INSERTION)));
     } else {
       setValue(inputValue);
       setModeState(SEARCH);
@@ -163,7 +154,7 @@ function AVLTreeParam({ alg, mode: urlMode, list: urlList, value: urlValue }) {
   };
 
   const handleRefresh = () => {
-    setList(genUniqueRandNumList(defaultProps.list.length, 1, 100).join(','));
+    setList(genUniqueRandNumList(12, 1, 100).join(','));
     setBSTCase(UNCHECKED);
     setModeState(INSERTION);
     setMessage(null);
