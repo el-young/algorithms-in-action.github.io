@@ -174,6 +174,7 @@ export const parseEdges = (edgeString, size) => {
     const parts = edge.split("-").map(Number);
     const [a, b, weight = 1] = parts;
     matrix[a - 1][b - 1] = weight;
+    matrix[b - 1][a - 1] = weight;
   });
 
   return matrix;
