@@ -131,9 +131,6 @@ export const edgesValidCheck = (t, size) => {
   for (let edge of edges) {
     const parts = edge.split("-").map(Number);
 
-    // TODO: Still not sure how unweighted works going to leave 
-    // the possibility of edges not including third part for unweighted
-    // algorithms like BFS.
     if (parts.length < 2 || parts.length > 3 || parts.some(isNaN)) {
       return { valid: false, error: ERRORS.GEN_GRAPH_INVALID_EDGES };
     }
@@ -144,9 +141,9 @@ export const edgesValidCheck = (t, size) => {
     }
 
     // TODO: Circular in original code allows this?
-    // if (a === b) {
-    //   return { valid: false, error: ERRORS.GEN_GRAPH_NO_SELF_LOOPS };
-    // }
+    if (a === b) {
+      return { valid: false, error: ERRORS.GEN_GRAPH_NO_LOOPS };
+    }
 
     const key = `${Math.min(a,b)}-${Math.max(a,b)}`;
     if (seen.has(key)) {

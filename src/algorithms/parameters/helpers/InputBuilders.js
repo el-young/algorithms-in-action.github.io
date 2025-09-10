@@ -216,10 +216,16 @@ export function generateGraph(
   minWeight = 1,
   maxWeight = 100,
   size = 10,
-  maxRandomDegreeGen=5, // Use this to control density
   iterations = 1000
 ) {
-  // Generate random coords
+  // TODO: Crude approach to scaling density by size for now
+  // Note the implementation to avoid having too many edges
+  // uses maxRandomDegreeGen as an upperbound for random generation
+  // if it exceeds amount of nodes it just clamps to the amount of nodes.
+  let maxRandomDegreeGen;
+  if (size <= 6) maxRandomDegreeGen = 15; // Most likely fully connected
+  else maxRandomDegreeGen = 5;
+
   const coords = genCoords(minX, maxX, minY, maxY, size, iterations);
   const edges = genEdges(coords, minWeight, maxWeight, maxRandomDegreeGen, iterations);
   return {

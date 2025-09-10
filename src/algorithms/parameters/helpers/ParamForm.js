@@ -63,7 +63,7 @@ ParamForm.propTypes = {
   value: PropTypes.string.isRequired,
   setValue: PropTypes.func.isRequired,
   children: PropTypes.node,
-  disabled: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
   onInputChange: PropTypes.func,
 };
 

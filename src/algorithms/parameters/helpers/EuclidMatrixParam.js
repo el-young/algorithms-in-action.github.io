@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { arrayOf } from 'prop-types';
 import '../../../styles/EuclideanMatrix.scss';
 import '../../../styles/Param.scss';
 import ParamFormRefresh from './ParamFormRefresh';
@@ -62,7 +62,7 @@ function EuclideanMatrixParams({
     return ( 
     <>
         {/* forms for sizeForRandomGen/start/end buttons for heuristic and weight calculation modes */}
-        {genRandGraph !== undefined && (
+        {genRandGraph != null && (
             <div className="outerInput">
                 <label className="inputText" htmlFor="sizeInput">
                 Random Graph Size:&nbsp;
@@ -83,7 +83,7 @@ function EuclideanMatrixParams({
             </div>
         )}
 
-        {start !== undefined && (
+        {start != null && (
             <div className="outerInput">
                 <label className="inputText" htmlFor="startInput">
                 Start:&nbsp;
@@ -104,7 +104,7 @@ function EuclideanMatrixParams({
             </div>
         )}
 
-        {weightCalc !== undefined && (
+        {weightCalc != null && (
             <button
                 className="algorithmBtn"
                 onClick={changeWeightCalc}
@@ -113,7 +113,7 @@ function EuclideanMatrixParams({
             </button>
         )}
 
-        {heuristic !== undefined && (
+        {heuristic != null && (
             <button
                 className="algorithmBtn"
                 onClick={changeHeuristic}
@@ -122,7 +122,7 @@ function EuclideanMatrixParams({
             </button>
         )}
 
-        {end !== undefined && (
+        {end != null && (
             <div className="outerInput">
                 <label className="inputText" htmlFor="endInput">
                     End:&nbsp;
@@ -143,7 +143,7 @@ function EuclideanMatrixParams({
             </div>
         )}
 
-        {coords && (
+        {coords != null && (
         <div>
             <ParamForm
                 formClassName='formLeft'
@@ -155,7 +155,7 @@ function EuclideanMatrixParams({
         </div>
         )}
 
-        {edges && (
+        {edges != null && (
         <div>
             <ParamForm
                 formClassName='formLeft'
@@ -169,7 +169,7 @@ function EuclideanMatrixParams({
 
         <div style={{ display: "flex", gap: "2rem" }}>
             {/* Coordinate Table */}
-            {coords && (
+            {coords != null && (
                 <>
                 <h4>Coordinates (X,Y)</h4>
                 <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
@@ -209,7 +209,7 @@ function EuclideanMatrixParams({
             )}
 
             {/* Edge Matrix */}
-            {edges && (
+            {edges != null && (
                 <>
                 <h4>Edges (0, 1)</h4>
                 <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
