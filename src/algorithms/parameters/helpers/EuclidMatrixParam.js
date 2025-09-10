@@ -5,48 +5,31 @@ import '../../../styles/Param.scss';
 import ParamFormRefresh from './ParamFormRefresh';
 import ParamForm from './ParamForm';
 
-// graphExamples // Parent component
-// minXYCoord, maxXYCoord, // For random node generation define in parent param which will define callback for random gen
 // symmetric // Parent im assuming this is for random node gen
 // circular  // Parent im assuming this is for random node gen
 // unweighted, // Might not be relevant if parent visualiser makes edges unweighted when we pass in 1-2
 
-
 // TODO: Needs some CSS polish.
 function EuclideanMatrixParams({
-    sizeForRandomGen,           // Number nodes in the graph
-    start,          // Node to start search from
-    end,            // Node to end search at, can be left null.
-    weightCalc,     // weightCalculation, Manhattan, as input, etc.
-    heuristic,      // huerisitc, Manhattan, as input, etc.
-    coords,         // Default coords to display in form
-    edges,          // Default edges to display in form
+    start,                      // Node to start search from
+    end,                        // Node to end search at, can be left null.
+    weightCalc,                 // weightCalculation, Manhattan, as input, etc.
+    heuristic,                  // huerisitc, Manhattan, as input, etc.
+    coords,                     // Default coords to display in form
+    edges,                      // Default edges to display in form
 
     // Callbacks
-    handleSizeSubmit,
-    handleStartSubmit,
-    handleEndSubmit,
+    setStart,
+    setEnd,
+    setCoords, 
+    setEdges,
     changeWeightCalc,
     changeHeuristic,
-    handleCoordsSubmit, handleEdgesSubmit, // In case you want different behvaiour for each
-    onCoordsChange,
-    onEdgesChange,
+    onCoordsChange, onEdgesChange, // In case you want side effects when user types into forms
     onCoordCellSubmit,
     onEdgeCellSubmit,
+    genRandGraph,
 }) {
-
-    // Local mirrors for inputs (to keep typing smooth)
-    const [sizeInput, setSizeInput] = useState(sizeForRandomGen || '');
-    const [startInput, setStartInput] = useState(start || '');
-    const [endInput, setEndInput] = useState(end || '');
-
-    // If parent for some reason changes sizeForRandomGen, start, end
-    // and not the user from typing, update the form content.
-    // For example, maybe clicking another button set sizeForRandomGen in parent
-    // to another value.
-    useEffect(() => setSizeInput(sizeForRandomGen || ''), [sizeForRandomGen]);
-    useEffect(() => setStartInput(start || ''), [start]);
-    useEffect(() => setEndInput(end || ''), [end]);
 
     // Derive coord/edge matrix from string encoding
     const coordMatrix = coords.split(",").map(pair => {
@@ -54,55 +37,71 @@ function EuclideanMatrixParams({
         return [x, y];
     });
 
-    const edgeMatrix = Array.from({ length: coordMatrix.length }, () => Array(coordMatrix.length).fill(0));
-    if (edges.trim() !== "") {
-    edges.split(",").forEach(edge => {
-        const [i, j, w] = edge.split("-").map(Number);
-        if (!Number.isNaN(i) && !Number.isNaN(j) && !Number.isNaN(w)) {
-        edgeMatrix[i - 1][j - 1] = w;
-        edgeMatrix[j - 1][i - 1] = w; // undirected assumption
-        }
-    });
-    }
+    const edgeMatrix = Array.from({ length: coordMatrix.length }, 
+        () => Array(coordMatrix.length).fill(0));
 
+    if (edges.trim() !== "") {
+        edges.split(",").forEach(edge => {
+            const [i, j, w] = edge.split("-").map(Number);
+
+            // Only include if both endpoints are valid
+            if (
+            Number.isInteger(i) && Number.isInteger(j) && Number.isInteger(w) &&
+            i >= 1 && i <= coordMatrix.length &&
+            j >= 1 && j <= coordMatrix.length
+            ) {
+            edgeMatrix[i - 1][j - 1] = w;
+            edgeMatrix[j - 1][i - 1] = w; // undirected assumption
+            }
+        });
+    }
+    
     // Many items conditionally rendered, for examples AStar will support heuristics
     // BFS/DFS will not. So the heurisitc prop will be null and not rendered for
-    // BFS/DFS. Assumed that all users of EuclideanMatrixParams will have forms
-    // for edge and coord input. Conditionally render matrices and edge form
-    // since gwrap doesnt use it.
+    // BFS/DFS.
     return ( 
     <>
         {/* forms for sizeForRandomGen/start/end buttons for heuristic and weight calculation modes */}
-        {sizeForRandomGen !== undefined && (
-        <form className="formLeft" onSubmit={handleSizeSubmit}>
+        {genRandGraph !== undefined && (
             <div className="outerInput">
-            <label className="inputText" htmlFor="sizeInput">
-                Size:&nbsp;
-            </label>
-            <input
-                id="sizeInput"
-                type="text"
-                value={sizeInput}
-                onChange={(e) => setSizeInput(e.target.value)}
-            />
+                <label className="inputText" htmlFor="sizeInput">
+                Random Graph Size:&nbsp;
+                </label>
+                <input
+                    id="randSizeInput"
+                    type="text"
+                    placeholder="e.g. 10"
+                    onBlur={(e) => genRandGraph(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.target.blur(); // Trigger callback in onBlur
+                            // otherwise enter then leave input triggers twice
+                        }
+                    }}
+                />
             </div>
-        </form>
         )}
 
         {start !== undefined && (
-        <form className="formLeft" onSubmit={handleStartSubmit}>
             <div className="outerInput">
-            <label className="inputText" htmlFor="startInput">
+                <label className="inputText" htmlFor="startInput">
                 Start:&nbsp;
-            </label>
-            <input
-                id="startInput"
-                type="text"
-                value={startInput}
-                onChange={(e) => setStartInput(e.target.value)}
-            />
+                </label>
+                <input
+                    key={start} // re-mount when prop changes
+                    id="startInput"
+                    type="text"
+                    defaultValue={start}
+                    onBlur={(e) => setStart(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.target.blur();
+                        }
+                    }}
+                />
             </div>
-        </form>
         )}
 
         {weightCalc !== undefined && (
@@ -124,28 +123,33 @@ function EuclideanMatrixParams({
         )}
 
         {end !== undefined && (
-        <form className="formLeft" onSubmit={handleEndSubmit}>
             <div className="outerInput">
-            <label className="inputText" htmlFor="endInput">
-                End:&nbsp;
-            </label>
-            <input
-                id="endInput"
-                type="text"
-                value={endInput}
-                onChange={(e) => setEndInput(e.target.value)}
-            />
+                <label className="inputText" htmlFor="endInput">
+                    End:&nbsp;
+                </label>
+                <input
+                    key={end} // re-mount when prop changes
+                    id="endInput"
+                    type="text"
+                    defaultValue={end}
+                    onBlur={(e) => setEnd(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.target.blur();
+                        }
+                    }}
+                />
             </div>
-        </form>
         )}
 
         {coords && (
         <div>
             <ParamForm
+                formClassName='formLeft'
                 buttonName="Set&nbsp;X-Y&nbsp;Coordinates"
-                formClassName="formLeft"
                 value={coords}
-                handleSubmit={handleCoordsSubmit}
+                setValue={setCoords}
                 onInputChange={onCoordsChange}
             />
         </div>
@@ -154,98 +158,102 @@ function EuclideanMatrixParams({
         {edges && (
         <div>
             <ParamForm
+                formClassName='formLeft'
                 buttonName="Set&nbsp;Edges/Weights"
-                formClassName="formLeft"
                 value={edges}
-                handleSubmit={handleEdgesSubmit}
+                setValue={setEdges}
                 onInputChange={onEdgesChange}
             />
         </div>
         )}
 
-
-        {/* Matrix representation */}
-        {(coords || edges) && (
-        <div style={{ display: "flex", gap: "2rem"}}>
+        <div style={{ display: "flex", gap: "2rem" }}>
             {/* Coordinate Table */}
             {coords && (
-            <>
+                <>
                 <h4>Coordinates (X,Y)</h4>
                 <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
                     <thead>
-                        <tr>
+                    <tr>
                         <th>Node</th>
                         <th>X</th>
                         <th>Y</th>
-                        </tr>
+                    </tr>
                     </thead>
                     <tbody>
-                        {coordMatrix.map(([x, y], i) => (
+                    {coordMatrix.map(([x, y], i) => (
                         <tr key={i}>
-                            <td>{i + 1}</td>
-                            {[x, y].map((val, j) => (
+                        <td>{i + 1}</td>
+                        {[x, y].map((val, j) => (
                             <td key={j}>
-                                <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const newVal = e.target[0].value;
-                                    onCoordCellSubmit(i, j, newVal);
+                            <input
+                                key={`${i}-${j}-${val}`} // force remount on value change
+                                type="text"
+                                defaultValue={val}
+                                style={{ width: "3rem" }}
+                                onBlur={(e) => onCoordCellSubmit(i, j, e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        e.target.blur();
+                                    }
                                 }}
-                                >
-                                    <input key={`${i}-${j}-${val}`} type="text" defaultValue={val} style={{ width: "3rem" }} />
-                                </form>
+                            />
                             </td>
-                            ))}
-                        </tr>
                         ))}
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
-            </>
+                </>
             )}
+
+            {/* Edge Matrix */}
             {edges && (
-            <>
+                <>
                 <h4>Edges (0, 1)</h4>
                 <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
                     <thead>
-                        <tr>
+                    <tr>
                         <th>Node</th>
-                        {Array.from({ length: coordMatrix.length}, (_, j) => (
-                            <th key={j}>{j + 1}</th>
+                        {Array.from({ length: coordMatrix.length }, (_, j) => (
+                        <th key={j}>{j + 1}</th>
                         ))}
-                        </tr>
+                    </tr>
                     </thead>
                     <tbody>
-                        {edgeMatrix.map((row, i) => (
+                    {edgeMatrix.map((row, i) => (
                         <tr key={i}>
-                            <td>{i + 1}</td>
-                            {row.map((val, j) => (
+                        <td>{i + 1}</td>
+                        {row.map((val, j) => (
                             <td key={j}>
-                                <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const newVal = e.target[0].value;
-                                    onEdgeCellSubmit(i, j, newVal);
+                            <input
+                                key={`${i}-${j}-${val}`} // force remount on value change
+                                type="text"
+                                defaultValue={val}
+                                style={{ width: "3rem" }}
+                                onBlur={(e) => onEdgeCellSubmit(i, j, e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        e.target.blur();
+                                    }
                                 }}
-                                >
-                                    <input key={`${i}-${j}-${val}`} type="text" defaultValue={val} style={{ width: "3rem" }} />
-                                </form>
+                            />
                             </td>
-                            ))}
-                        </tr>
                         ))}
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
-            </>
+                </>
             )}
         </div>
-        )}
-
     </>
     )
 }
 
 EuclideanMatrixParams.propTypes = {
-  sizeForRandomGen: PropTypes.string.isRequired,
   start: PropTypes.string.isRequired,
   end: PropTypes.string.isRequired,
   weightCalc: PropTypes.string,
@@ -254,17 +262,17 @@ EuclideanMatrixParams.propTypes = {
   edges: PropTypes.string.isRequired,
 
   // Callbacks
-  handleSizeSubmit: PropTypes.func.isRequired,
-  handleStartSubmit: PropTypes.func.isRequired,
-  handleEndSubmit: PropTypes.func.isRequired,
+  setStart: PropTypes.func.isRequired,
+  setEnd: PropTypes.func.isRequired,
   changeWeightCalc: PropTypes.func,
   changeHeuristic: PropTypes.func,
-  handleCoordsSubmit: PropTypes.func.isRequired,
-  handleEdgesSubmit: PropTypes.func.isRequired,
+  setCoords: PropTypes.func.isRequired,
+  setEdges: PropTypes.func.isRequired,
   onCoordsChange: PropTypes.func,
   onEdgesChange: PropTypes.func,
   onCoordCellSubmit: PropTypes.func,
   onEdgeCellSubmit: PropTypes.func,
+  genRandGraph: PropTypes.func
 };
 
 export default EuclideanMatrixParams;

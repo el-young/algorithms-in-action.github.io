@@ -23,8 +23,6 @@ export const ERRORS = {
     GEN_MATRIX_NOT_SYMMETRIC       : "Matrix must be symmetric (m[i][j] = m[j][i]).",
     GEN_MATRIX_DIAGONAL_NOT_ZERO   : "Matrix diagonal entries must be zero.",
     GEN_POSITIVE_EDGE_WEIGHTS      : "Please enter positive edge weights (or 0 for no edge)",
-    GEN_POSITIVE_INT               : "Please enter a positive integer",
-
     GEN_PAIR_TRIPLES_POS_INT       : "Please enter a list containing positive integers, pairs or triples",
     GEN_RIGHT_NUMBER_INPUTS        : "Please enter the right amount of inputs",
     GEN_INVALID_RANGES             : "If you had entered ranges, please input valid ranges",
@@ -35,27 +33,32 @@ export const ERRORS = {
 
     GEN_BUILD_VISUALISER_FIRST     : (visualiserName, mode) => `Build a ${visualiserName} first by running some steps of the algorithm in ${mode} mode.`,
 
-    GEN_GRAPH_INVALID_COORDS    : "Coordinates input must follow the correct format.",
-    GEN_GRAPH_INVALID_EDGES     : "Edges input must follow the correct format.",
-    GEN_GRAPH_INVALID_ENDNODES  : "End nodes input must follow the correct format.",
-    GEN_GRAPH_DUPLICATE_EDGES   : "Duplicated edges detected in string format, please remove duplicate edges.",
-    GEN_GRAPH_START_OUT_OF_RANGE: (min, max) => 
+    GEN_GRAPH_INVALID_COORDS        : "Coordinates input must follow the correct format.",
+    GEN_GRAPH_INVALID_EDGES         : "Edges input must follow the correct format.",
+    GEN_GRAPH_INVALID_ENDNODES      : "End nodes input must follow the correct format.",
+    GEN_GRAPH_DUPLICATE_EDGES       : "Duplicated edges detected in string format, please remove duplicate edges.",
+    GEN_GRAPH_START_OUT_OF_RANGE    : (min, max) => 
         `Start node must be an integer between ${min} and ${max}.`,
-    GEN_GRAPH_ENDS_OUT_OF_RANGE : (min, max) => 
+    GEN_GRAPH_ENDS_OUT_OF_RANGE     : (min, max) => 
         `End node(s) must be integers between ${min} and ${max}, separated by commas.`,
-    GEN_GRAPH_COORDS            : "Coordinates input must contain only numbers separated by '-' with commas ',' inbetween coordinates.",
-    GEN_GRAPH_EDGE_OUT_OF_RANGE : (min, max) => 
+    GEN_GRAPH_COORDS                : "Coordinates input must contain only numbers separated by '-' with commas ',' inbetween coordinates.",
+    GEN_GRAPH_EDGE_OUT_OF_RANGE     : (min, max) => 
         `Edge start and endpoints must be integers between ${min} and ${max}.`,
+    GEN_GRAPH_MATRIX_ROW_COL        : (row, col, matrixName) => `See (${row},${col}) of the ${matrixName} matrix.`,
+    GEN_GRAPH_NO_LOOPS              : "Graph must not contain self-loops (edges from a node to itself).",
+    GEN_GRAPH_GEN_OUT_OF_RANGE      : (min, max) => 
+        `Graph generation is only supported for nodes between ${min} and ${max}.`,
+
 };
 
 export const EXAMPLES = {
     GEN_SYMMETRIC_MATRIX    : "TODO:",
-    GEN_COORDS_EXAMPLE      : "Please follow format: 1-1,3-4,4-1,6-6 giving the X-Y coordinates for each of the nodes in the graph.",
-    GEN_EDGES_EXAMPLE       : "Please follow format: 1-2,1-3,2-3,3-2-6,3-4-7 giving NodeA-NodeB-Weight for each in the graph; -Weight is optional and defaults to 1.",
+    GEN_COORDS              : "Please follow format: 1-1,3-4,4-1,6-6 giving the X-Y coordinates for each of the nodes in the graph.",
+    GEN_EDGES               : "Please follow format: 1-2,1-3,2-3,3-2-6,3-4-7 giving NodeA-NodeB-Weight for each in the graph; -Weight is optional and defaults to 1.",
     GEN_NUMBERS_BETWEEN_0_1 : "Please provide positive numbers: 0,1",
     GEN_SINGLE_INT          : "Please follow the example: 5",
     GEN_LIST_PARAM          : "Please follow the example provided: 0,1,2,3,4",
-    GEN_ENDNODES_EXAMPLE    : "Input a list of comma-separated node numbers, eg 1,2",
+    GEN_ENDNODES            : "Input a list of comma-separated node numbers, eg 1,2",
 
     HASHING_INSERT          : "TODO: Place holder example message",
     HASHING_TOO_LARGE       : "TODO: Add right amount of inputs whatever that is",

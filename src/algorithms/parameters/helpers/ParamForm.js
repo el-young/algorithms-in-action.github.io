@@ -14,33 +14,30 @@ function ParamForm({
   formClassName,
   buttonName,
   value,
-  handleSubmit,
+  setValue,
   children,
   disabled,
   onInputChange,
 }) {
-
   const { algorithm } = useContext(GlobalContext);
   const isDisabled = disabled ? disabled : 
                     ('visualisers' in algorithm && algorithm.playing);
   
-  // Local state for typing
-  const [inputValue, setInputValue] = useState(value);
-
-  // Sync parent changes down into local state
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-
   return (
-    <form className={formClassName} onSubmit={handleSubmit}>
+    <form 
+      className={formClassName} 
+      onSubmit={(e) => {
+        e.preventDefault();
+        setValue(e.target[0].value);
+      }}
+    >
       <div className="outerInput">
         <label className="inputText">
           <input
+            key={value}
             type="text"
-            value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
+            defaultValue={value}
+            onChange={() => {
               if (onInputChange) onInputChange();
             }}
           />
@@ -64,7 +61,7 @@ ParamForm.propTypes = {
   formClassName: PropTypes.string.isRequired,
   buttonName: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  setValue: PropTypes.func.isRequired,
   children: PropTypes.node,
   disabled: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func,

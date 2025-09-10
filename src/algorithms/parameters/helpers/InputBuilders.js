@@ -169,12 +169,11 @@ export const parseCoords = (coordString) => coordString
 export const parseEdges = (edgeString, size) => {
   // Initialize empty matrix with 0s
   const matrix = Array.from({ length: size }, () => Array(size).fill(0));
+
   edgeString.split(",").forEach(edge => {
     const parts = edge.split("-").map(Number);
-    const [a, b, weight = 1] = parts; // default weight = 1 TODO: going to have to look at visualiser code not sure how it chooses to not display edges
-    // assuming for now that weight = 1 does it, but then weights of 1 are allowed for AStar? Maybe the controller code just feeds a prop
-    // to visualiser saying do not draw edge weights.
-    matrix[a - 1][b - 1] = weight; // make zero indexed
+    const [a, b, weight = 1] = parts;
+    matrix[a - 1][b - 1] = weight;
   });
 
   return matrix;
@@ -201,89 +200,171 @@ export const recalcEdges = (distanceFn) => (coordString, edgeString) => {
 };
 
 // Generating an "aesthetically pleasing" graph is a non-trivial challenge
-// in fact its NP-Hard. https://en.wikipedia.org/wiki/Crossing_number_%28graph_theory%29  
-// It falls under the broader problem space of network spatialization.
-// https://en.wikipedia.org/wiki/Force-directed_graph_drawing
-import Graph from "graphology";
-import forceLayout from 'graphology-layout-force';
-
-// TODO: Still not great, do some more research.
+// in fact if you define aesthetically pleasing as getting the minimum number of edge crossings 
+// for some node and edge set its NP-Hard. 
+// https://en.wikipedia.org/wiki/Crossing_number_%28graph_theory%29  
+// Hill climbing seems good enough for our purposes.
+// I have defined "aesthetically pleasing" as spread out nodes
+// with very little edge crossings, this could definitely be
+// extended, I think minimum distance between edges (visual distance not
+// traversing graph distance) also plays a big role.
 export function generateGraph(
   minX = 1,
   minY = 1,
   maxX = 50,
   maxY = 20,
-  minWeight=1,
-  maxWeight=20,
+  minWeight = 1,
+  maxWeight = 100,
   size = 10,
-  maxIterations = 1000 // More iterations the better but keep light
+  maxRandomDegreeGen=5, // Use this to control density
+  iterations = 1000
 ) {
-  const graph = new Graph();
+  // Generate random coords
+  const coords = genCoords(minX, maxX, minY, maxY, size, iterations);
+  const edges = genEdges(coords, minWeight, maxWeight, maxRandomDegreeGen, iterations);
+  return {
+    coords: coords.map(([x, y]) => `${x}-${y}`).join(","),
+    edges: edges.map(([a, b, w]) => `${a + 1}-${b + 1}-${w}`)
+                .join(","),
+  };
+}
 
-  for (let i = 0; i < size; i++) {
-    graph.addNode(i, {
-      x: Math.random() * maxX,
-      y: Math.random() * maxY,
-    });
-  }
+// Favours maximising euclidian distance.
+function genCoords(minX, maxX, minY, maxY, size, iterations) {
+  // Generate random coords
+  const coords = [];
 
-  // Ensures connectivity
-  for (let i = 0; i < size - 1; i++) {
-    const weight = Math.floor(Math.random() * (maxWeight - minWeight + 1)) + minWeight;
-    graph.addUndirectedEdge(i, i + 1, { weight });
-  }
+  // Go node by node, take `iterations` amount of samples
+  // for each node, keep the one that yeilded the highest
+  // euclidean distance with the rest of the existing nodes.
+  for (let n = 0; n < size; n++) {
+    let bestCandidate = null;
+    let bestScore = -Infinity;
 
-  // Add some random edges too
-  for (let i = 0; i < size; i++) {
-    const j = Math.floor(Math.random() * size);
-    if (i !== j && !graph.hasEdge(i, j)) {
-      // graph too dense otherwise.
-      if (Math.random() < 0.5) {
-        const weight = Math.floor(Math.random() * (maxWeight - minWeight + 1)) + minWeight;
-        graph.addUndirectedEdge(i, j, { weight });
+    for (let s = 0; s < iterations; s++) {
+      const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+      const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+
+      const minDist = coords.length === 0
+        ? Infinity
+        : Math.min(...coords.map(([cx, cy]) => euclidean(x, y, cx, cy)));
+
+      if (minDist > bestScore) {
+        bestScore = minDist;
+        bestCandidate = [x, y];
       }
+    }
+
+    coords.push(bestCandidate);
+  }
+
+  return coords;
+}
+
+// Builds minimum spanning tree. Then randomly adds edges minimising edge crossings.
+function genEdges(coords, minWeight, maxWeight, maxRandomDegreeGen, iterations) {
+  // https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function
+  // Check if line segment (a,b) intersects with (c,d)
+  function edgesIntersect([ax, ay], [bx, by], [cx, cy], [dx, dy]) {
+    const det = (bx - ax) * (dy - cy) - (dx - cx) * (by - ay);
+    if (det === 0) return false;
+    const lambda = ((dy - cy) * (dx - ax) + (cx - dx) * (dy - ay)) / det;
+    const gamma  = ((ay - by) * (dx - ax) + (bx - ax) * (dy - ay)) / det;
+    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+  }
+
+  function countCrossings(candidate) {
+    const [i, j] = candidate;
+    const [ax, ay] = coords[i];
+    const [bx, by] = coords[j];
+    let crossings = 0;
+    for (const [a, b] of edges) {
+      // Shared end points do not count.
+      if (a === i || a === j || b === i || b === j) continue;
+      const [cx, cy] = coords[a];
+      const [dx, dy] = coords[b];
+      if (edgesIntersect([ax, ay], [bx, by], [cx, cy], [dx, dy])) crossings++;
+    }
+    return crossings;
+  }
+
+  const size = coords.length;
+  const edges = [];
+  const degrees = Array(size).fill(0);
+
+  function prims() {
+    const inTree = Array(size).fill(false);
+    inTree[0] = true;
+
+    while (edges.length < size - 1) {
+      let bestEdge = null;
+      let bestDist = Infinity;
+
+      for (let i = 0; i < size; i++) {
+        if (!inTree[i]) continue;
+        for (let j = 0; j < size; j++) {
+          if (inTree[j]) continue;
+          const dist = euclidean(coords[i][0], coords[i][1], coords[j][0], coords[j][1]);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestEdge = [i, j];
+          }
+        }
+      }
+
+      if (!bestEdge) break;
+      
+      const [a, b] = bestEdge;
+      const weight = Math.floor(Math.random() * (maxWeight - minWeight + 1)) + minWeight;
+      edges.push([a, b, weight]);
+      degrees[a]++;
+      degrees[b]++;
+      inTree[b] = true;
     }
   }
 
-  forceLayout.assign(graph, { 
-    maxIterations,
-    gravity: 0.01,
-    attraction: 0.0001,
-    repulsion: 0.5
-  });
+  // Build MST first
+  prims();
 
-  let minLayoutX = Infinity,
-      maxLayoutX = -Infinity,
-      minLayoutY = Infinity,
-      maxLayoutY = -Infinity;
+  // Create target degrees, note that it is possible prims
+  // made a node exceed maxRandomDegreeGen that is fine.
+  const targetDegrees = Array.from({ length: size }, (_, i) => Math.floor(Math.random() * maxRandomDegreeGen) + 1);
+  for (let i = 0; i < size; i++) {
+    while (degrees[i] < targetDegrees[i]) {
+      let bestCandidate = null;
+      let bestCross = Infinity;
 
-  // Get min/max x and min/max y produced by the model
-  graph.forEachNode((node, attr) => {
-    if (attr.x < minLayoutX) minLayoutX = attr.x;
-    if (attr.x > maxLayoutX) maxLayoutX = attr.x;
-    if (attr.y < minLayoutY) minLayoutY = attr.y;
-    if (attr.y > maxLayoutY) maxLayoutY = attr.y;
-  });
+      // Find the best node to connect to (minimise crossings)
+      for (let s = 0; s < iterations; s++) {
+        const j = Math.floor(Math.random() * size);
 
-  // Need to scale down on all node coords to our space.
-  const scaleX = (maxX - minX) / (maxLayoutX - minLayoutX || 1);
-  const scaleY = (maxY - minY) / (maxLayoutY - minLayoutY || 1);
-  const coords = [];
-  graph.forEachNode((node, attr) => {
-    const scaledX = minX + (attr.x - minLayoutX) * scaleX;
-    const scaledY = minY + (attr.y - minLayoutY) * scaleY;
-    coords.push(`${Math.round(scaledX)}-${Math.round(scaledY)}`);
-  });
+        // Skip invalid candidates
+        if (i === j || degrees[j] >= targetDegrees[j] || 
+            edges.some(([a, b]) => (a === i && b === j) || (a === j && b === i))
+        ) {
+          continue;
+        }
 
-  const edges = [];
-  graph.forEachEdge((edge, attr, source, target) => {
-    edges.push(`${Number(source) + 1}-${Number(target) + 1}-${attr.weight}`);
-  });
+        const crossings = countCrossings([i, j]);
+        if (crossings < bestCross) {
+          bestCross = crossings;
+          bestCandidate = j;
+        }
+      }
 
-  console.log(coords.join(","));
-  console.log(edges.join(","));
-  return {
-    coords: coords.join(","),
-    edges: edges.join(",")
-  };
+      // No valid candiate, can happen if all nodes
+      // have exceeded target degree, or random could not
+      // find a valid target. Still guarantee connectedness
+      // because we built MST first.
+      if (bestCandidate === null) break;
+
+      // Add edge
+      const weight = Math.floor(Math.random() * (maxWeight - minWeight + 1)) + minWeight;
+      edges.push([i, bestCandidate, weight]);
+      degrees[i]++;
+      degrees[bestCandidate]++;
+    }
+  }
+
+  return edges;
 }

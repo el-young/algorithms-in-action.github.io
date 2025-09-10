@@ -18,7 +18,7 @@ function ParamFormRefresh({
   buttonName,
   value,
   formClassName,
-  handleSubmit,
+  setValue,
   refreshFunction,
   onInputChange,
 }) {
@@ -31,7 +31,7 @@ function ParamFormRefresh({
       buttonName={buttonName}
       value={value}
       disabled={disabled}
-      handleSubmit={handleSubmit}
+      setValue={setValue}
       onInputChange={onInputChange}
     >
       <ControlButton
@@ -48,7 +48,7 @@ ParamFormRefresh.propTypes = {
   buttonName: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   formClassName: PropTypes.string.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  setValue: PropTypes.func.isRequired,
   refreshFunction: PropTypes.func.isRequired,
   onInputChange: PropTypes.func,
 };
