@@ -14,9 +14,9 @@ import {
   shuffleArray,
 } from './helpers/InputBuilders';
 import { errorParamMsg } from './helpers/ParamMsg';
-import { 
-  commaSeparatedNumberListValidCheck, 
-  singleNumberValidCheck 
+import {
+  commaSeparatedNumberListValidCheck,
+  singleNumberValidCheck,
 } from './helpers/InputValidators';
 import ParamForm from './helpers/ParamForm';
 import { ERRORS, EXAMPLES } from './helpers/ErrorExampleStrings';
@@ -25,8 +25,8 @@ const INSERTION = 'insertion';
 const SEARCH = 'search';
 
 const defaultProps = (() => {
-  const listArray = genUniqueRandNumList(12, 1, 100);  // [1,23,45,...]
-  const list = listArray.join(',');                    // "1,23,45,..."
+  const listArray = genUniqueRandNumList(12, 1, 100);
+  const list = listArray.join(',');
   const value = listArray[Math.floor(Math.random() * listArray.length)].toString();
   return {
     mode: INSERTION,
@@ -51,55 +51,70 @@ const BlueRadio = withStyles({
   checked: {},
 })((props) => <Radio {...props} />);
 
-function AVLTreeParam({ alg, 
-  //mode: urlMode, // TODO: Not supported. 
-  list: urlList, value: urlValue }) {
+function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
-  
-  // TODO: URL validation
-  const [list, setList] = useState(urlList || defaultProps.list);
-  const [value, setValue] = useState(urlValue || defaultProps.value);
-  const [bstCase, setBSTCase] = useState(UNCHECKED);
-  const [modeState, setModeState] = useState(defaultProps.mode);
-  const [message, setMessage] = useState(null);
 
+  // Keep everything as strings
+  const [ list, setList ]           = useState(urlList || defaultProps.list);
+  const [ value, setValue ]         = useState(urlValue || defaultProps.value);
+  const [ bstCase, setBSTCase ]     = useState(UNCHECKED);
+  const [ modeState, setModeState ] = useState(defaultProps.mode);
+  const [ message, setMessage ]     = useState(null);
+
+  // Validate + dispatch whenever inputs change
   useEffect(() => {
-    if (modeState === INSERTION) {
-      dispatch(GlobalActions.LOAD_ALGORITHM, {
-        name: alg,
-        mode: INSERTION,
+    const { valid, errors } = validateAll();
 
-        url: {
-          alg,
+    if (valid) {
+      if (modeState === INSERTION) {
+        dispatch(GlobalActions.LOAD_ALGORITHM, {
+          name: alg,
           mode: INSERTION,
-          list,
-          value,
-        },
 
-        nodes: list
-              .split(',')
-              .map((n) => Number(n))
-              .filter((n) => !isNaN(n)),
-      });
-    } else if (modeState === SEARCH) {
-      dispatch(GlobalActions.LOAD_ALGORITHM, {
-        name: alg,
-        mode: SEARCH,
+          url: { alg, mode: INSERTION, list, value },
 
-        url: {
-          alg,
+          nodes: list
+            .split(',')
+            .map((n) => Number(n))
+            .filter((n) => !isNaN(n)),
+        });
+      } else if (modeState === SEARCH) {
+        dispatch(GlobalActions.LOAD_ALGORITHM, {
+          name: alg,
           mode: SEARCH,
-          list,
-          value,
-        },
 
-        target: value,
-        visualiser: algorithm?.chunker?.visualisers,
-      });
+          url: { alg, mode: SEARCH, list, value },
+
+          target: value,
+          visualiser: algorithm?.chunker?.visualisers,
+        });
+      }
+      setMessage(null);
+    } else {
+      setMessage(errorParamMsg(errors.join('\n')));
     }
   }, [modeState, list, value]);
 
-  const uncheckCases = () => setBSTCase({...UNCHECKED});
+  const validateAll = () => {
+    const errors = [];
+
+    let { valid, error } = commaSeparatedNumberListValidCheck(list);
+    if (!valid) errors.push(error, EXAMPLES.GEN_LIST_PARAM);
+
+    ({ valid, error } = singleNumberValidCheck(value));
+    if (!valid) {
+      errors.push(error + " " + EXAMPLES.GEN_SINGLE_INT);
+    } else if (modeState === SEARCH && algorithm?.visualisers?.graph?.instance.isEmpty()) {
+      errors.push(ERRORS.GEN_BUILD_VISUALISER_FIRST('tree', INSERTION));
+    }
+
+    return {
+      valid: errors.length === 0, 
+      errors
+    };
+  };
+
+  const uncheckCases = () => setBSTCase({ ...UNCHECKED });
 
   const handleCaseChange = (e) => {
     let nums = list.split(',').map(Number).filter((n) => !isNaN(n));
@@ -117,47 +132,15 @@ function AVLTreeParam({ alg,
       default:
     }
 
-    // Convert back to string
     setList(nums.join(','));
     setBSTCase({ ...UNCHECKED, [e.target.name]: true });
-    // Switch back to insertion mode on case change
     setModeState(INSERTION);
-  };
-
-  const handleInsert = (e) => {
-    e.preventDefault();
-    const inputValue = e.target[0].value.replace(/\s+/g, '');
-    if (!commaSeparatedNumberListValidCheck(inputValue)) {
-      setMessage(errorParamMsg(null));
-    } else {
-      setList(inputValue);
-      setModeState(INSERTION);
-      setMessage(null);
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const inputValue = e.target[0].value;
-
-    let {valid, reason} = singleNumberValidCheck(inputValue);
-    if (!valid) {
-      setMessage(errorParamMsg(reason, EXAMPLES.GEN_SINGLE_INT));
-      return;
-    } else if (algorithm?.visualisers?.graph?.instance.isEmpty()) {
-      setMessage(errorParamMsg(ERRORS.GEN_BUILD_VISUALISER_FIRST("tree", INSERTION)));
-    } else {
-      setValue(inputValue);
-      setModeState(SEARCH);
-      setMessage(null);
-    }
   };
 
   const handleRefresh = () => {
     setList(genUniqueRandNumList(12, 1, 100).join(','));
     setBSTCase(UNCHECKED);
     setModeState(INSERTION);
-    setMessage(null);
   };
 
   return (
@@ -168,7 +151,10 @@ function AVLTreeParam({ alg,
           buttonName="Insert"
           formClassName="formLeft"
           value={list}
-          handleSubmit={handleInsert}
+          setValue={(val) => {
+            setList(val);
+            setModeState(INSERTION);
+          }}
           refreshFunction={handleRefresh}
           onInputChange={uncheckCases}
         />
@@ -178,7 +164,10 @@ function AVLTreeParam({ alg,
           formClassName="formRight"
           buttonName="Search"
           value={value}
-          handleSubmit={handleSearch}
+          setValue={(val) => {
+            setValue(val);
+            setModeState(SEARCH);
+          }}
           onInputChange={uncheckCases}
         />
       </div>
@@ -230,7 +219,6 @@ function AVLTreeParam({ alg,
 
 AVLTreeParam.propTypes = {
   alg: PropTypes.string.isRequired,
-  mode: PropTypes.string.isRequired,
   list: PropTypes.string,
   value: PropTypes.string,
 };

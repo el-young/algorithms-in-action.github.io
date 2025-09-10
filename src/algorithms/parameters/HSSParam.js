@@ -2,84 +2,76 @@
 import React, { useState, useContext, useEffect } from 'react';
 import StringParamForm from './helpers/StringParamForm';
 import '../../styles/Param.scss';
-import PropTypes from 'prop-types'; // Import this for URL Param
+import PropTypes from 'prop-types';
 import { stringValidCheck } from './helpers/InputValidators';
 import { errorParamMsg } from './helpers/ParamMsg';
 import { GlobalContext } from '../../context/GlobalState';
 import { GlobalActions } from '../../context/actions';
 
 const defaultProps = {
-    mode: "search",
-    string: 'dcaccdddabddac',
-    pattern: 'ddac'
+  mode: "search",
+  string: "dcaccdddabddac",
+  pattern: "ddac",
 };
 
 function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
   const { dispatch } = useContext(GlobalContext);
-  const [message, setMessage] = useState(null);
-  const [string, setString] = useState(urlString || defaultProps.string);
-  const [pattern, setPattern] = useState(urlPattern || defaultProps.pattern);
+
+  // state as strings
+  const [ string, setString ]   = useState(urlString || defaultProps.string);
+  const [ pattern, setPattern ] = useState(urlPattern || defaultProps.pattern);
+  const [ message, setMessage ] = useState(null);
 
   useEffect(() => {
-    dispatch(GlobalActions.LOAD_ALGORITHM, {
-      name: alg,
-      mode: defaultProps.mode,
+    const { valid, errors } = validateAll();
 
-      url: {
-        alg,
+    if (valid) {
+      dispatch(GlobalActions.LOAD_ALGORITHM, {
+        name: alg,
         mode: defaultProps.mode,
-        string,
-        pattern,
-      },
-
-      nodes: [string, pattern],
-    });
-  }, [string, pattern]);
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const stringVal = e.target[0].value;
-    const patternVal = e.target[1].value;
-
-    const { valid: stringOk, error: stringErr } = stringValidCheck(stringVal);
-    const { valid: patternOk, error: patternErr } = stringValidCheck(patternVal);
-
-    if (stringOk && patternOk) {
-      setString(stringVal);
-      setPattern(patternVal);
+        url: { alg, mode: defaultProps.mode, string, pattern },
+        nodes: [string, pattern],
+      });
       setMessage(null);
     } else {
-      if (!stringOk) {
-        setMessage(errorParamMsg(stringErr));
-      } else {
-        setMessage(errorParamMsg(patternErr));
-      }
+      setMessage(errorParamMsg(errors.join("\n")));
     }
+  }, [string, pattern]);
+
+  const validateAll = () => {
+    const errors = [];
+
+    const { valid: stringOk, error: stringErr } = stringValidCheck(string);
+    if (!stringOk) errors.push(stringErr);
+
+    const { valid: patternOk, error: patternErr } = stringValidCheck(pattern);
+    if (!patternOk) errors.push(patternErr);
+
+    return { valid: errors.length === 0, errors };
   };
-  
+
   return (
     <>
       <div className="form">
         <StringParamForm
           buttonName="Search"
           formClassName="formLeft"
-          handleSubmit={handleSubmit}
           string={string}
           pattern={pattern}
+          setString={setString}
+          setPattern={setPattern}
         />
       </div>
-      {/* render success/error message */}
       {message}
     </>
   );
 }
 
-// Define the prop types for URL Params
 HSSParam.propTypes = {
   alg: PropTypes.string.isRequired,
-  mode: PropTypes.string.isRequired,
-  string: PropTypes.string.isRequired,
-  pattern: PropTypes.string.isRequired
+  mode: PropTypes.string,
+  string: PropTypes.string,
+  pattern: PropTypes.string,
 };
 
 export default HSSParam;
