@@ -36,6 +36,7 @@ const defaultProps = {
 
 function UFParam({
   alg,
+  mode : urlMode,
   union: urlUnion,
   value: urlValue,
   compress,
@@ -44,7 +45,7 @@ function UFParam({
 
   const [ unions, setUnions ] = useState(urlUnion || defaultProps.union);
   const [ value, setValue ]   = useState(urlValue || defaultProps.value);
-  const [ mode, setMode ]     = useState(defaultProps.mode);
+  const [ mode, setMode ]     = useState(urlMode  || defaultProps.mode);
   const [ isPathCompression, setIsPathCompression ] = useState(
     compress === "true"
       ? true
@@ -54,7 +55,6 @@ function UFParam({
   );
   const [ message, setMessage ] = useState(null);
 
-  // Validate and dispatch when state changes
   useEffect(() => {
     const { valid, errors } = validateAll();
 
@@ -109,16 +109,21 @@ function UFParam({
     const errors = [];
 
     if (mode === UNION) {
-      const check = dualValueParamValidCheck(unions, N_ARRAY);
-      if (!check.valid) errors.push(`${check.error} ${EXAMPLES.UF_UNION}`);
+      const { valid, error } = dualValueParamValidCheck(unions, "Union field", N_ARRAY);
+      if (!valid) errors.push(`${error}\n${EXAMPLES.UF_UNION}`);
     }
 
     if (mode === FIND) {
       const num = parseInt(value, 10);
+
       if (Number.isNaN(num)) {
-        errors.push(`${ERRORS.GEN_ONLY_POSITIVE_INTEGERS} ${EXAMPLES.UF_FIND}`);
+        errors.push(
+          `${ERRORS.GEN_ONLY_POSITIVE_INTEGERS("find value field")}\n${EXAMPLES.UF_FIND}`
+        );
       } else if (!N_ARRAY.includes(value)) {
-        errors.push(`${ERRORS.GEN_NUMBER_NOT_IN_DOMAIN} ${EXAMPLES.UF_FIND}`);
+        errors.push(
+          `${ERRORS.GEN_NUMBER_NOT_IN_DOMAIN("find value field")}\n${EXAMPLES.UF_FIND}`
+        );
       } else if (!algorithm?.visualisers) {
         errors.push(
           ERRORS.GEN_BUILD_VISUALISER_FIRST("union find array", UNION)
@@ -128,8 +133,6 @@ function UFParam({
 
     return { valid: errors.length === 0, errors };
   };
-
-  const handleChange = () => setIsPathCompression((prevState) => !prevState);
 
   return (
     <>
@@ -161,7 +164,7 @@ function UFParam({
         control={
           <BlueRadio
             checked={isPathCompression}
-            onChange={handleChange}
+            onChange={() => setIsPathCompression(true)}
             name="on"
           />
         }
@@ -172,7 +175,7 @@ function UFParam({
         control={
           <BlueRadio
             checked={!isPathCompression}
-            onChange={handleChange}
+            onChange={() => setIsPathCompression(false)}
             name="off"
           />
         }

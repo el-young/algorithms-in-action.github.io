@@ -5,10 +5,6 @@ import '../../../styles/Param.scss';
 import ParamFormRefresh from './ParamFormRefresh';
 import ParamForm from './ParamForm';
 
-// symmetric // Parent im assuming this is for random node gen
-// circular  // Parent im assuming this is for random node gen
-// unweighted, // Might not be relevant if parent visualiser makes edges unweighted when we pass in 1-2
-
 // TODO: Needs some CSS polish.
 function EuclideanMatrixParams({
     start,                      // Node to start search from
@@ -29,6 +25,7 @@ function EuclideanMatrixParams({
     onCoordCellSubmit,
     onEdgeCellSubmit,
     genRandGraph,
+    undirected=true,
 }) {
 
     // Derive coord/edge matrix from string encoding
@@ -50,8 +47,8 @@ function EuclideanMatrixParams({
             i >= 1 && i <= coordMatrix.length &&
             j >= 1 && j <= coordMatrix.length
             ) {
-            edgeMatrix[i - 1][j - 1] = w;
-            edgeMatrix[j - 1][i - 1] = w; // undirected assumption
+                edgeMatrix[i - 1][j - 1] = w;
+                if (undirected) edgeMatrix[j - 1][i - 1] = w;
             }
         });
     }
@@ -61,194 +58,202 @@ function EuclideanMatrixParams({
     // BFS/DFS.
     return ( 
     <>
-        {/* forms for sizeForRandomGen/start/end buttons for heuristic and weight calculation modes */}
-        {genRandGraph != null && (
-            <div className="outerInput">
-                <label className="inputText" htmlFor="sizeInput">
-                Random Graph Size:&nbsp;
-                </label>
-                <input
-                    id="randSizeInput"
-                    type="text"
-                    placeholder="e.g. 10"
-                    onBlur={(e) => genRandGraph(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-                            e.target.blur(); // Trigger callback in onBlur
-                            // otherwise enter then leave input triggers twice
-                        }
-                    }}
-                />
-            </div>
-        )}
+    <div className="euclid-matrix-container">
+        <div className="top-row">
+            {/* forms for sizeForRandomGen/start/end buttons for heuristic and weight calculation modes */}
+            {genRandGraph != null && (
+                <div className="outerInput">
+                    <label className="inputText" htmlFor="sizeInput">
+                    Random Graph Size:&nbsp;
+                    </label>
+                    <input
+                        id="randSizeInput"
+                        type="text"
+                        placeholder="e.g. 10"
+                        onBlur={(e) => genRandGraph(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                e.target.blur(); // Trigger callback in onBlur
+                                // otherwise enter then leave input triggers twice
+                            }
+                        }}
+                    />
+                </div>
+            )}
 
-        {start != null && (
-            <div className="outerInput">
-                <label className="inputText" htmlFor="startInput">
-                Start:&nbsp;
-                </label>
-                <input
-                    key={start} // re-mount when prop changes
-                    id="startInput"
-                    type="text"
-                    defaultValue={start}
-                    onBlur={(e) => setStart(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-                            e.target.blur();
-                        }
-                    }}
-                />
-            </div>
-        )}
+            {start != null && (
+                <div className="outerInput">
+                    <label className="inputText" htmlFor="startInput">
+                    Start:&nbsp;
+                    </label>
+                    <input
+                        key={start} // re-mount when prop changes
+                        id="startInput"
+                        type="text"
+                        defaultValue={start}
+                        onBlur={(e) => setStart(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                e.target.blur();
+                            }
+                        }}
+                    />
+                </div>
+            )}
 
-        {weightCalc != null && (
-            <button
-                className="algorithmBtn"
-                onClick={changeWeightCalc}
-            >
-                Weights: {weightCalc}
-            </button>
-        )}
+            {end != null && (
+                <div className="outerInput">
+                    <label className="inputText" htmlFor="endInput">
+                        End:&nbsp;
+                    </label>
+                    <input
+                        key={end} // re-mount when prop changes
+                        id="endInput"
+                        type="text"
+                        defaultValue={end}
+                        onBlur={(e) => setEnd(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                e.target.blur();
+                            }
+                        }}
+                    />
+                </div>
+            )}
 
-        {heuristic != null && (
-            <button
-                className="algorithmBtn"
-                onClick={changeHeuristic}
-            >
-                Heuristic: {heuristic}
-            </button>
-        )}
+            {weightCalc != null && (
+                <button
+                    className="algorithmBtn"
+                    onClick={changeWeightCalc}
+                >
+                    Weights: {weightCalc}
+                </button>
+            )}
 
-        {end != null && (
-            <div className="outerInput">
-                <label className="inputText" htmlFor="endInput">
-                    End:&nbsp;
-                </label>
-                <input
-                    key={end} // re-mount when prop changes
-                    id="endInput"
-                    type="text"
-                    defaultValue={end}
-                    onBlur={(e) => setEnd(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-                            e.target.blur();
-                        }
-                    }}
-                />
-            </div>
-        )}
-
-        {coords != null && (
-        <div>
-            <ParamForm
-                formClassName='formLeft'
-                buttonName="Set&nbsp;X-Y&nbsp;Coordinates"
-                value={coords}
-                setValue={setCoords}
-                onInputChange={onCoordsChange}
-            />
+            {heuristic != null && (
+                <button
+                    className="algorithmBtn"
+                    onClick={changeHeuristic}
+                >
+                    Heuristic: {heuristic}
+                </button>
+            )}
         </div>
-        )}
 
-        {edges != null && (
-        <div>
-            <ParamForm
-                formClassName='formLeft'
-                buttonName="Set&nbsp;Edges/Weights"
-                value={edges}
-                setValue={setEdges}
-                onInputChange={onEdgesChange}
-            />
-        </div>
-        )}
-
-        <div style={{ display: "flex", gap: "2rem" }}>
-            {/* Coordinate Table */}
+        <div className="param-forms">
             {coords != null && (
-                <>
-                <h4>Coordinates (X,Y)</h4>
-                <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
-                    <thead>
-                    <tr>
-                        <th>Node</th>
-                        <th>X</th>
-                        <th>Y</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {coordMatrix.map(([x, y], i) => (
-                        <tr key={i}>
-                        <td>{i + 1}</td>
-                        {[x, y].map((val, j) => (
-                            <td key={j}>
-                            <input
-                                key={`${i}-${j}-${val}`} // force remount on value change
-                                type="text"
-                                defaultValue={val}
-                                style={{ width: "3rem" }}
-                                onBlur={(e) => onCoordCellSubmit(i, j, e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        e.target.blur();
-                                    }
-                                }}
-                            />
-                            </td>
-                        ))}
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                </>
+            <div>
+                <ParamForm
+                    formClassName='formLeft'
+                    buttonName="Set&nbsp;X-Y&nbsp;Coordinates"
+                    value={coords}
+                    setValue={setCoords}
+                    onInputChange={onCoordsChange}
+                />
+            </div>
             )}
 
-            {/* Edge Matrix */}
             {edges != null && (
-                <>
-                <h4>Edges (0, 1)</h4>
-                <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
-                    <thead>
-                    <tr>
-                        <th>Node</th>
-                        {Array.from({ length: coordMatrix.length }, (_, j) => (
-                        <th key={j}>{j + 1}</th>
-                        ))}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {edgeMatrix.map((row, i) => (
-                        <tr key={i}>
-                        <td>{i + 1}</td>
-                        {row.map((val, j) => (
-                            <td key={j}>
-                            <input
-                                key={`${i}-${j}-${val}`} // force remount on value change
-                                type="text"
-                                defaultValue={val}
-                                style={{ width: "3rem" }}
-                                onBlur={(e) => onEdgeCellSubmit(i, j, e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        e.target.blur();
-                                    }
-                                }}
-                            />
-                            </td>
-                        ))}
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                </>
+            <div>
+                <ParamForm
+                    formClassName='formLeft'
+                    buttonName="Set&nbsp;Edges/Weights"
+                    value={edges}
+                    setValue={setEdges}
+                    onInputChange={onEdgesChange}
+                />
+            </div>
             )}
         </div>
+
+        <div className="matrix-wrapper">
+            <div style={{ display: "flex", gap: "2rem" }}>
+                {/* Coordinate Table */}
+                {coords != null && (
+                    <div className='coord-matrix'>
+                    <h4>Coordinates (X,Y)</h4>
+                    <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
+                        <thead>
+                        <tr>
+                            <th>Node</th>
+                            <th>X</th>
+                            <th>Y</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {coordMatrix.map(([x, y], i) => (
+                            <tr key={i}>
+                            <td>{i + 1}</td>
+                            {[x, y].map((val, j) => (
+                                <td key={j}>
+                                <input
+                                    key={`${i}-${j}-${val}`} // force remount on value change
+                                    type="text"
+                                    defaultValue={val}
+                                    style={{ width: "3rem" }}
+                                    onBlur={(e) => onCoordCellSubmit(i, j, e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            e.target.blur();
+                                        }
+                                    }}
+                                />
+                                </td>
+                            ))}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    </div>
+                )}
+
+                {/* Edge Matrix */}
+                {edges != null && (
+                    <div className='edge-matrix'>
+                    <h4>Edges (X, Y)</h4>
+                    <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
+                        <thead>
+                        <tr>
+                            <th>Node</th>
+                            {Array.from({ length: coordMatrix.length }, (_, j) => (
+                            <th key={j}>{j + 1}</th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {edgeMatrix.map((row, i) => (
+                            <tr key={i}>
+                            <td>{i + 1}</td>
+                            {row.map((val, j) => (
+                                <td key={j}>
+                                <input
+                                    key={`${i}-${j}-${val}`} // force remount on value change
+                                    type="text"
+                                    defaultValue={val}
+                                    style={{ width: "3rem" }}
+                                    onBlur={(e) => onEdgeCellSubmit(i, j, e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            e.target.blur();
+                                        }
+                                    }}
+                                />
+                                </td>
+                            ))}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
     </>
     )
 }
@@ -272,7 +277,8 @@ EuclideanMatrixParams.propTypes = {
   onEdgesChange: PropTypes.func,
   onCoordCellSubmit: PropTypes.func,
   onEdgeCellSubmit: PropTypes.func,
-  genRandGraph: PropTypes.func
+  genRandGraph: PropTypes.func,
+  undirected: PropTypes.bool
 };
 
 export default EuclideanMatrixParams;

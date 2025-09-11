@@ -53,6 +53,10 @@ const MAX_Y_COORD = 15;
 const MIN_WEIGHT  = 1;
 const MAX_WEIGHT  = 20;
 
+// Validation logic for edges
+const SYMMETRIC   = true;
+const SELF_LOOPS  = false;
+
 function ASTParam({
   alg,
   mode,
@@ -146,24 +150,35 @@ function ASTParam({
   const validateAll = () => {
     const errors = [];
 
-    const coordCheck = coordsValidCheck(coords);
-    if (!coordCheck.valid) errors.push(coordCheck.error);
-    else {
+    // Coordinates
+    const coordCheck = coordsValidCheck(coords, "Coordinates field");
+    if (!coordCheck.valid) {
+      errors.push(`${coordCheck.error}\n${EXAMPLES.GEN_COORDS}`);
+    } else {
       const numNodes = coords.split(",").length;
 
-      const edgeCheck = edgesValidCheck(edges, numNodes);
-      if (!edgeCheck.valid) errors.push(edgeCheck.error);
-      
-      const startCheck = startEndValidCheck(start, numNodes);
-      if (!startCheck.valid) errors.push(startCheck.error);
+      // Edges
+      const edgeCheck = edgesValidCheck(edges, "Edges field", numNodes, SYMMETRIC, SELF_LOOPS);
+      if (!edgeCheck.valid) {
+        errors.push(`${edgeCheck.error}\n${EXAMPLES.GEN_EDGES}`);
+      }
 
-      const endCheck = startEndValidCheck(end, numNodes, true);
-      if (!endCheck.valid) errors.push(endCheck.error);
+      // Start node
+      const startCheck = startEndValidCheck(start, "Start node field", numNodes);
+      if (!startCheck.valid) {
+        errors.push(`${startCheck.error}\n${EXAMPLES.GEN_SINGLE_INT}`);
+      }
+
+      // End node(s)
+      const endCheck = startEndValidCheck(end, "End nodes field", numNodes, true);
+      if (!endCheck.valid) {
+        errors.push(`${endCheck.error}\n${EXAMPLES.GRAPH_ENDNODES}`);
+      }
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   };
 
@@ -186,7 +201,7 @@ function ASTParam({
   };
 
   const genRandGraph = (size) => {
-    const check = singleNumberValidCheck(size);
+    const check = singleNumberValidCheck(size, "Random graph size");
     if (!check.valid) {
       setMessage(errorParamMsg(check.error));
       return;
@@ -215,11 +230,11 @@ function ASTParam({
   };
 
   const handleCoordSubmit = (newCoords) => {
-    const coordCheck = coordsValidCheck(newCoords);
+    const coordCheck = coordsValidCheck(newCoords, "Coordinates field");
     // Do not update coords if invalid, matrix
     // component in EuclicdMatrix is observing.
     if (!coordCheck.valid) {
-      setMessage(errorParamMsg(coordCheck.error), EXAMPLES.GEN_COORDS);
+      setMessage(errorParamMsg(`${coordCheck.error}\n${EXAMPLES.GEN_COORDS}`));
       return;
     }
     setCoords(newCoords);
@@ -234,18 +249,18 @@ function ASTParam({
       // must be exactly 3 parts: a, b, w
       .filter(parts => parts.length === 3 && parts.every(n => Number.isInteger(n)))
       // keep only if endpoints are strictly less than numNodes
-      .filter(([a, b]) => a < numNodes && b < numNodes)
+      .filter(([a, b]) => a <= numNodes && b <= numNodes)
       .map(([a, b, w]) => `${a}-${b}-${w}`)
       .join(",")
     );
   }
 
   const handleEdgeSubmit = (newEdges) => {
-    const edgeCheck = edgesValidCheck(newEdges, coords.split(",").length);
+    const edgeCheck = edgesValidCheck(newEdges, "Edges field", coords.split(",").length, SYMMETRIC, SELF_LOOPS);
     // Do not update coords if invalid, matrix
     // component in EuclicdMatrix is observing.
     if (!edgeCheck.valid) {
-      setMessage(errorParamMsg(edgeCheck.error, EXAMPLES.GEN_EDGES));
+      setMessage(errorParamMsg(`${edgeCheck.error}\n${EXAMPLES.GEN_EDGES}`));
       return;
     }
     setEdges(newEdges);
@@ -274,17 +289,14 @@ function ASTParam({
   // these callbacks are so matrix changes update the
   // string encoding.
   const onCoordCellSubmit = (row, col, val) => {
-    const check = singleNumberValidCheck(val);
-    if (val !== "" && !check.valid) {
-       setMessage(
-          errorParamMsg(
-            `${check.error} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "coordinate")}`
-        ));
-      }
-    else {
+    const check = singleNumberValidCheck(val, "Coordinate cell");
+    if (!check.valid) {
+       setMessage(errorParamMsg(
+        `${check.error} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "coordinate")}`
+       ))
+    } else {
       const coordsArray = coords.split(",").map(pair => pair.split("-").map(Number));
-      if (val === "") coordsArray.splice(row, 1); // delete coord
-      else coordsArray[row][col] = Number(val);
+      coordsArray[row][col] = Number(val);
       const newCoords = coordsArray.map(([cx, cy]) => `${cx}-${cy}`).join(",");
       setCoords(newCoords);
 
@@ -298,7 +310,7 @@ function ASTParam({
         // must be exactly 3 parts: a, b, w
         .filter(parts => parts.length === 3 && parts.every(n => Number.isInteger(n)))
         // keep only if endpoints are strictly less than numNodes
-        .filter(([a, b]) => a < numNodes && b < numNodes)
+        .filter(([a, b]) => a <= numNodes && b <= numNodes)
         .map(([a, b, w]) => `${a}-${b}-${w}`)
         .join(",")
       );
@@ -306,25 +318,28 @@ function ASTParam({
   };
 
   const onEdgeCellSubmit = (row, col, val) => {
-    const check = singleNumberValidCheck(val);
+    const check = singleNumberValidCheck(val, "Edge cell");
     if (!check.valid) {
-      setMessage(
-        errorParamMsg(
-          `${check.error} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "edge")}`
+      setMessage(errorParamMsg(
+        `${check.error} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "edge")}`
       ));
-    } else if (row === col && Number(val) != 0) {
-      setMessage(
-        errorParamMsg(
-          `${ERRORS.GEN_GRAPH_NO_LOOPS} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "edge")}`
+    } else if (!SELF_LOOPS && row === col && Number(val) != 0) {
+      setMessage(errorParamMsg(
+        `${ERRORS.GEN_GRAPH_NO_LOOPS("Edges field")} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "edge")}`
       ));
     } else {
       let edgeList = edges.trim()
       ? edges.split(",").map(e => e.split("-").map(Number))
       : [];
 
-      // Remove any existing entry for this edge
+      // Remove any existing entry for this edge (and its reverse if symmetric)
       edgeList = edgeList.filter(
-        ([a, b]) => !((a === row + 1 && b === col + 1) || (a === col + 1 && b === row + 1))
+          SYMMETRIC
+          ? ([a, b]) => !(
+              (a === row + 1 && b === col + 1) ||
+              (a === col + 1 && b === row + 1)
+            )
+          : ([a, b]) => !(a === row + 1 && b === col + 1)
       );
 
       // insert new only if val is not 0

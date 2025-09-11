@@ -1,198 +1,118 @@
 @import './global.scss';
 
-.matrixContainer {
+.euclid-matrix-container {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 1.5rem;
 
-  .matrixButtonContainer {
-    background-color: var(--mid-control-param-matrix-btn-bg);
+  // Row for Start / Size / End / Buttons
+  .top-row {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    @include border-radius(6px);
-    margin-right: 16px;
-    border: 1px solid var(--system-border);
-    width: 170px;
-    font-size: 12px;
-    
-    button {
-      margin-top: 2px;
-    }
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: nowrap;
 
-    .algorithmBtn {
-      text-transform: uppercase;
-      @include removeBtnStyling;
-      height: 35px;
-      margin-top: 1px;
+    .outerInput {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: none;
+      background: transparent;
+      white-space: nowrap;
 
-      @include border-radius(1px);
-      text-align: Left;
-      cursor: pointer;
-      padding: 6px;
-      color: var(--mid-control-param-btn-active-col);
-
-    }
-
-    .algorithmBtn:hover {
-      transition: .4s;
-      background: var(--mid-control-param-btn-bg-col-hover);
-    }
-    .algorithmBtn:active {
-      transition: .2s;
-      background: var(--mid-control-param-btn-bg-col-active);
-    }
-
-  }
-
-  .sLineButtonContainer {
-    background-color: var(--mid-control-param-matrix-btn-bg);
-    display: flex;
-    flex-direction: row; /* Change to row to display buttons in a single line */
-    justify-content: flex-start; 
-    padding: 10px 0px;
-    @include border-radius(6px);
-    white-space: nowrap;
-    text-align: center;
-    height: 10px;
-    font-size: 12px;
-    margin-bottom: 20px;
-
-    .sizeBtn {
-      text-transform: uppercase;
-      display: inline-block;
-      @include removeBtnStyling;
-      padding: 6px 6px 12px;
-      margin-top: 1px;
-      width: 50px;
-      height: 35px;
-      font-size: 20px;
-      @include border-radius(1px);
-      text-align: Center;
-      cursor: pointer;
-      padding: 6px;
-      color: var(--mid-control-param-btn-active-col);
-
-    }
-
-    .sizeBtn:hover {
-      transition: .4s;
-      background: var(--mid-control-param-btn-bg-col-hover);
-    }
-    .sizeBtn:active {
-      transition: .2s;
-      background: var(--mid-control-param-btn-bg-col-active);
-    }
-
-    .size {
-      text-transform: uppercase;
-      display: inline-block;
-      padding: 6px 6px 12px;
-      margin-top: 5.5px;
-      width: 95px;
-      color: var(--mid-control-param-btn-active-col);
-    }
-
-    .matrixBtn {
-      text-transform: uppercase;
-      @include removeBtnStyling;
-      width: 100px;
-      height: 35px;
-      @include border-radius(1px);
-      text-align: center;
-      cursor: pointer;
-      padding: 4px;
-      color: var(--mid-control-param-btn-active-col);
-
-    }
-
-    .matrixBtn:hover {
-      transition: .4s;
-      background: var(--mid-control-param-btn-bg-col-hover);
-    }
-    .matrixBtn:active {
-      transition: .2s;
-      background: var(--mid-control-param-btn-bg-col-active);
-    }
-
-    .greyRoundBtn {
-      text-align: right;
-      margin-top: 3.5px;
-      width: 35px;
-      height: 35px;
-    }
-
-    
-    
-  }
-
-  .table {
-    overflow: auto;
-    
-    th {
-      color: var(--mid-control-param-matrix-header-font);
-      background-color: var(--mid-control-param-matrix-header-bg);
-      width: 32px;
-      height: 24px;
-      font-size: 1.1em;
-      font-weight: 500;
-      @include border-radius(2px);
-      cursor: default;
-    }
-    th,
-    td {
-      border: 1px solid var(--system-border);
+      label.inputText {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--mid-header-font);
+      }
 
       input {
-        width: 32px;
-        height: 24px;
-        text-align: center;
+        width: 90px;
+        padding: 0.25rem 0.4rem;
+        font-size: 0.85rem;
+        border: 1px solid #666;
+        border-radius: 4px;
+        background: var(--mid-control-param-matrix-cell-bg);
         color: var(--mid-control-param-matrix-cell-font);
-        background-color: var(--mid-control-param-matrix-cell-bg);
-        border: none;
-        -webkit-appearance: none;
-        outline: none;
-        @include border-radius(2px);
 
-
+        &:focus {
+          border-color: var(--sky);
+          outline: none;
+          box-shadow: 0 0 3px rgba(34, 137, 255, 0.3);
+        }
       }
     }
 
-    
-  }
-
-  .coord {
-    margin-left: 0px;
-
-    .titles {
-      color: var(--mid-control-param-matrix-header-font);
-      background-color: var(--mid-control-param-matrix-header-bg);
-      font-size: 1.1em;
-      font-weight: 500;
+    .algorithmBtn {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border: none;
+      background: var(--mid-control-param-blue-btn-col);
+      color: #fff;
+      cursor: pointer;
       white-space: nowrap;
-      display: flex;
-      margin-left: 2px;
-      margin-right: 2px;
-      padding: 2px;
+      transition: background-color 0.25s ease, color 0.25s ease;
 
+      &:hover {
+        background: var(--mid-control-param-btn-bg-col-hover);
+      }
     }
   }
 
-  .edge {
-    margin-left: 50px;
-
-    .titles {
-      color: var(--mid-control-param-matrix-header-font);
-      background-color: var(--mid-control-param-matrix-header-bg);
-      font-size: 1.1em;
-      font-weight: 500;
-      white-space: nowrap;
-      display: flex;
-      margin-left: 2px;
-      margin-right: 2px;
-      padding: 2px;
-    }
+  .param-forms {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  
+  // Matrices
+  .matrix-wrapper {
+    display: flex;
+    gap: 1rem;
 
+    .coord-matrix,
+    .edge-matrix {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--mid-header-font);
+      }
+
+      table {
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        color: var(--mid-control-param-matrix-cell-font);
+
+        th, td {
+          border: 1px solid var(--mid-control-param-border);
+          padding: 0.2rem 0.4rem;
+          text-align: center;
+        }
+
+        input {
+          width: 2.2rem;
+          text-align: center;
+          border: 1px solid var(--mid-control-param-border);
+          border-radius: 4px;
+          padding: 0.15rem 0.25rem;
+          background: var(--mid-control-param-matrix-cell-bg);
+          color: var(--mid-control-param-matrix-cell-font);
+          transition: border-color 0.2s ease;
+
+          &:focus {
+            border-color: var(--sky);
+            outline: none;
+            box-shadow: 0 0 2px rgba(34, 137, 255, 0.3);
+          }
+        }
+      }
+    }
+  }
 }

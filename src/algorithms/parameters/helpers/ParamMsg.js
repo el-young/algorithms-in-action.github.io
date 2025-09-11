@@ -16,16 +16,14 @@ function ParamMsg({ logWarning, logTag, logMsg }) {
   const warningCol = '#FB3640';
   const successCol = '#52AA5E';
 
-  // Scroll logContainer into view
+  // Scroll logContainer into view on every render
   const ref = useRef(null);
-
-  // Every render scroll into view.
   useEffect(() => {
     if (!ref.current) return;
 
     ref.current.scrollIntoView({
       behavior: 'smooth',
-      block: 'center', // TODO: email
+      block: 'center',
       inline: 'nearest',
     });
   });
@@ -39,6 +37,7 @@ function ParamMsg({ logWarning, logTag, logMsg }) {
       >
         { logTag }
       </span>
+      <br />
       <span className="logText">{ logMsg }</span>
     </div>
   );
@@ -58,12 +57,11 @@ export default ParamMsg;
  * @param {string} reason optional provided, if not provide, use default value
  */
 export const errorParamMsg = (
-  reason,
-  example,
+  reason
 ) => (
   <ParamMsg
     logWarning
     logTag="Oops..."
-    logMsg={`${reason}\n${example ? example : ''}`}
+    logMsg={`${reason}\n`}
   />
 );

@@ -257,7 +257,6 @@ export const GlobalActions = {
   // that should call LOAD_ALGORITHM. Other components that want to call LOAD_ALGORITHM
   // should go through INDIRECTION_INTO_PARAM.
   LOAD_ALGORITHM: (state, params) => {
-    console.log(params)
     const {
       controller,
       name,

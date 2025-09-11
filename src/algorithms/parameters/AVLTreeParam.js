@@ -54,14 +54,12 @@ const BlueRadio = withStyles({
 function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
   const { algorithm, dispatch } = useContext(GlobalContext);
 
-  // Keep everything as strings
   const [ list, setList ]           = useState(urlList || defaultProps.list);
   const [ value, setValue ]         = useState(urlValue || defaultProps.value);
   const [ bstCase, setBSTCase ]     = useState(UNCHECKED);
   const [ modeState, setModeState ] = useState(defaultProps.mode);
   const [ message, setMessage ]     = useState(null);
 
-  // Validate + dispatch whenever inputs change
   useEffect(() => {
     const { valid, errors } = validateAll();
 
@@ -98,12 +96,14 @@ function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
   const validateAll = () => {
     const errors = [];
 
-    let { valid, error } = commaSeparatedNumberListValidCheck(list);
-    if (!valid) errors.push(error, EXAMPLES.GEN_LIST_PARAM);
+    // Validate insertion list
+    let { valid, error } = commaSeparatedNumberListValidCheck(list, "Insert mode field");
+    if (!valid) errors.push(`${error}\n${EXAMPLES.GEN_LIST_PARAM}`);
 
-    ({ valid, error } = singleNumberValidCheck(value));
+    // Validate search value
+    ({ valid, error } = singleNumberValidCheck(value, "Search mode field"));
     if (!valid) {
-      errors.push(error + " " + EXAMPLES.GEN_SINGLE_INT);
+      errors.push(`${error}\n${EXAMPLES.GEN_SINGLE_INT}`);
     } else if (modeState === SEARCH && algorithm?.visualisers?.graph?.instance.isEmpty()) {
       errors.push(ERRORS.GEN_BUILD_VISUALISER_FIRST('tree', INSERTION));
     }
@@ -113,8 +113,6 @@ function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
       errors
     };
   };
-
-  const uncheckCases = () => setBSTCase({ ...UNCHECKED });
 
   const handleCaseChange = (e) => {
     let nums = list.split(',').map(Number).filter((n) => !isNaN(n));
@@ -137,12 +135,6 @@ function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
     setModeState(INSERTION);
   };
 
-  const handleRefresh = () => {
-    setList(genUniqueRandNumList(12, 1, 100).join(','));
-    setBSTCase(UNCHECKED);
-    setModeState(INSERTION);
-  };
-
   return (
     <>
       <div className="form">
@@ -155,8 +147,12 @@ function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
             setList(val);
             setModeState(INSERTION);
           }}
-          refreshFunction={handleRefresh}
-          onInputChange={uncheckCases}
+          refreshFunction={() => {
+            setList(genUniqueRandNumList(12, 1, 100).join(','));
+            setBSTCase(UNCHECKED);
+            setModeState(INSERTION);
+          }}
+          onInputChange={() => setBSTCase({ ...UNCHECKED })}
         />
 
         {/* Search input */}
@@ -168,7 +164,7 @@ function AVLTreeParam({ alg, list: urlList, value: urlValue }) {
             setValue(val);
             setModeState(SEARCH);
           }}
-          onInputChange={uncheckCases}
+          onInputChange={() => setBSTCase({ ...UNCHECKED })}
         />
       </div>
 

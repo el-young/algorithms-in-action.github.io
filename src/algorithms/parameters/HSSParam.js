@@ -16,8 +16,6 @@ const defaultProps = {
 
 function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
   const { dispatch } = useContext(GlobalContext);
-
-  // state as strings
   const [ string, setString ]   = useState(urlString || defaultProps.string);
   const [ pattern, setPattern ] = useState(urlPattern || defaultProps.pattern);
   const [ message, setMessage ] = useState(null);
@@ -29,7 +27,15 @@ function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
       dispatch(GlobalActions.LOAD_ALGORITHM, {
         name: alg,
         mode: defaultProps.mode,
-        url: { alg, mode: defaultProps.mode, string, pattern },
+
+        url: { 
+          alg, 
+          mode: 
+          defaultProps.mode, 
+          string, 
+          pattern 
+        },
+        
         nodes: [string, pattern],
       });
       setMessage(null);
@@ -41,10 +47,10 @@ function HSSParam({ alg, string: urlString, pattern: urlPattern }) {
   const validateAll = () => {
     const errors = [];
 
-    const { valid: stringOk, error: stringErr } = stringValidCheck(string);
+    const { valid: stringOk, error: stringErr } = stringValidCheck(string, "String input field");
     if (!stringOk) errors.push(stringErr);
 
-    const { valid: patternOk, error: patternErr } = stringValidCheck(pattern);
+    const { valid: patternOk, error: patternErr } = stringValidCheck(pattern, "Pattern input field");
     if (!patternOk) errors.push(patternErr);
 
     return { valid: errors.length === 0, errors };
