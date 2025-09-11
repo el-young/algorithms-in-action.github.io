@@ -17,8 +17,14 @@ import { GlobalContext } from '../../../context/GlobalState';
 import { GlobalActions } from '../../../context/actions';
 import '../../../styles/LineNumHighLight.scss';
 import LineExplanation from './LineExplanation';
-import { markdownKeywords } from './MarkdownKeywords';
+import { FontSizeContext } from '../../../context/FontSize';
 
+const markdownKeywords = {
+  keyword: ['for', 'while', 'if', 'else', 'in', 'each', 'do',
+    'repeat', 'until', 'Empty', 'Locate', 'of', 'not', 'downto', 'and', 'or', 'return', 'NotFound'],
+  operator: ['<', '>', '+', '-'],
+  arrow: ['<-'],
+};
 
 function blockContainsBookmark(algorithm, block) {
   for (const line of algorithm.pseudocode[block]) {
@@ -231,24 +237,27 @@ const PADDING_LINE = 2;
 
 const LineNumHighLight = () => {
   const { algorithm, dispatch } = useContext(GlobalContext);
-  const fontID = 'code-container';
-
+  const { fontSizeIncrease } = useContext(FontSizeContext);
 
   const { index, cl } = pseudocodeBlock(algorithm, dispatch, 'Main', 0);
   const pseudoCodePad = pseudoCodePadding(index + 1, PADDING_LINE);
 
   return (
     <div className="line-light">
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap" rel="stylesheet" />
-      <div className="code-container" id={fontID}>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap"
+        rel="stylesheet"
+      />
+      <div
+        className="code-container"
+        style={{ fontSize: `${fontSizeIncrease}px` }}
+      >
         {cl}
         {pseudoCodePad}
       </div>
-      {algorithm.lineExplanation ? (
-        <LineExplanation
-          explanation={algorithm.lineExplanation}
-        />
-      ) : ''}
+      {algorithm.lineExplanation && (
+        <LineExplanation explanation={algorithm.lineExplanation} />
+      )}
     </div>
   );
 };

@@ -5,18 +5,24 @@ import PropTypes from 'prop-types';
 
 import CodeBlock from '../../../markdown/code-block';
 import { GlobalContext } from '../../../context/GlobalState';
+import { FontSizeContext } from '../../../context/FontSize';
 
 function MoreInfo() {
   const { algorithm } = useContext(GlobalContext);
+  const { fontSizeIncrease } = useContext(FontSizeContext);
   const [explanation, setExplanation] = useState('');
-  const fontID = 'textAreaExtra';
 
   useEffect(() => {
-    fetch(algorithm.extraInfo).then((res) => res.text()).then((text) => setExplanation(text));
+    fetch(algorithm.extraInfo)
+      .then((res) => res.text())
+      .then((text) => setExplanation(text));
   }, [algorithm.extraInfo]);
 
   return (
-    <div className="textArea" id={fontID}>
+    <div
+      className="textArea"
+      style={{ fontSize: `${fontSizeIncrease}px` }}
+    >
       <ReactMarkDown
         source={explanation}
         escapeHtml={false}

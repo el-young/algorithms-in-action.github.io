@@ -4,13 +4,14 @@ import { GlobalContext } from '../../../context/GlobalState';
 import { GlobalActions } from '../../../context/actions';
 import ControlButton from '../../common/ControlButton';
 import { ReactComponent as Cancel } from '../../../assets/icons/cancel.svg';
+import { FontSizeContext } from '../../../context/FontSize';
 
 function LineExplanation({ explanation }) {
   const { dispatch } = useContext(GlobalContext);
-  const fontID = 'lineExplanation';
-
+  const { fontSizeIncrease } = useContext(FontSizeContext);
+  
   return (
-    <div className="lineExplanation" id={fontID}>
+    <div className="lineExplanation" style={{ fontSize: `${fontSizeIncrease}px` }}>
       <div className="lEHeader">
         <div className="lEtitle">Explanation</div>
         <ControlButton

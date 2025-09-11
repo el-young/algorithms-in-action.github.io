@@ -1,65 +1,43 @@
-/* eslint-disable max-len */
+// TopPanel.js
 import React, { useState } from 'react';
-import Header from './Header';
+import { useHistory } from 'react-router-dom';
+import '../../../styles/TopPanel.scss';
+import logo from '../../../assets/logo.svg';
+import AlgorithmMenu from './AlgorithmMenu';
 import Settings from './Settings';
-import {
-  setTheme,
-  setAlgoTheme,
-  getSystemColorMode,
-  getWithExpiry,
-  ALGO_THEME_KEY,
-  ALGO_THEME_1,
-  SYSTEM_THEME_KEY,
-} from './helper';
 
 function TopPanel() {
-  const [isSettingVisible, setSettingVisible] = useState(false);
+  const history = useHistory();
 
-  const onSetting = () => setSettingVisible((prev) => !prev);
+  const handleLogoClick = () => history.push('/mainmenu');
+  const handleAboutClick = () => history.push('/about');
 
-  const initAlgoColor = () => {
-    const algoTheme = getWithExpiry(ALGO_THEME_KEY);
-    if (algoTheme === null) {
-      setAlgoTheme(ALGO_THEME_1);
-      return ALGO_THEME_1;
-    }
-    return algoTheme;
-  };
-
-  const [colorMode, setColorMode] = useState(initAlgoColor());
-  const handleColorModeChange = (id) => {
-    setColorMode(id);
-    setAlgoTheme(id);
-  };
-
-  const initSystemColor = () => {
-    const theme = getWithExpiry(SYSTEM_THEME_KEY);
-    if (theme === null) {
-      const sys = getSystemColorMode();
-      setTheme(sys);
-      return sys;
-    }
-    return theme;
-  };
-
-  const [systemColor, setSystemColor] = useState(initSystemColor());
-  const handleSystemColorChange = (id) => {
-    setSystemColor(id);
-    setTheme(id);
-  };
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <div className="top-panel">
-      {isSettingVisible && (
-        <Settings
-          onSetting={onSetting}
-          colorMode={colorMode}
-          handleColorModeChange={handleColorModeChange}
-          systemColor={systemColor}
-          handleSystemColorChange={handleSystemColorChange}
-        />
-      )}
-      <Header onSetting={onSetting} />
+      <div className="top-left">
+        <button type="button" className="nav-btn" onClick={() => setMenuOpen((o) => !o)}>
+          Menu
+        </button>
+        {menuOpen && <AlgorithmMenu onClose={() => setMenuOpen(false)} />}
+      </div>
+
+      <div className="top-center">
+        <button className="headerTitle" type="button" onClick={handleLogoClick}>
+          <img src={logo} alt="logo" />
+          <h1>Algorithms in Action</h1>
+        </button>
+      </div>
+
+      <div className="top-right">
+        <button type="button" onClick={handleAboutClick}>About</button>
+        <button type="button" className="nav-btn" onClick={() => setSettingsOpen((o) => !o)}>
+          Settings
+        </button>
+        {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+      </div>
     </div>
   );
 }

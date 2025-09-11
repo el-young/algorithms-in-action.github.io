@@ -1,15 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ReactMarkDown from 'react-markdown/with-html';
 import toc from 'remark-toc';
-
 import PropTypes from 'prop-types';
+
 import CodeBlock from '../../../markdown/code-block';
 import { GlobalContext } from '../../../context/GlobalState';
+import { FontSizeContext } from '../../../context/FontSize';
 
 function Instruction() {
   const { algorithm } = useContext(GlobalContext);
+  const { fontSizeIncrease } = useContext(FontSizeContext);
   const [explanation, setExplanation] = useState('');
-  const fontID = 'textAreaExplanation';
 
   useEffect(() => {
     let text = '# Instructions\n\n';
@@ -23,7 +24,10 @@ function Instruction() {
   }, [algorithm.instructions]);
 
   return (
-    <div className="textArea" id={fontID}>
+    <div
+      className="textArea"
+      style={{ fontSize: `${fontSizeIncrease}px` }}
+    >
       <ReactMarkDown
         source={explanation}
         escapeHtml={false}

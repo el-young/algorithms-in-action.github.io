@@ -96,7 +96,6 @@ body {
 	}
 }
 
-.left-panel,
 .right-panel,
 .mid-panel,
 .bottom-panel {
@@ -104,10 +103,6 @@ body {
   display: flex;
   flex-direction: column;
   overflow: auto;
-}
-
-.left-panel {
-  background-color: var(--left-bg);
 }
 
 .mid-panel {
