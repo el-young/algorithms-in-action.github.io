@@ -210,7 +210,7 @@ function ASTParam({
     // Generating graph is expensive, clamp requests.
     const newSize = parseInt(size, 10);
     if (newSize < 1 || newSize > 50) {
-      setMessage(errorParamMsg(ERRORS.GEN_GRAPH_GEN_OUT_OF_RANGE(1, 50)));
+      setMessage(errorParamMsg(ERRORS.GEN_GRAPH_GEN_OUT_OF_RANGE("Random graph size", 1, 50)));
       return;
     }
 
