@@ -109,7 +109,7 @@ function ASTParam({
         // Each of the values should be strings.
         url : {
           alg,
-          mode,
+          mode: defaultProps.mode,
           start,
           end,
           coords,
