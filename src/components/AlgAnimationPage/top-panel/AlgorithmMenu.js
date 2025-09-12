@@ -123,7 +123,7 @@ function AlgorithmMenu({ onClose }) {
                         key={algo.shorthand}
                         className={
                           algorithm.id.name === algo.shorthand
-                            ? "algoItem active"
+                            ? "algoItem algoActive"
                             : "algoItem"
                         }
                         type="button"
@@ -147,7 +147,7 @@ function AlgorithmMenu({ onClose }) {
                   type="button"
                   className={
                     algorithm.id.name === algo.shorthand
-                      ? "algoItem active"
+                      ? "algoItem algoActive"
                       : "algoItem"
                   }
                   onClick={() => {

@@ -133,7 +133,6 @@ $leftFontSize: 0.89em;
       overflow: hidden;
 
       &:hover {
-        border-left: $border solid var(--left-item-border-hover);
         background-color: var(--left-item-bg-hover);
       }
     }
@@ -155,14 +154,13 @@ $leftFontSize: 0.89em;
     overflow: hidden;
   }
 
-  .algoItem.active .algoItemContent {
-    border-left: $border solid var(--left-item-border-active);
+  .algoItem.algoActive {
+    background-color: var(--left-bg);
     color: var(--left-item-font-active);
-    background-color: var(--left-search-bg);
-  }
 
-  .algoItem.active .algoItemContent:hover {
-    border-left: $border solid var(--left-item-border-active);
-    color: var(--left-item-font-active);
+    .algoItemContent {
+      border-left: $border solid var(--left-item-border-active);
+      background-color: var(--left-item-bg-hover);
+    }
   }
 }
