@@ -1,0 +1,476 @@
+@import "../../common/stylesheet/index";
+
+
+// --graph-node-fill: orange;
+
+/*
+@keyframes colorChange {
+
+  /*  
+  Animation for changing the color of the node
+  
+  0% {
+    fill: var(--stable_color);
+  }
+
+  50% {
+    fill: var(--breath_color);
+  }
+
+  100% {
+    fill: var(--stable_color);
+  }
+}
+  */
+
+
+// AVL tree selction color
+.select_rect {
+  //fill: var(--graph-node-circle-fill);
+  fill: none;
+  stroke: var(--graph-select_color-fill);
+  stroke-width: 5;
+
+}
+
+.select_color {
+  fill: var(--graph-select_color-fill);
+}
+
+.graph {
+  flex: 1;
+
+  align-self: stretch;
+  --stable_color: var(--graph-node-circle-fill);
+  --breath_color: var(--graph-node-circle-fill);
+
+  //AVL tree parameters
+  --circle-radius: 37px;
+  --text-fontsize: calc(var(--circle-radius)/37*35);
+  --height-Yposition: calc(var(--circle-radius)/37*-50);
+  --stroke-width: calc(var(--circle-radius)/37*7);
+
+
+  .node {
+
+    .circle {
+      fill: var(--graph-node-circle-fill);
+      //--breath_color: --graph-node-circle-fill-rgb1;
+      //animation: colorChange 3s infinite; // anmation
+
+      stroke: var(--graph-node-circle-stroke);
+      stroke-width: 1;
+
+      r: var(--circle-radius);
+      //transform: scale(0.5);
+      /* Shrinks the size by 50% */
+      //transform-origin: center;
+    }
+
+    .select_circle_t {
+      --stroke-color: var(--graph-node-circle-fill-selected);
+      fill: var(--graph-node-circle-fill);
+      stroke: var(--stroke-color);
+
+      r: var(--circle-radius);
+      stroke-width: 5;
+
+      //shadow display
+      filter: drop-shadow(0 0 5px var(--stroke-color));
+    }
+
+    .select_circle_f {
+      --stroke-color: var(--graph-select_color-fill);
+      fill: var(--graph-node-circle-fill);
+      stroke: var(--stroke-color);
+
+      r: var(--circle-radius);
+      stroke-width: 5;
+
+      //shadow display
+      filter: drop-shadow(0 0 5px var(--stroke-color));
+    }
+
+    .rect {
+      fill: var(--graph-node-circle-fill);
+      stroke: var(--graph-node-circle-stroke);
+      stroke-width: 1;
+    }
+
+    .id {
+      fill: var(--graph-node-id-fill);
+      dominant-baseline: central;
+      text-anchor: middle;
+      font-size: var(--text-fontsize); // font size for labels inside nodes
+    }
+
+    .weight {
+      fill: var(--graph-node-weight-fill);
+      font-weight: bold;
+      font-size: 15px;
+      alignment-baseline: central;
+      text-anchor: left;
+    }
+
+    .height {
+      //--breath_color: var(--graph-node-height-fill);
+      //animation: colorChange 1.5s 3; // anmation
+
+      fill: var(--graph-node-id-fill);
+
+      // font-weight: bold;
+      // font-size: 15px;
+      // alignment-baseline: central;
+      dominant-baseline: central;
+      text-anchor: middle;
+      font-size: var(--text-fontsize); // font size for labels inside nodes
+      transform: translateY(var(--height-Yposition));
+      // text-anchor: left;
+    }
+
+    .AVL_TID {
+      fill: var(--graph-node-AVL_TID-fill);
+      //--breath_color: var(--graph-node-AVL_TID-fill);
+      //animation: colorChange 1.5s infinite; // anmation
+      // font-weight: bold;
+      // font-size: 15px;
+      // alignment-baseline: central;
+      dominant-baseline: central;
+      text-anchor: middle;
+      font-size: 40px; // font size for labels inside nodes
+      // transform: translateY(-40px);
+      transform: translate(+50px, -35px);
+      // text-anchor: left;
+    }
+
+    // XXX best change this so it's consistent with "selected" in array colors!
+    // Use selected:sky, selected1:leaf, selected2:apple, selected3:peach
+    // Need to fix controller code etc accordingly (eg
+    // graphSearchColours.js) as this change will result in different
+    // colors.
+    &.selected {
+      .circle {
+        fill: var(--sky);
+        stroke: var(--sky);
+      }
+
+      .rect {
+        fill: var(--sky);
+        stroke: var(--sky);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-selected);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-selected);
+      }
+
+    }
+
+    &.visited0 {
+      .circle {
+        fill: var(--graph-node-circle-fill-visited0);
+        stroke: var(--graph-node-circle-stroke-visited0);
+      }
+
+      .rect {
+        fill: var(--graph-node-circle-fill-visited0);
+        stroke: var(--graph-node-circle-stroke-visited0);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-visited);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-visited0);
+      }
+
+    }
+
+    // XXX best change this so it's consistent with "select" in array colors!
+    // Use visited:sky, visited1:leaf, visited2:apple, visited3:peach
+    // Need to fix controller code etc accordingly (eg
+    // graphSearchColours.js) as this change will result in different
+    // colors.
+    &.visited {
+      .circle {
+        fill: var(--apple);
+        stroke: var(--apple);
+      }
+
+      .rect {
+        fill: var(--apple);
+        stroke: var(--apple);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-visited);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-visited);
+      }
+
+    }
+
+    &.sorted {
+      .circle {
+        fill: var(--graph-node-circle-fill-sorted);
+
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-sorted);
+      }
+    }
+
+    &.visited1 {
+      .circle {
+        fill: var(--leaf);
+        stroke: var(--leaf);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-visited);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-visited1);
+      }
+
+    }
+
+    &.visited2 {
+      .circle {
+        fill: var(--peach);
+        stroke: var(--peach);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-visited);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-visited2);
+      }
+    }
+
+    &.visited3 {
+      .circle {
+        fill: var(--apple);
+        stroke: var(--apple);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-visited);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-visited3);
+      }
+    }
+
+    &.visited4 {
+      .circle {
+        fill: var(--sky);
+        stroke: var(--sky);
+      }
+
+      .id {
+        fill: var(--graph-node-id-fill-visited);
+      }
+
+      .height {
+        fill: var(--graph-node-circle-fill-visited4);
+      }
+
+    }
+  }
+
+  .edge {
+    .line {
+      stroke: var(--graph-edge-line-stroke);
+      // For various trees we don't care much about edges so having them
+      // thin is fine but for some graph algorithms in particular we
+      // want to highlight edges and change their color to we want
+      // reasonable thick edges; this is a compromise (maybe we could
+      // add an interface to adjust it for different algorithms XXX)
+      stroke-width: var(--stroke-width); // width of edges in graphs
+      fill: none;
+
+
+      &.directed {
+        marker-end: url(#markerArrow);
+      }
+    }
+
+    .weight {
+      fill: var(--graph-edge-line-weight-fill);
+      alignment-baseline: baseline;
+      text-anchor: middle;
+      // font size for labels in nodes - should be linked to node radius
+      // XXX but currently isn't.  Another difficulty was node sizes
+      // were adjusted depending on coordinate list - now deleted.
+      // font-size: 15px;
+      font-size: 35px;
+    }
+
+    // XXX best change this so it's consistent with "select" in array colors!
+    // Use visited:sky, visited1:leaf, visited2:apple, visited3:peach
+    // Need to fix controller code accordingly (eg
+    // graphSearchColours.js) as this change will result in different
+    // colors.
+    &.selected {
+      .line {
+        stroke: var(--sky);
+
+        &.directed {
+          marker-end: url(#markerArrowSelected);
+        }
+      }
+
+      .weight {
+        fill: var(--sky);
+      }
+    }
+
+    &.sorted {
+      .line {
+        stroke-width: 0;
+      }
+    }
+
+    &.visited {
+      .line {
+        stroke: var(--leaf);
+
+        &.directed {
+          marker-end: url(#markerArrowVisited);
+        }
+      }
+
+      .weight {
+        fill: var(--leaf);
+      }
+    }
+
+    &.visited1 {
+      .line {
+        stroke: var(--leaf);
+
+        &.directed {
+          marker-end: url(#markerArrowVisited1);
+        }
+      }
+
+      .weight {
+        fill: var(--leaf);
+      }
+    }
+
+    &.visited2 {
+      .line {
+        stroke: var(--peach);
+
+        &.directed {
+          marker-end: url(#markerArrowVisited2);
+        }
+      }
+
+      .weight {
+        fill: var(--peach);
+      }
+    }
+
+    &.visited3 {
+      .line {
+        stroke: var(--apple);
+
+        &.directed {
+          marker-end: url(#markerArrowVisited3);
+        }
+      }
+
+      .weight {
+        fill: var(--apple);
+      }
+    }
+
+    &.visited4 {
+      .line {
+        stroke: var(--sky);
+
+        &.directed {
+          marker-end: url(#markerArrowVisited4);
+        }
+      }
+
+      .weight {
+        fill: var(--sky);
+      }
+    }
+
+  }
+
+  .arrow {
+    fill: var(--graph-arrow-fill);
+
+    &.selected {
+      fill: var(--sky);
+    }
+
+    // XXX best change this so it's consistent with "select" in array colors!
+    // Use visited:sky, visited1:leaf, visited2:apple, visited3:peach
+    // Need to fix controller code accordingly (eg
+    // graphSearchColours.js) as this change will result in different
+    // colors.
+    &.visited {
+      fill: var(--leaf);
+    }
+
+    &.visited1 {
+      fill: var(--leaf);
+    }
+
+    &.visited2 {
+      fill: var(--peach);
+    }
+
+    &.visited3 {
+      fill: var(---apple);
+    }
+
+    &.visited4 {
+      fill: var(--sky);
+    }
+  }
+
+  // X, Y axis
+  .axis {
+    stroke: var(--axis);
+    stroke-width: 1;
+    fill: none;
+  }
+
+  .axisLabel {
+    // font-size: 15px;
+    font-size: 35px;
+    font-weight: 1;
+  }
+
+  .text {
+    fill: var(--array-2d-row-col-value-color); // to support light and dark mode
+    dominant-baseline: central;
+    text-anchor: middle;
+    font-size: 35px;
+    font-family: Menlo, "Liberation Mono", Courier, monospace;
+  }
+
+  .pseudocode_function {
+    fill: var(--right-code-function-font);
+    dominant-baseline: central;
+  }
+}
