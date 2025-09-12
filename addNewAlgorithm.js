@@ -18,13 +18,20 @@ const { default: algorithms, AlgorithmCategoryList } = require('./src/algorithms
           {default as x, y, z} or {x, y, z} will not allow the script to copy the algorithm that
           uses those exports. This is definitely something that can be implemented later on since
           in some cases it can be annoying to make multiple files just to statisfy this constraint.
+
         - Change of names for properties in master list will cause problems, we are
           inserting an entry, so we use the property names at the time of writing. I have
           created a map PROPERTY_NAMES which should be modified if the property names in
           masterList.js is changed.
-        - Main concern with the script is copying, in order to copy an algorithm
-          we must cp the source files thus this feature is naturally coupled heavily
-          to the file system structure at the time of writing, namely src/directory/*.
+
+        - The main fragility of this script lies in how it handles copying. To duplicate an algorithm, the script
+          must copy the source files directly, which means it is tightly coupled to the file system structure 
+          at the time of writing (specifically src/directory/*). If any files reference the algorithm ID 
+          in the master list via hardcoded keys, this script can break related features. At the time of writing, 
+          parameter components did exactly that, requiring users to run the script and then manually 
+          update all hardcoded references in the parameter component file. This issue has since been 
+          resolved—parameter components no longer rely on such hardcoded keys, reducing the coupling and fragility.
+
         - In any case if the script can not be made to work or you want an easy fix
           the functionality to select an algorithm to copy can be removed by commenting out
           certain sections. See COPY and END COPY markers (match casing). Uncomment the section
@@ -297,8 +304,9 @@ Note: The default port should be 3000 but it may be something else, see npm star
     await retrieveDataFromUser();
 
     /* Run commands */
-    // shell.exec(`git switch ${NAME_OF_DEV_BRANCH}`);
-    // shell.exec(`git pull`);
+    // No longer included see comments at top.
+    shell.exec(`git switch ${NAME_OF_DEV_BRANCH}`);
+    shell.exec(`git pull`);
     shell.exec(`git switch -c add_${algorithmId}`);
 
     // New entry in master list
@@ -346,6 +354,9 @@ Note: The default port should be 3000 but it may be something else, see npm star
             let addToTemplate = {};
             Object.keys(exportName).forEach((mode) => {
                 let innerExportName = exportName[mode];
+                // Seems too verbose? There is many ways to validly write
+                // syntax for an export line in JS, this regex tries to cover those 
+                // unorthodox ways.
                 const pat = new RegExp(
                     String.raw`export\s*\{\s*default\s+as\s+${innerExportName}\s*\}\s*from\s*['"]([^'"]+)['"]\s*;?`,
                 );
@@ -513,10 +524,14 @@ Note: The default port should be 3000 but it may be something else, see npm star
     Enter the full algorithm name:
     Bubble Sort
     What category does your algorithm fall under?
+    (Will display numbered list of categories)
     (Enter a number or enter a new category)
     Sort
-    Enter the short ID (used as filename perfix in src/algorithms/*):
+    Enter the short ID (used as filename perfix in src/algorithms/* and the key in master list):
     bsort
+    Enter the algorithm to copy:
+    (Will display numbered list of algorithms to copy)
+    1
     Enter search keywords (space-seperated):
     n^2 slow hello world
     Do you want to deploy your algorithm to the site immediately? (y/n)
