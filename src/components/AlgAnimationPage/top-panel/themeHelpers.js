@@ -28,22 +28,6 @@ export const allSystemCol = Object.values(SYSTEM_THEMES).map((theme) => ({
   secondary: theme === SYSTEM_THEMES.LIGHT ? "white" : "black",
 }));
 
-// Algo theme buttons
-const algoColorMap = {
-  [ALGO_THEMES.DEFAULT]: ["positive1", "negative1", "hint1", "back-up1"],
-  [ALGO_THEMES.GREEN]:   ["positive2", "negative2", "hint2", "back-up2"],
-  [ALGO_THEMES.RED]:     ["cyan", "purple", "green", "yellow"],
-  [ALGO_THEMES.GREY]:    ["white", "grey", "dark-grey", "black"],
-};
-
-export const allColBtn = Object.entries(algoColorMap).map(([id, [primary, secondary, third, fourth]]) => ({
-  id,
-  primary,
-  secondary,
-  third,
-  fourth,
-}));
-
 /* System Theme */
 
 // Apply theme and save to local storage (for next session retrieval)

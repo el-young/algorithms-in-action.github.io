@@ -99,69 +99,36 @@ $outerBorder: 2px;
   display: grid;
   grid-template-columns: repeat(4, $btnSize);
   grid-gap: 12px;
-  grid-auto-rows: minmax($btnSize, auto);
   justify-content: center;
   align-content: center;
 
   .colorBtn {
     @include removeBtnStyling;
-    border: $outerBorder solid var(--top-setting-bg);
-    display:flex;
-    @include border-radius(50%);
-    cursor: pointer;
-    padding: $outerBorder;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: $btnSize;
     width: $btnSize;
-
-    .left {
-      @include border-radii($btnSize,0,0,$btnSize);
-      height: $btnSize - ($outerBorder * 4);
-      width: calc($btnSize /2) - ($outerBorder * 2);
-    }
-
-    .right {
-      height: $btnSize - ($outerBorder * 4);
-      width: calc($btnSize /2) - ($outerBorder * 2);
-      @include border-radii(0,$btnSize,$btnSize,0);
-
-    }
-    .top-left {
-    
-      @include border-radii($btnSize,0,0,0);
-      height: calc($btnSize/2) - ($outerBorder * 4);
-      width: calc($btnSize/2)  - ($outerBorder * 2);
-    }
-    .top-right {
-      
-      @include border-radii(0,$btnSize,0,0);
-      height: calc($btnSize/2) - ($outerBorder * 4);
-      width: calc($btnSize/2)  - ($outerBorder * 2);
-    }
-    .bottom-right {
-      
-      height: calc($btnSize/2) - ($outerBorder * 4);
-      width: calc($btnSize/2)  - ($outerBorder * 2);
-      @include border-radii(0,0,$btnSize,0);
-
-    }
-    .bottom-left {
-      
-      height: calc($btnSize/2) - ($outerBorder * 4);
-      width: calc($btnSize/2)  - ($outerBorder * 2);
-      @include border-radii(0,0,0,$btnSize);
-
-    }
-
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
   }
 
-  .active {
-    border: $outerBorder solid $sigBlue;
+  .colorBtn.active {
+    border: 2px solid $sigBlue;
   }
 
-
+  // Small gap between blue highlight and circle.
+  .color-quadrant-circle,
+  .color-circle {
+    width: calc(100% - 6px);
+    height: calc(100% - 6px);
+    border-radius: 50%;
+    overflow: hidden;
+  }
 }
 
-// asdassda
 .settingFooter {
   display: flex;
 
@@ -181,69 +148,4 @@ $outerBorder: 2px;
     background-color: var(--top-setting-btn-bg-active);
 
   }
-}
-
-
-.red {
-  background: #ee0970;
-}
-
-.yellow {
-  background: #F1F511;
-}
-
-.green {
-  background: #059847;
-}
-
-.pink {
-  background: #e42fd5;
-}
-
-.cyan {
-  background: #0d9eae;
-}
-
-.blue {
-  background: #2289ff;
-}
-
-.black {
-  background: #505050;
-}
-
-.grey {
-  background: #BBBBBB;
-}
-
-.purple {
-  background: #9f2fe4;
-}
-
-.white {
-  background: #cecece;
-}
-.positive1{
-  background: #83d489;
-}
-.positive2{
-  background: #258bff;
-}
-.negative1{
-  background: #e85c49;
-}
-.negative2{
-  background: #ec0a70;
-}
-.hint1{
-  background: #fbd651;
-}
-.hint2{
-  background: #f2c988;
-}
-.back-up1{
-  background: #4768de;
-}
-.back-up2{
-  background: #308f45;
 }

@@ -1,0 +1,131 @@
+@import './global.scss';
+
+.color-quadrant-circle {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+
+    .quadrant {
+        width: 50%;
+        height: 50%;
+    }
+
+    .top-left {
+        border-top-left-radius: 50%;
+    }
+    .top-right {
+        border-top-right-radius: 50%;
+    }
+    .bottom-left {
+        border-bottom-left-radius: 50%;
+    }
+    .bottom-right {
+        border-bottom-right-radius: 50%;
+    }
+
+    /* Splitter lines */
+    .splitter {
+        position: absolute;
+        background: var(--system-border);
+    }
+
+    .splitter.vertical {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 2px;
+        transform: translateX(-50%);
+    }
+
+    .splitter.horizontal {
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 2px;
+        transform: translateY(-50%);
+    }
+
+    // Example color classes if you want
+    // a quadrant to show a different color
+    // the class you inject as a property into Circle
+    // must exist here.
+    .red {
+        background: #ee0970;
+    }
+
+    .yellow {
+        background: #F1F511;
+    }
+
+    .green {
+        background: #059847;
+    }
+
+    .pink {
+        background: #e42fd5;
+    }
+
+    .cyan {
+        background: #0d9eae;
+    }
+
+    .blue {
+        background: #2289ff;
+    }
+
+    .black {
+        background: #505050;
+    }
+
+    .grey {
+        background: #BBBBBB;
+    }
+
+    .purple {
+        background: #9f2fe4;
+    }
+
+    .white {
+        background: #cecece;
+    }
+    
+    .positive1 {
+        background: #83d489;
+    }
+
+    .positive2 {
+        background: #258bff;
+    }
+
+    .negative1 {
+        background: #e85c49;
+    }
+
+    .negative2 {
+        background: #ec0a70;
+    }
+
+    .hint1 {
+        background: #fbd651;
+    }
+
+    .hint2 {
+        background: #f2c988;
+    }
+
+    .back-up1 {
+        background: #4768de;
+    }
+
+    .back-up2 {
+        background: #308f45;
+    }
+
+    .dark-grey {
+        background: darkgrey;
+    }
+}

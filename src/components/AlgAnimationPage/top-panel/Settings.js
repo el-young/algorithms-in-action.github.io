@@ -1,22 +1,21 @@
 /* eslint-disable import/no-mutable-exports */
-import React, { useContext, useState } from 'react';
-import '../../../styles/Settings.scss';
-import PropTypes from 'prop-types';
-import { ReactComponent as Font } from '../../../assets/icons/font.svg';
-import { FontSizeContext } from '../../../context/FontSize';
-import { setAlgoTheme, setSystemTheme, allColBtn, allSystemCol } from './themeHelpers';
+import React, { useContext, useState } from "react";
+import PropTypes from "prop-types";
+import "../../../styles/Settings.scss";
+import { ReactComponent as Font } from "../../../assets/icons/font.svg";
+import { FontSizeContext } from "../../../context/FontSize";
+import { setAlgoTheme, setSystemTheme, SYSTEM_THEMES, ALGO_THEMES, getSystemTheme, getAlgoTheme } from "./themeHelpers";
+import { ColorQuadrantCircle, ColorCircle } from "./ColoredCircles";
 
-const DEFAULT_COL = 0;
-
-const mode = () => DEFAULT_COL;
+const mode = () => 0;
 export { mode };
 
 function Settings({ onClose }) {
   const { increaseFont } = useContext(FontSizeContext);
 
   // Track active selections locally
-  const [colorMode, setColorMode] = useState('');
-  const [systemColor, setSystemColor] = useState('');
+  const [colorMode, setColorMode] = useState(getAlgoTheme());
+  const [systemColor, setSystemColor] = useState(getSystemTheme());
 
   return (
     <div className="settingsContainer">
@@ -45,31 +44,69 @@ function Settings({ onClose }) {
       <div className="setContainer">
         <div className="label">Data Structures</div>
         <div className="algoCol">
-          {allColBtn.map(({ primary, secondary, third, fourth, id }) => (
-            <button
-              key={id}
-              id={id}
-              type="button"
-              className={colorMode === id ? 'colorBtn active' : 'colorBtn'}
-              onClick={() => {
-                setAlgoTheme(id);
-                setColorMode(id);
-              }}
-            >
-              <table>
-                <tbody>
-                  <tr>
-                    <th className={`top-left ${primary}`} />
-                    <th className={`top-right ${secondary}`} />
-                  </tr>
-                  <tr>
-                    <td className={`bottom-left ${third}`} />
-                    <td className={`bottom-right ${fourth}`} />
-                  </tr>
-                </tbody>
-              </table>
-            </button>
-          ))}
+          <button
+            type="button"
+            className={colorMode === ALGO_THEMES.DEFAULT ? "colorBtn active" : "colorBtn"}
+            onClick={() => {
+              setAlgoTheme(ALGO_THEMES.DEFAULT);
+              setColorMode(ALGO_THEMES.DEFAULT);
+            }}
+          >
+            <ColorQuadrantCircle
+              topLeft="positive1"
+              topRight="negative1"
+              bottomLeft="hint1"
+              bottomRight="back-up1"
+            />
+          </button>
+
+          <button
+            type="button"
+            className={colorMode === ALGO_THEMES.GREEN ? "colorBtn active" : "colorBtn"}
+            onClick={() => {
+              setAlgoTheme(ALGO_THEMES.GREEN);
+              setColorMode(ALGO_THEMES.GREEN);
+            }}
+          >
+            <ColorQuadrantCircle
+              topLeft="positive2"
+              topRight="negative2"
+              bottomLeft="hint2"
+              bottomRight="back-up2"
+            />
+          </button>
+
+          <button
+            type="button"
+            className={colorMode === ALGO_THEMES.RED ? "colorBtn active" : "colorBtn"}
+            onClick={() => {
+              setAlgoTheme(ALGO_THEMES.RED);
+              setColorMode(ALGO_THEMES.RED);
+            }}
+          >
+            <ColorQuadrantCircle
+              topLeft="cyan"
+              topRight="purple"
+              bottomLeft="green"
+              bottomRight="yellow"
+            />
+          </button>
+
+          <button
+            type="button"
+            className={colorMode === ALGO_THEMES.GREY ? "colorBtn active" : "colorBtn"}
+            onClick={() => {
+              setAlgoTheme(ALGO_THEMES.GREY);
+              setColorMode(ALGO_THEMES.GREY);
+            }}
+          >
+            <ColorQuadrantCircle
+              topLeft="white"
+              topRight="grey"
+              bottomLeft="dark-grey"
+              bottomRight="black"
+            />
+          </button>
         </div>
       </div>
 
@@ -77,21 +114,27 @@ function Settings({ onClose }) {
       <div className="setContainer">
         <div className="label">System</div>
         <div className="algoCol">
-          {allSystemCol.map(({ primary, secondary, id }) => (
-            <button
-              key={id}
-              id={id}
-              type="button"
-              className={systemColor === id ? 'colorBtn active' : 'colorBtn'}
-              onClick={() => {
-                setSystemTheme(id);
-                setSystemColor(id);
-              }}
-            >
-              <span className={`left ${primary}`} />
-              <span className={`right ${secondary}`} />
-            </button>
-          ))}
+          <button
+            type="button"
+            className={systemColor === SYSTEM_THEMES.LIGHT ? "colorBtn active" : "colorBtn"}
+            onClick={() => {
+              setSystemTheme(SYSTEM_THEMES.LIGHT);
+              setSystemColor(SYSTEM_THEMES.LIGHT);
+            }}
+          >
+            <ColorCircle colorClass="white" />
+          </button>
+
+          <button
+            type="button"
+            className={systemColor === SYSTEM_THEMES.DARK ? "colorBtn active" : "colorBtn"}
+            onClick={() => {
+              setSystemTheme(SYSTEM_THEMES.DARK);
+              setSystemColor(SYSTEM_THEMES.DARK);
+            }}
+          >
+            <ColorCircle colorClass="black" />
+          </button>
         </div>
       </div>
 
@@ -105,8 +148,8 @@ function Settings({ onClose }) {
   );
 }
 
-export default Settings;
-
 Settings.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
+
+export default Settings;
