@@ -213,6 +213,7 @@ function ASTParam({
       setMessage(errorParamMsg(ERRORS.GEN_GRAPH_GEN_OUT_OF_RANGE("Random graph size", 1, 50)));
       return;
     }
+    setMessage(null);
 
     // Generate new coords and edges
     const { coords, edges } = generateGraph(
@@ -237,6 +238,7 @@ function ASTParam({
       setMessage(errorParamMsg(`${coordCheck.error}\n${EXAMPLES.GEN_COORDS}`));
       return;
     }
+    setMessage(null);
     setCoords(newCoords);
 
     // Fix edges for user, too tedious.
@@ -263,6 +265,7 @@ function ASTParam({
       setMessage(errorParamMsg(`${edgeCheck.error}\n${EXAMPLES.GEN_EDGES}`));
       return;
     }
+    setMessage(null);
     setEdges(newEdges);
   }
 
@@ -295,6 +298,7 @@ function ASTParam({
         `${check.error} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "coordinate")}`
        ))
     } else {
+      setMessage(null);
       const coordsArray = coords.split(",").map(pair => pair.split("-").map(Number));
       coordsArray[row][col] = Number(val);
       const newCoords = coordsArray.map(([cx, cy]) => `${cx}-${cy}`).join(",");
@@ -328,6 +332,14 @@ function ASTParam({
         `${ERRORS.GEN_GRAPH_NO_LOOPS("Edges field")} ${ERRORS.GEN_GRAPH_MATRIX_ROW_COL(row + 1, col + 1, "edge")}`
       ));
     } else {
+      // UseEffect and thus validate all will not run
+      // and clear error message if no state changes, for example
+      // user enter 1 in diagonal (no loop error shows), user
+      // fixes error, this runs but nothing about edges has changed
+      // so no useEffect call -> no clear message. Best practice
+      // to just call setMessage(null) in callbacks that can generate
+      // them.
+      setMessage(null);
       let edgeList = edges.trim()
       ? edges.split(",").map(e => e.split("-").map(Number))
       : [];
