@@ -6,68 +6,58 @@
   justify-content: space-between;
   padding: 0.25rem 1rem;
   background: var(--top-header-bg);
+}
 
-  .top-left {
-    flex: 0 0 auto;
-  }
+.top-left {
+  flex: 0 0 auto;
+}
 
-  .top-center {
-    flex: 1;
+.top-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+
+  .headerTitle {
+    @include removeBtnStyling;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 
-    .headerTitle {
-      @include removeBtnStyling;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-
-      img {
-        margin-right: 8px;
-        width: 1.6em;
-        height: 1.6em;
-      }
-
-      h1 {
-        color: var(--top-header-btn);
-        font-size: 0.9em;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
+    img {
+      margin-right: 8px;
+      width: 1.6em;
+      height: 1.6em;
     }
-  }
 
-  .top-right {
-    flex: 0 0 auto;
-    display: flex;
-    gap: 1rem;
-  }
-
-  button {
+    h1 {
       color: var(--top-header-btn);
-      font-size: 0.75em;
-      font-weight: 600;
-      background: transparent;
-      border: none;
-      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 700;
       text-transform: uppercase;
-      padding: 0.25rem 0.5rem;
-      border-bottom: 3px solid transparent;
-      transition: border-color 0.25s ease, color 0.25s ease;
-      
-      &:hover {
-        border-bottom: 3px solid var(--top-header-btn-hg);
-      }
     }
+  }
+}
 
-    .dropdown-wrapper {
-      position: relative;
-    }
+.top-right {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 1rem;
+}
 
-    .dropdown-container {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 1000;
-    }
+.nav-btn,
+.top-right > button {
+  color: var(--top-header-btn);
+  font-size: 0.75em;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.25s ease, color 0.25s ease;
+
+  &:hover {
+    border-bottom: 3px solid var(--top-header-btn-hg);
+  }
 }

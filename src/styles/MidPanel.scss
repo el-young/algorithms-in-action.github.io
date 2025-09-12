@@ -39,3 +39,24 @@ $midTitleFontSize: 0.89em;
 
 }
 
+.popup-content {
+  background: var(--mid-anim-bg) !important;
+}
+
+.shareArea {
+  color: var(--mid-header-font);
+  p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    height: fit-content;
+    overflow: hidden;
+  }
+
+  button {
+    background-color: var(--right-header-bg);
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    color: var(--left-font);;
+  }
+}

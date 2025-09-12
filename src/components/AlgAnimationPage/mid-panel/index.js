@@ -3,7 +3,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { GlobalContext } from '../../../context/GlobalState';
 import '../../../styles/MidPanel.scss';
-import PopUpComponent from 'reactjs-popup';
+/* eslint-disable-next-line import/no-named-as-default */
+import Popup from 'reactjs-popup';
 import ControlButton from '../../common/ControlButton';
 import ShareIcon from '@mui/icons-material/Share';
 import { createUrl } from './urlCreator';
@@ -37,34 +38,22 @@ function MidPanel() {
     <div className="midPanelContainer">
       <div className="midPanelHeader">
         <div>
-          {/* Share button */}
-          <ControlButton
-            icon={<ShareIcon />}
-            onClick={() => setShare((o) => !o)}
-          />
-
-          {/* Share popup */}
-          <PopUpComponent open={share} closeOnDocumentClick onClose={() => setShare(false)}>
+          <ControlButton icon={< ShareIcon />} onClick={() => setShare((o) => !o)} />
+          <Popup open={share} closeOnDocumentClick onClose={() => setShare(false)}>
             <div className="shareArea">
-              <button
-                className="closeShare"
-                type="button"
-                onClick={() => setShare(false)}
-                aria-label="Close share popup"
-              >
+              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+              <button className="closeShare" onClick={() => setShare(false)}>
                 &times;
               </button>
-
-              <p>{currentUrl}</p>
-              <button
-                type="button"
-                onClick={copyToClipboard}
-                className="copyButton"
-              >
+              {/* eslint-disable-next-line max-len */}
+              <p>
+                {currentUrl}
+              </p>
+              <button onClick={copyToClipboard} style={{ cursor: 'pointer' }}>
                 Copy URL
               </button>
             </div>
-          </PopUpComponent>
+          </Popup>
         </div>
 
         <div className="algorithmTitle" style={{ fontSize: `${fontSizeIncrease}px` }}>

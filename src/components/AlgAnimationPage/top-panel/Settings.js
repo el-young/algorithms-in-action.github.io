@@ -1,94 +1,112 @@
 /* eslint-disable import/no-mutable-exports */
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import '../../../styles/Settings.scss';
 import PropTypes from 'prop-types';
 import { ReactComponent as Font } from '../../../assets/icons/font.svg';
-import {
-  allColBtn, allSystemCol,
-} from './helper';
 import { FontSizeContext } from '../../../context/FontSize';
+import { setAlgoTheme, setSystemTheme, allColBtn, allSystemCol } from './themeHelpers';
 
 const DEFAULT_COL = 0;
 
 const mode = () => DEFAULT_COL;
+export { mode };
 
-function Settings({
-  onSetting,
-  colorMode,
-  handleColorModeChange,
-  systemColor,
-  handleSystemColorChange,
-  onClose
-}) {
+function Settings({ onClose }) {
   const { increaseFont } = useContext(FontSizeContext);
+
+  // Track active selections locally
+  const [colorMode, setColorMode] = useState('');
+  const [systemColor, setSystemColor] = useState('');
 
   return (
     <div className="settingsContainer">
+      {/* Font Size */}
       <div className="setContainer">
         <div className="label">Font Size</div>
         <div className="fontSize">
-          <button type="button" className="fontBtn small" onClick={() => { increaseFont(-1); }}>
+          <button
+            type="button"
+            className="fontBtn small"
+            onClick={() => increaseFont(-1)}
+          >
             <Font />
           </button>
-          <button type="button" className="fontBtn big" onClick={() => { increaseFont(1); }}>
+          <button
+            type="button"
+            className="fontBtn big"
+            onClick={() => increaseFont(1)}
+          >
             <Font />
           </button>
         </div>
       </div>
+
+      {/* Algo Theme */}
       <div className="setContainer">
         <div className="label">Data Structures</div>
         <div className="algoCol">
-          {
-          allColBtn.map(({ primary, secondary, third,fourth,id }) => (
-            <button key={id} id={id} type="button" className={colorMode === id ? 'colorBtn active' : 'colorBtn'} onClick={(e) => handleColorModeChange(e.target.id)}>
-              <table border="0">
-                <tr>
-                  <th id={id} className={`top-left ${primary}`}></th>
-                  <th id={id} className={`top-right ${secondary}`}></th>
-                </tr>
-                <tr>
-                  <td id={id} className={`bottom-left ${third}`}></td>
-                  <td id={id} className={`bottom-right ${fourth}`}></td>
-                </tr>
+          {allColBtn.map(({ primary, secondary, third, fourth, id }) => (
+            <button
+              key={id}
+              id={id}
+              type="button"
+              className={colorMode === id ? 'colorBtn active' : 'colorBtn'}
+              onClick={() => {
+                setAlgoTheme(id);
+                setColorMode(id);
+              }}
+            >
+              <table>
+                <tbody>
+                  <tr>
+                    <th className={`top-left ${primary}`} />
+                    <th className={`top-right ${secondary}`} />
+                  </tr>
+                  <tr>
+                    <td className={`bottom-left ${third}`} />
+                    <td className={`bottom-right ${fourth}`} />
+                  </tr>
+                </tbody>
               </table>
-              
-              
-            </button>   
-          ))
-        }
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* System Theme */}
       <div className="setContainer">
         <div className="label">System</div>
         <div className="algoCol">
-          {
-          allSystemCol.map(({ primary, secondary, id }) => (
-            <button key={id} id={id} type="button" className={systemColor === id ? 'colorBtn active' : 'colorBtn'} onClick={(e) => handleSystemColorChange(e.target.id)}>
-              <span id={id} className={`left ${primary}`}> </span>
-              <span id={id} className={`right ${secondary}`}> </span>
+          {allSystemCol.map(({ primary, secondary, id }) => (
+            <button
+              key={id}
+              id={id}
+              type="button"
+              className={systemColor === id ? 'colorBtn active' : 'colorBtn'}
+              onClick={() => {
+                setSystemTheme(id);
+                setSystemColor(id);
+              }}
+            >
+              <span className={`left ${primary}`} />
+              <span className={`right ${secondary}`} />
             </button>
-          ))
-        }
+          ))}
         </div>
       </div>
+
+      {/* Footer */}
       <div className="settingFooter">
-        <button className="saveBtn" type="button" onClick={onSetting}>Return</button>
+        <button className="saveBtn" type="button" onClick={onClose}>
+          Return
+        </button>
       </div>
     </div>
   );
 }
 
 export default Settings;
-export {
-  mode,
-};
 
 Settings.propTypes = {
-  onFontIncrease: PropTypes.func.isRequired,
-  onSetting: PropTypes.func.isRequired,
-  colorMode: PropTypes.string.isRequired,
-  handleColorModeChange: PropTypes.func.isRequired,
-  systemColor: PropTypes.string.isRequired,
-  handleSystemColorChange: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
 };

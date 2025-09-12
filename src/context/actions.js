@@ -247,6 +247,8 @@ export const GlobalActions = {
         ...params,
         alg : params.name,
       }),
+      name: params.name,
+      mode: params.mode
     }
   },
 

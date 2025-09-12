@@ -1,46 +1,168 @@
-.algorithm-menu {
-  position: relative;
-  font-size: 0.9rem;
+@import './global.scss';
 
-  // Dropdown menu
-  .dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 220px;
-    margin-top: 4px;
-    background: var(--menu-background);
-    border: 1px solid var(--system-border);
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 1000;
-    overflow: hidden;
+$padding: 16px;
+$itemHeight: 40px;
+$border: 4px;
+$searchHeight: 40px;
+$leftFontSize: 0.89em;
 
-    .category {
-      padding: 0.6rem 1rem;
-      font-size: 0.85rem;
-      color: var(--menu-text);
-      cursor: pointer;
-      transition: background 0.2s ease;
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: flex-start;
+  z-index: 1000;
+}
 
-      &:hover {
-        background: var(--menu-hover-background);
-      }
+.popup-panel {
+  width: 320px;
+  height: 100%;
+  background: var(--left-bg);
+  color: var(--left-font);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  animation: slideInLeft 0.3s ease forwards;
+  padding: 0;
 
-      // Submenu
-      .subcategory {
-        position: absolute;
-        top: 0;
-        left: 100%;
-        min-width: 220px;
-        margin-left: 4px;
-        background: var(--menu-background);
-        border: 1px solid var(--system-border);
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        display: flex;
-        flex-direction: column;
+  @keyframes slideInLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  .content {
+    transition: max-height 0.06s ease-in;
+    max-height: 0;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+
+    span {
+      display: flex;
+
+      .searchInput {
+        font-size: 0.82em !important;
+        font-weight: 500;
+        color: var(--left-font);
+        padding: 0px $padding;
+        background-color: var(--left-search-bg);
+        width: 100%;
+        height: $searchHeight;
+        -webkit-appearance: none;
+        outline: none;
+        border: none;
+        border-left: $border solid var(--left-search-border);
+
+        &:focus {
+          border-left: $border solid var(--left-search-border-focus);
+          background-color: var(--left-search-bg-focus);
+        }
       }
     }
+
+    .algorithmList {
+      display: flex;
+      flex-direction: column;
+
+      .algoItemContainer {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    }
+  }
+
+  .algoCat {
+    @include removeBtnStyling;
+    font-size: 0.9em;
+    font-weight: 400;
+    color: var(--left-cat-font);
+    justify-content: space-between;
+    background-color: var(--left-cat-bg);
+    text-align: left;
+    padding: 0 $padding;
+    margin: 0;
+
+    border-left: $border solid var(--left-cat-border);
+    text-transform: uppercase;
+
+    min-height: $itemHeight !important;
+    display: flex;
+    align-items: center;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+
+    &:hover {
+      border-left: $border solid var(--left-cat-border-hover);
+      background-color: var(--left-cat-bg-hover);
+    }
+  }
+
+  .algoItem {
+    @include removeBtnStyling;
+    color: var(--left-item-font);
+    padding-left: $padding;
+    background-color: var(--left-bg);
+    margin: 0;
+
+    min-height: $itemHeight !important;
+    display: flex;
+    align-items: stretch;
+
+    .algoItemContent {
+      border-left: $border solid var(--left-item-border);
+      padding: 0 $padding;
+      background-color: var(--left-item-bg);
+
+      width: 100%;
+      height: $itemHeight;
+
+      text-align: left;
+      font-weight: 300;
+      font-size: 0.95em;
+      display: flex;
+      align-items: center;
+
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+
+      &:hover {
+        border-left: $border solid var(--left-item-border-hover);
+        background-color: var(--left-item-bg-hover);
+      }
+    }
+  }
+
+  .arrow {
+    color: var(--left-cat-font);
+    font-size: 0.8em;
+    margin-left: auto;
+    transition: transform 0.25s ease;
+  }
+
+  .arrow.open {
+    transform: rotate(90deg);
+  }
+
+  .algoItemContainer.content {
+    transition: max-height 0.25s ease-in-out;
+    overflow: hidden;
+  }
+
+  .algoItem.active .algoItemContent {
+    border-left: $border solid var(--left-item-border-active);
+    color: var(--left-item-font-active);
+    background-color: var(--left-search-bg);
+  }
+
+  .algoItem.active .algoItemContent:hover {
+    border-left: $border solid var(--left-item-border-active);
+    color: var(--left-item-font-active);
   }
 }
