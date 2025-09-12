@@ -32,7 +32,7 @@ function AlgorithmMenu({ onClose }) {
         setOpenCategories([currentCategory]);
       }
     }
-  }, [algorithm]);
+  }, [algorithm?.chunker]);
 
   // Auto focus so key down handlers work without
   // needing to tab.
