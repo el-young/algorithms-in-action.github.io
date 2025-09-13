@@ -61,3 +61,16 @@ export function getAlgoTheme() {
   if (stored && Object.values(ALGO_THEMES).includes(stored)) return stored;
   return ALGO_THEMES.DEFAULT;
 }
+
+/* Font size */
+export const FONT_SIZE_KEY = "font-size";
+export const DEFAULT_FONT_SIZE = 15; // px
+
+export function setFontSizePersist(size) {
+  localStorage.setItem(FONT_SIZE_KEY, size);
+}
+
+export function getFontSizePersist() {
+  const stored = localStorage.getItem(FONT_SIZE_KEY);
+  return stored ? parseInt(stored, 10) : DEFAULT_FONT_SIZE;
+}

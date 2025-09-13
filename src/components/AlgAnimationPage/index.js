@@ -10,7 +10,7 @@ import { ReactComponent as Circle } from "../../assets/icons/circle.svg";
 // eslint-disable-next-line import/no-unresolved
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FontSizeProvider } from "../../context/FontSize";
-import { getAlgoTheme, getSystemTheme, setAlgoTheme, setSystemTheme } from "./top-panel/themeHelpers";
+import { getAlgoTheme, getSystemTheme, setAlgoTheme, setSystemTheme } from "./top-panel/persistentStorageHelpers";
 
 /*
   This is the main algorithm animation page.

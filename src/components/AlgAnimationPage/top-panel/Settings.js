@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import "../../../styles/Settings.scss";
 import { ReactComponent as Font } from "../../../assets/icons/font.svg";
 import { FontSizeContext } from "../../../context/FontSize";
-import { setAlgoTheme, setSystemTheme, SYSTEM_THEMES, ALGO_THEMES, getSystemTheme, getAlgoTheme } from "./themeHelpers";
+import { setAlgoTheme, setSystemTheme, SYSTEM_THEMES, ALGO_THEMES, getSystemTheme, getAlgoTheme } from "./persistentStorageHelpers";
 import { ColorQuadrantCircle, ColorCircle } from "./ColoredCircles";
 
 const mode = () => 0;
