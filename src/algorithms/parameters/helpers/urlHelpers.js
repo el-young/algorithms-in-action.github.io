@@ -46,20 +46,7 @@ const DEFAULT_VALUES = {
 
 
 export function useUrlParams() {
-    const [search, setSearch] = useState(window.location.search);
-
-    useEffect(() => {
-        const handleUrlChange = () => {
-            setSearch(window.location.search);
-        };
-
-        window.addEventListener('popstate', handleUrlChange);
-        return () => {
-            window.removeEventListener('popstate', handleUrlChange);
-        };
-    }, []);
-
-    const urlParams = useMemo(() => new URLSearchParams(search), [search]);
+    const urlParams = new URLSearchParams(window.location.search)
     const params = {};
 
     // Filter and parse valid URL parameters
@@ -67,8 +54,6 @@ export function useUrlParams() {
         const value = urlParams.get(name);
         params[name] = value !== null ? value : DEFAULT_VALUES[name];
     });
-
-    console.log(" useUrlParams parsed params:", params);
 
     // Log a warning if there are any invalid parameters in the URL
     urlParams.forEach((_, key) => {
