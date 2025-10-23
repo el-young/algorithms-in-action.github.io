@@ -17,6 +17,17 @@
 //  "controller": { "find": "grahamScan_find"},
 //   "pseudocode": { "find": "grahamScan_find"},
 
+// This codebase mixes commonJS and ESM, the bundler converts
+// all into commonJS at build time (npm start), this script
+// runs outside of that process, it tries to read from masterList.js
+// which node thinks is commonJS but it has ESM syntax. This step basically
+// does what the bundler does. I am not sure how this script works on a different
+// machine of mine, maybe node versions play a role? Not sure.
+require("@babel/register")({
+  extensions: [".js"],
+  ignore: [/node_modules/],
+  presets: [["@babel/preset-env", { targets: { node: "current" } }]],
+});
 
 // Parser for JS files
 const parser = require("@babel/parser");
