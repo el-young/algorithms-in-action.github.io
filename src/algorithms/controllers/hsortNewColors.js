@@ -137,6 +137,16 @@ export default {
         // from the visualization. This makes reasoning about behavior difficult and
         // complicates a future refactor of the color API.
         // vis.heap.sorted(2);
+
+        // vis.array.selectColor(5, 3);
+        // vis.heap.colorNode(6, 2);
+        // vis.heap.colorEdge(6, 12, 2);
+
+        // New API
+        // vis.array.setColor(5, "var(--peach)");
+        // vis.heap.myColorNode(6, "var(--peach)");
+        // vis.heap.myColorEdge(6, 12, "var(--peach)");
+
       },
       [nodes],
     );
