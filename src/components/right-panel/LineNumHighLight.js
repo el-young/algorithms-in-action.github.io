@@ -271,7 +271,7 @@ const LineNumHighLight = ({ fontSize, fontSizeIncrement }) => {
   return (
     <div className="line-light" style={{
         flex: "1 0 0",
-        overflowY: "scroll",
+        overflow: "auto",
         scrollbarGutter: "stable",
       }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap" rel="stylesheet" />
