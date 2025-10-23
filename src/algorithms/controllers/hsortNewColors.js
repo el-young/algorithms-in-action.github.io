@@ -103,6 +103,40 @@ export default {
         // tell the graph renderer that it is heapsort
         // so that the array index should start from 1
         vis.array.set(array, 'heapsort');
+
+        // The marker is now a string type across all tracers and simply
+        // states the CSS colour property you want.
+        vis.array.setColor(0, "red");
+        vis.heap.myColorNode(1, "red");
+
+        vis.heap.myColorNode(2, "orange");
+        vis.heap.myColorEdge(1, 2, "green");
+
+        // CSS vars that are loaded by the bundler at top level can also be used.
+        // This is defined in styles/global.scss.
+        vis.heap.myColorNode(3, "var(--leaf)");
+
+        /*
+          Prefer using the predefined algorithm color palette constants, since 
+          accessibility and color-perception modes can override the underlying CSS variables.
+
+          export const ALGO_COLOR_PALETTE = {
+            sky: "var(--sky)",
+            leaf: "var(--leaf)",
+            apple: "var(--apple)",
+            peach: "var(--peach)",
+            plum: "var(--plum)",
+            wood: "var(--wood)",
+            stone: "var(--stone)",
+          };
+
+          This also helps maintain consistent color usage across visualizations.
+        */
+
+        // The "sorted" marker currently has hidden side effects, such as removing an edge
+        // from the visualization. This makes reasoning about behavior difficult and
+        // complicates a future refactor of the color API.
+        // vis.heap.sorted(2);
       },
       [nodes],
     );
