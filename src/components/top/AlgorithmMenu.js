@@ -140,7 +140,7 @@ function AlgorithmMenu({ onClose }) {
         height: "100%",
         background: "var(--left-bg)",
         color: "var(--left-font)",
-        overflowY: "auto",
+        overflow: "auto",
       }}
     >
       <input
@@ -157,6 +157,7 @@ function AlgorithmMenu({ onClose }) {
           outline: "none",
           transition: "all 0.2s ease",
           flexShrink: 0,
+          boxSizing: "border-box",
         }}
         onFocus={(e) => {
           e.currentTarget.style.background = "var(--left-search-bg-focus)";
@@ -198,6 +199,7 @@ function AlgorithmMenu({ onClose }) {
                   paddingBottom: "4px",
                   color: "var(--left-cat-font)",
                   transition: "all 0.2s ease",
+                  boxSizing: "border-box",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "var(--left-cat-bg-hover)";
@@ -246,6 +248,7 @@ function AlgorithmMenu({ onClose }) {
                       marginLeft: "8px",
                       borderRadius: "4px",
                       paddingLeft: "4px",
+                      boxSizing: "border-box",
                     }}
                   >
                     {Object.values(algs).map(({ name, shorthand }) => (
